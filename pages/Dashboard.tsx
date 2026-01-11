@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   CloudSun, Wind, Navigation, AlertTriangle,
   CheckCircle, ListChecks, MessageSquareText,
   Clock, MapPin, Search, Plane, ChevronRight,
   PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
   Mail, Phone, Award, Filter, Briefcase, GraduationCap,
-  User, Camera
+  User, Camera, RefreshCw
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -17,6 +17,8 @@ import { MissionExportButton } from '../components/ExportUI';
 import { BriefingCard } from '../components/BriefingUI';
 import { calculateCrewRelevance } from '../utils/searchUtils';
 import { ImageUpload } from '../components/ImageUploadUI';
+import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
+import { WeatherAlertsList } from '../components/WeatherAlertsUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -34,6 +36,7 @@ const Dashboard: React.FC = () => {
     duration: '90'
   });
 
+  // Weather System State
   const [weatherData, setWeatherData] = useState({
     temp: '68°F',
     wind: '18 mph',
@@ -41,6 +44,53 @@ const Dashboard: React.FC = () => {
     visibility: '10 mi',
     cloudBase: '4,000 ft'
   });
+  const [weatherAlerts, setWeatherAlerts] = useState<WeatherAlert[]>([]);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(false);
+  const lastSnapshot = useRef<WeatherSnapshot | null>(null);
+
+  // Poll for weather data
+  useEffect(() => {
+    let intervalId: number;
+
+    const updateWeather = async () => {
+      setIsWeatherLoading(true);
+      try {
+        // Use geolocation if available, otherwise fallback to base coords
+        const coords = { lat: 38.2975, lon: -122.4579 };
+        
+        const snapshot = await fetchLiveWeather(coords.lat, coords.lon);
+        
+        // Update basic weather card values
+        setWeatherData(prev => ({
+          ...prev,
+          temp: snapshot.temp,
+          wind: `${snapshot.windSpeed} mph`,
+          direction: snapshot.windDirection
+        }));
+
+        // Detect new alerts
+        const newAlerts = detectWeatherAlerts(snapshot, lastSnapshot.current);
+        if (newAlerts.length > 0) {
+          setWeatherAlerts(prev => [...newAlerts, ...prev].slice(0, 5)); // Keep last 5 alerts
+        }
+
+        lastSnapshot.current = snapshot;
+      } catch (err) {
+        console.error("Failed to fetch live weather", err);
+      } finally {
+        setIsWeatherLoading(false);
+      }
+    };
+
+    updateWeather(); // Initial fetch
+    intervalId = window.setInterval(updateWeather, 30000); // Update every 30s
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const dismissAlert = (id: string) => {
+    setWeatherAlerts(prev => prev.filter(a => a.id !== id));
+  };
 
   // Checklist state
   const [checklists, setChecklists] = useState([
@@ -269,7 +319,10 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
       {activeTab === 'status' && (
         <div className="space-y-6 flex flex-col">
-          {isHighWind && showWindAlert && (
+          {/* New Real-time Weather Alerts Section */}
+          <WeatherAlertsList alerts={weatherAlerts} onDismiss={dismissAlert} />
+
+          {isHighWind && showWindAlert && weatherAlerts.length === 0 && (
             <div className="bg-destructive/15 border-2 border-destructive/30 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-3">
                 <div className="bg-destructive text-destructive-foreground p-2 rounded-full"><AlertTriangle size={20} /></div>
@@ -290,7 +343,13 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           <div className="bg-muted/30 border rounded-3xl p-6">
-            <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex items-center gap-2"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-1 rounded-lg">
+                {isWeatherLoading ? <RefreshCw size={10} className="animate-spin text-primary" /> : <div className="w-2 h-2 rounded-full bg-green-500" />}
+                Live Sync {isWeatherLoading ? 'Updating' : 'Active'}
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {forecastData.map((day, idx) => (
                 <ForecastCard key={idx} {...day} />
