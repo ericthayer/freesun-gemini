@@ -25,7 +25,7 @@ const App: React.FC = () => {
       <div className={`min-h-screen flex flex-col ${theme}`}>
         {/* Top Navigation */}
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="container mx-auto h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <span className="bg-primary p-1.5 rounded-lg text-primary-foreground">
                 <Wind size={20} />
@@ -34,10 +34,10 @@ const App: React.FC = () => {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-6">
-              <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">Experience</Link>
+            <nav className="hidden md:flex md:ml-auto items-center gap-6">
+              {/*<Link to="/" className="text-sm font-medium hover:text-primary transition-colors">Experience</Link>
               <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">The Club</Link>
-              <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">Flights</Link>
+              <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">Flights</Link> */}
               {isLoggedIn ? (
                 <Link to="/dashboard" className="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">Pilot Portal</Link>
               ) : (
@@ -45,7 +45,7 @@ const App: React.FC = () => {
               )}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 md:ml-6">
               <button 
                 onClick={toggleTheme}
                 className="p-2 hover:bg-muted rounded-md transition-colors"
