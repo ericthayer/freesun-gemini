@@ -15,6 +15,7 @@ import { LogCard, LogSortBar, FlightLog, SortField, SortOrder } from '../compone
 import { ConfirmationModal } from '../components/CommonUI';
 import { MissionExportButton } from '../components/ExportUI';
 import { BriefingCard } from '../components/BriefingUI';
+import { calculateCrewRelevance } from '../utils/searchUtils';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -131,17 +132,35 @@ const Dashboard: React.FC = () => {
   ]);
 
   const filteredCrew = useMemo(() => {
-    const searchTerms = crewSearch.toLowerCase().trim().split(/\s+/).filter(t => t.length > 0);
-    return crewMembers.filter(member => {
-      const searchableStr = `${member.name} ${member.role} ${member.bio} ${member.certifications.join(' ')}`.toLowerCase();
-      const matchesSearch = searchTerms.every(term => searchableStr.includes(term));
+    const isSearching = crewSearch.trim().length > 0;
+
+    const items = crewMembers.filter(member => {
+      // Basic hard filters
       const matchesRole = roleFilter === 'All' || member.role === roleFilter;
       const matchesExp = member.experience >= minExpFilter;
       const matchesCert = certTypeFilter === 'All' || member.certifications.some(c =>
         c.toLowerCase().includes(certTypeFilter.toLowerCase())
       );
-      return matchesSearch && matchesRole && matchesExp && matchesCert;
+      
+      if (!matchesRole || !matchesExp || !matchesCert) return false;
+
+      // If searching, check if relevance is non-zero
+      if (isSearching) {
+        return calculateCrewRelevance(member, crewSearch) > -20; // Allow some slack for multi-word
+      }
+      return true;
     });
+
+    // If searching, sort by relevance
+    if (isSearching) {
+      return items.sort((a, b) => {
+        const scoreA = calculateCrewRelevance(a, crewSearch);
+        const scoreB = calculateCrewRelevance(b, crewSearch);
+        return scoreB - scoreA;
+      });
+    }
+
+    return items;
   }, [crewMembers, crewSearch, roleFilter, minExpFilter, certTypeFilter]);
 
   const [isAddingLog, setIsAddingLog] = useState(false);
