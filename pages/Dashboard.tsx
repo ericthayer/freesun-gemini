@@ -13,6 +13,7 @@ import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI'
 import { WeatherCard, ForecastCard, SparkleIcon, Spinner } from '../components/StatusUI';
 import { LogCard, LogSortBar, FlightLog, SortField, SortOrder } from '../components/LogsUI';
 import { ConfirmationModal } from '../components/CommonUI';
+import { MissionExportButton } from '../components/ExportUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -319,7 +320,19 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
                   <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
                 </div>
-                <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>
+                <div className="flex flex-col gap-2 mt-6">
+                  <button className="w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>
+                  <MissionExportButton 
+                    data={{
+                      launchTime: "06:15 AM",
+                      passengers: `${pilotContext.passengers} Adult(s)`,
+                      balloon: pilotContext.balloon,
+                      location: "Sonoma Field Base (N 38.2975, W 122.4579)",
+                      pilot: "Sarah \"Sky\" Miller",
+                      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
