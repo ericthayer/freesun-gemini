@@ -2,15 +2,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   CloudSun, Wind, Navigation, AlertTriangle,
-  CheckCircle, ListChecks, MessageSquareText,
-  Clock, MapPin, Search, Plane, ChevronRight,
-  PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
-  Mail, Phone, Award, Filter, Briefcase, GraduationCap,
-  User, Camera, RefreshCw, CalendarDays
+  CheckCircle, ListChecks,
+  Clock, MapPin, Search, ChevronRight,
+  X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
+  Mail, Phone, RefreshCw, Camera, User, Briefcase
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
-import { WeatherCard, ForecastCard, SparkleIcon, Spinner } from '../components/StatusUI';
+import { WeatherCard, ForecastCard } from '../components/StatusUI';
 import { LogCard, LogSortBar, FlightLog, SortField, SortOrder } from '../components/LogsUI';
 import { ConfirmationModal } from '../components/CommonUI';
 import { MissionExportButton } from '../components/ExportUI';
@@ -19,9 +18,8 @@ import { calculateCrewRelevance } from '../utils/searchUtils';
 import { ImageUpload } from '../components/ImageUploadUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
-import { ScheduleItem, ScheduleCard, ScheduleForm } from '../components/ScheduleUI';
 
-type TabType = 'status' | 'checklists' | 'logs' | 'crew' | 'schedule';
+type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('status');
@@ -87,71 +85,6 @@ const Dashboard: React.FC = () => {
 
   const dismissAlert = (id: string) => {
     setWeatherAlerts(prev => prev.filter(a => a.id !== id));
-  };
-
-  // Schedule State
-  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([
-    {
-      id: 's1',
-      type: 'flight',
-      title: 'Valley Mist Morning Ride',
-      date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-      time: '06:15',
-      location: 'South Ridge Launch Site',
-      description: 'Standard tourist flight for 4 passengers. Ground crew arrival at 05:30 for cold inflation.',
-      attendees: 4
-    },
-    {
-      id: 's2',
-      type: 'training',
-      title: 'Emergency Landing Drills',
-      date: new Date(Date.now() + 172800000).toISOString().split('T')[0],
-      time: '09:00',
-      location: 'West Field',
-      description: 'Mandatory session for all junior pilots. Focus on high-wind approach techniques.',
-      attendees: 12
-    },
-    {
-      id: 's3',
-      type: 'meeting',
-      title: 'Annual Safety Review',
-      date: new Date(Date.now() + 259200000).toISOString().split('T')[0],
-      time: '18:30',
-      location: 'Main Clubhouse',
-      description: 'Discussion of new FAA regulations and internal club maintenance logs for the winter season.',
-    }
-  ]);
-  const [isAddingEvent, setIsAddingEvent] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<ScheduleItem | null>(null);
-  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
-
-  const sortedSchedule = useMemo(() => {
-    return [...scheduleItems].sort((a, b) => {
-      const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
-      if (dateCompare !== 0) return dateCompare;
-      return a.time.localeCompare(b.time);
-    });
-  }, [scheduleItems]);
-
-  const handleEventSubmit = (data: Partial<ScheduleItem>) => {
-    if (editingEvent) {
-      setScheduleItems(prev => prev.map(item => item.id === editingEvent.id ? { ...item, ...data } as ScheduleItem : item));
-      setEditingEvent(null);
-    } else {
-      const newItem: ScheduleItem = {
-        ...data as ScheduleItem,
-        id: Math.random().toString(36).substr(2, 9),
-      };
-      setScheduleItems(prev => [...prev, newItem]);
-      setIsAddingEvent(false);
-    }
-  };
-
-  const handleDeleteEvent = () => {
-    if (eventToDelete) {
-      setScheduleItems(prev => prev.filter(item => item.id !== eventToDelete));
-      setEventToDelete(null);
-    }
   };
 
   // Checklist state
@@ -351,7 +284,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
   const tabs: {id: TabType, label: string, icon: any}[] = [
     {id: 'status', label: 'Status', icon: CloudSun},
-    {id: 'schedule', label: 'Schedule', icon: CalendarDays},
     {id: 'checklists', label: 'Checklists', icon: ListChecks},
     {id: 'logs', label: 'Logs', icon: FileText},
     {id: 'crew', label: 'Crew', icon: Users},
@@ -454,72 +386,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'schedule' && (
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2"><CalendarDays className="text-primary" /> Club Schedule</h2>
-            <button 
-              onClick={() => {
-                setEditingEvent(null);
-                setIsAddingEvent(!isAddingEvent);
-              }} 
-              className="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 flex items-center gap-2"
-            >
-              {isAddingEvent ? <X size={16} /> : <Plus size={16} />}
-              {isAddingEvent ? 'Cancel' : 'New Schedule Item'}
-            </button>
-          </div>
-
-          {(isAddingEvent || editingEvent) && (
-            <div className="bg-muted/30 border-2 border-primary/30 rounded-[2rem] p-8 animate-in zoom-in-95 duration-200">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  {editingEvent ? <Edit2Icon /> : <Plus className="text-primary" />}
-                  {editingEvent ? `Edit Event: ${editingEvent.title}` : 'Create New Event'}
-                </h3>
-                <button 
-                  onClick={() => {
-                    setIsAddingEvent(false);
-                    setEditingEvent(null);
-                  }}
-                  className="p-2 hover:bg-muted rounded-full"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              <ScheduleForm 
-                initialData={editingEvent || undefined}
-                isEditing={!!editingEvent}
-                onSubmit={handleEventSubmit}
-                onCancel={() => {
-                  setIsAddingEvent(false);
-                  setEditingEvent(null);
-                }}
-              />
-            </div>
-          )}
-
-          <div className="space-y-4">
-            {sortedSchedule.length > 0 ? (
-              sortedSchedule.map(item => (
-                <ScheduleCard 
-                  key={item.id} 
-                  item={item} 
-                  onEdit={setEditingEvent}
-                  onDelete={setEventToDelete}
-                />
-              ))
-            ) : (
-              <div className="py-20 text-center bg-muted/20 rounded-[3rem] border-2 border-dashed">
-                <CalendarDays size={48} className="mx-auto text-muted-foreground/30 mb-4" />
-                <h3 className="text-xl font-bold text-muted-foreground">No upcoming events</h3>
-                <p className="text-sm text-muted-foreground/60">The schedule is clear. Check back later or add a new session.</p>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -700,16 +566,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         title="Archive Flight Log"
         message="Are you sure you want to archive this flight log? It will be removed from your active history list. This action can be reversed by a club administrator."
         confirmText="Archive Entry"
-        variant="danger"
-      />
-
-      <ConfirmationModal
-        isOpen={eventToDelete !== null}
-        onClose={() => setEventToDelete(null)}
-        onConfirm={handleDeleteEvent}
-        title="Delete Schedule Item"
-        message="Are you sure you want to remove this event from the schedule? This action cannot be undone."
-        confirmText="Delete Event"
         variant="danger"
       />
     </div>

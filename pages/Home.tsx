@@ -19,14 +19,6 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
             className="w-full h-full object-cover brightness-50 dark:brightness-[0.3]"
           />
         </div>
-        
-        {/* Floating Balloons Animation Simulated via images */}
-        <div className="absolute top-1/4 right-1/4 animate-float opacity-80 pointer-events-none hidden md:block">
-          <div className="w-32 h-40 bg-primary/40 rounded-full blur-2xl"></div>
-        </div>
-        <div className="absolute bottom-1/3 left-1/4 animate-float [animation-delay:2s] opacity-60 pointer-events-none hidden md:block">
-          <div className="w-48 h-60 bg-accent/40 rounded-full blur-3xl"></div>
-        </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center text-white">
           <h1 className="text-5xl md:text-8xl font-bold mb-4 tracking-tight italic">
@@ -96,22 +88,22 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="lg:col-span-2 lg:row-span-2 relative group overflow-hidden rounded-3xl h-[400px] lg:h-auto">
-              <img src="https://images.unsplash.com/photo-1542332213-31f87348057f?auto=format&fit=crop&q=80&w=1200" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
+              <img src="https://assets.codepen.io/97621/img-ballooning-3008_1.jpg?format=avif" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
                 <div className="text-white">
                   <h4 className="text-2xl font-bold">Dawn Chasing</h4>
-                  <p className="opacity-80">Sonoma Valley, CA</p>
+                  <p className="opacity-80">Littleton, CO</p>
                 </div>
               </div>
             </div>
             <div className="relative group overflow-hidden rounded-3xl h-[300px]">
-              <img src="https://images.unsplash.com/photo-1469317632111-e7935f50180b?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
+              <img src="https://assets.codepen.io/97621/img-ballooning-1763.jpg?width=2419&height=1814&format=webp" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
             </div>
             <div className="relative group overflow-hidden rounded-3xl h-[300px]">
-              <img src="https://images.unsplash.com/photo-1484196813136-1e0892c21949?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
+              <img src="https://assets.codepen.io/97621/img-ballooning-3199_1.jpg?format=webp" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
             </div>
             <div className="lg:col-span-2 relative group overflow-hidden rounded-3xl h-[300px]">
-              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1200" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
+              <img src="https://assets.codepen.io/97621/img-ballooning-2860_1.jpg?width=1965&height=2620&format=webp" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
             </div>
           </div>
         </div>

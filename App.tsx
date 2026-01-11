@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { 
-  Menu, X, Sun, Moon, Wind, Map as MapIcon, 
-  Settings, LogOut, CheckCircle2, User, 
-  CloudSun, Navigation, Compass, PlaneTakeoff 
+  Menu, X, Sun, Moon, Wind, 
+  LogOut, CalendarDays 
 } from 'lucide-react';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import Schedule from './pages/Schedule';
 import { useTheme } from './hooks/useTheme';
 
 const App: React.FC = () => {
@@ -25,7 +25,7 @@ const App: React.FC = () => {
       <div className={`min-h-screen flex flex-col ${theme}`}>
         {/* Top Navigation */}
         <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container max-w-[1400] mx-auto h-16 pr-4 pl-5 flex items-center justify-between">
+          <div className="container max-w-[1400] mx-auto h-16 px-4 md:px-8 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <span className="bg-primary p-1.5 rounded-lg text-primary-foreground">
                 <Wind size={20} />
@@ -35,11 +35,11 @@ const App: React.FC = () => {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex md:ml-auto items-center gap-6">
-              {/*<Link to="/" className="text-sm font-medium hover:text-primary transition-colors">Experience</Link>
-              <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">The Club</Link>
-              <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">Flights</Link> */}
+              <Link to="/schedule" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2">
+                <CalendarDays size={16} /> Schedule
+              </Link>
               {isLoggedIn ? (
-                <Link to="/dashboard" className="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">Pilot Portal</Link>
+                <Link to="/dashboard" className="text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition-all">Pilot Portal</Link>
               ) : (
                 <button onClick={() => setIsLoggedIn(true)} className="text-sm font-medium hover:text-primary transition-colors">Crew Login</button>
               )}
@@ -68,9 +68,9 @@ const App: React.FC = () => {
         {isMenuOpen && (
           <div className="fixed inset-0 top-16 z-40 bg-background md:hidden animate-in slide-in-from-top-4 duration-200">
             <nav className="flex flex-col p-6 gap-6">
-              <Link to="/" className="text-2xl font-bold border-b pb-4" onClick={() => setIsMenuOpen(false)}>Experience</Link>
-              <Link to="/" className="text-2xl font-bold border-b pb-4" onClick={() => setIsMenuOpen(false)}>The Club</Link>
-              <Link to="/" className="text-2xl font-bold border-b pb-4" onClick={() => setIsMenuOpen(false)}>Flights</Link>
+              <Link to="/schedule" className="text-2xl font-bold border-b pb-4 flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
+                <CalendarDays size={24} /> Schedule
+              </Link>
               {isLoggedIn ? (
                 <Link to="/dashboard" className="text-2xl font-bold text-primary" onClick={() => setIsMenuOpen(false)}>Pilot Portal</Link>
               ) : (
@@ -97,6 +97,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
           </Routes>
         </main>
 

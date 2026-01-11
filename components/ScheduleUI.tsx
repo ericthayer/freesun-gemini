@@ -2,8 +2,7 @@
 import React from 'react';
 import { 
   Calendar, Clock, MapPin, Plane, Users, GraduationCap, 
-  MessageSquare, MoreVertical, Edit2, Trash2, ChevronRight,
-  Bell, Info, Tag
+  MessageSquare, Edit2, Trash2, Tag, Info
 } from 'lucide-react';
 
 export type ScheduleItemType = 'flight' | 'training' | 'social' | 'meeting';
@@ -28,8 +27,8 @@ const typeConfig = {
 
 interface ScheduleCardProps {
   item: ScheduleItem;
-  onEdit: (item: ScheduleItem) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (item: ScheduleItem) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDelete }) => {
@@ -58,22 +57,28 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDele
             <h3 className="text-xl font-bold mt-1 group-hover:text-primary transition-colors">{item.title}</h3>
           </div>
           
-          <div className="flex items-center gap-1">
-            <button 
-              onClick={() => onEdit(item)}
-              className="p-2 hover:bg-primary/10 rounded-xl text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-              title="Edit Event"
-            >
-              <Edit2 size={16} />
-            </button>
-            <button 
-              onClick={() => onDelete(item.id)}
-              className="p-2 hover:bg-destructive/10 rounded-xl text-destructive transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-              title="Delete Event"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
+          {(onEdit || onDelete) && (
+            <div className="flex items-center gap-1">
+              {onEdit && (
+                <button 
+                  onClick={() => onEdit(item)}
+                  className="p-2 hover:bg-primary/10 rounded-xl text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  title="Edit Event"
+                >
+                  <Edit2 size={16} />
+                </button>
+              )}
+              {onDelete && (
+                <button 
+                  onClick={() => onDelete(item.id)}
+                  className="p-2 hover:bg-destructive/10 rounded-xl text-destructive transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  title="Delete Event"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6 text-sm">
