@@ -1,0 +1,7 @@
+{
+  "name": "FreeSun Hot Air Ballooning Club",
+  "description": "A high-performance, mobile-first redesign for the FreeSun Hot Air Ballooning club, featuring a public landing page and a specialized pilot/crew dashboard with AI-powered flight briefings.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
