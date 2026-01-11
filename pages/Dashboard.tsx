@@ -22,6 +22,26 @@ const Dashboard: React.FC = () => {
     cloudBase: '4,000 ft'
   });
 
+  // Checklist state
+  const [checklists, setChecklists] = useState([
+    { id: 1, text: "Envelope Integrity Check", done: true },
+    { id: 2, text: "Burner Test (Left & Right)", done: true },
+    { id: 3, text: "Fuel Pressure Inspection", done: true },
+    { id: 4, text: "Radio Communication Sync", done: false },
+    { id: 5, text: "Landing Site Permission Verified", done: false },
+    { id: 6, text: "Chase Vehicle Fuel Status", done: false },
+    { id: 7, text: "Emergency Kit Inventory", done: false },
+    { id: 8, text: "Pax Safety Briefing Signed", done: false },
+  ]);
+
+  const toggleChecklist = (id: number) => {
+    setChecklists(prev => prev.map(item => 
+      item.id === id ? { ...item, done: !item.done } : item
+    ));
+  };
+
+  const completedCount = checklists.filter(item => item.done).length;
+
   // Placeholder forecast data
   const forecastData = [
     { day: 'Tomorrow', condition: 'Clear', temp: '72° / 54°', wind: '4-6 mph', icon: Sun },
@@ -217,35 +237,50 @@ const Dashboard: React.FC = () => {
         <div className="space-y-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2"><ListChecks /> Pre-Flight Checklist</h2>
-            <span className="text-sm bg-muted px-2 py-1 rounded">3 / 8 Complete</span>
+            <span className="text-sm bg-muted px-2 py-1 rounded font-bold transition-all">
+              {completedCount} / {checklists.length} Complete
+            </span>
           </div>
           
-          {[
-            { id: 1, text: "Envelope Integrity Check", done: true },
-            { id: 2, text: "Burner Test (Left & Right)", done: true },
-            { id: 3, text: "Fuel Pressure Inspection", done: true },
-            { id: 4, text: "Radio Communication Sync", done: false },
-            { id: 5, text: "Landing Site Permission Verified", done: false },
-            { id: 6, text: "Chase Vehicle Fuel Status", done: false },
-            { id: 7, text: "Emergency Kit Inventory", done: false },
-            { id: 8, text: "Pax Safety Briefing Signed", done: false },
-          ].map(item => (
-            <div 
-              key={item.id} 
-              className={`p-5 border rounded-2xl flex items-center gap-4 transition-all cursor-pointer ${item.done ? 'bg-muted/20 border-green-500/20' : 'hover:border-primary'}`}
-            >
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${item.done ? 'bg-green-500 border-green-500 text-white' : 'border-muted-foreground/30'}`}>
-                {item.done && <CheckCircle size={16} />}
+          <div className="space-y-3">
+            {checklists.map(item => (
+              <div 
+                key={item.id} 
+                onClick={() => toggleChecklist(item.id)}
+                className={`p-5 border rounded-2xl flex items-center gap-4 transition-all duration-300 cursor-pointer select-none active:scale-[0.98] ${
+                  item.done 
+                    ? 'bg-green-500/5 border-green-500/30' 
+                    : 'bg-background hover:border-primary border-border'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 transform ${
+                  item.done 
+                    ? 'bg-green-500 border-green-500 text-white scale-110' 
+                    : 'border-muted-foreground/30 scale-100'
+                }`}>
+                  {item.done && (
+                    <div className="animate-in zoom-in-50 duration-200">
+                      <CheckCircle size={16} />
+                    </div>
+                  )}
+                </div>
+                <span className={`font-medium transition-all duration-300 ${item.done ? 'text-muted-foreground line-through opacity-70' : ''}`}>
+                  {item.text}
+                </span>
+                <ChevronRight className={`ml-auto text-muted-foreground transition-transform duration-300 ${item.done ? 'rotate-90 opacity-0' : ''}`} size={16} />
               </div>
-              <span className={`font-medium ${item.done ? 'text-muted-foreground line-through' : ''}`}>
-                {item.text}
-              </span>
-              <ChevronRight className="ml-auto text-muted-foreground" size={16} />
-            </div>
-          ))}
+            ))}
+          </div>
           
-          <button className="w-full mt-6 py-4 bg-primary text-white font-black text-lg rounded-2xl shadow-lg shadow-primary/20">
-            Submit Safe Launch Status
+          <button 
+            disabled={completedCount < checklists.length}
+            className={`w-full mt-6 py-4 font-black text-lg rounded-2xl shadow-lg transition-all active:scale-95 ${
+              completedCount === checklists.length 
+                ? 'bg-primary text-white shadow-primary/20 hover:bg-primary/90' 
+                : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+            }`}
+          >
+            {completedCount === checklists.length ? 'Submit Safe Launch Status' : `Complete ${checklists.length - completedCount} more items`}
           </button>
         </div>
       )}
