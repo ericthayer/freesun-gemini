@@ -1,30 +1,45 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { 
   Menu, X, Sun, Moon, Wind, 
-  LogOut, CalendarDays 
+  LogOut, CalendarDays, User 
 } from 'lucide-react';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Schedule from './pages/Schedule';
+import Login from './pages/Login';
+import CrewDashboard from './pages/CrewDashboard';
 import { useTheme } from './hooks/useTheme';
+
+type UserRole = 'pilot' | 'crew' | null;
 
 const App: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>(null);
 
   // Close menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
   }, []);
 
+  const handleLogin = (role: 'pilot' | 'crew') => {
+    setIsLoggedIn(true);
+    setUserRole(role);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserRole(null);
+  };
+
   return (
     <HashRouter>
       <div className={`min-h-screen flex flex-col ${theme}`}>
         {/* Top Navigation */}
-        <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="container max-w-[1400] mx-auto h-16 px-4 md:px-8 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <span className="bg-primary p-1.5 rounded-lg text-primary-foreground">
@@ -38,10 +53,24 @@ const App: React.FC = () => {
               <Link to="/schedule" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2">
                 <CalendarDays size={16} /> Schedule
               </Link>
+              
               {isLoggedIn ? (
-                <Link to="/dashboard" className="text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition-all">Pilot Portal</Link>
+                <div className="flex items-center gap-4">
+                  <Link 
+                    to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'} 
+                    className="text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-full hover:bg-primary/20 transition-all flex items-center gap-2"
+                  >
+                    <User size={14} />
+                    {userRole === 'pilot' ? 'Pilot Portal' : 'Crew Portal'}
+                  </Link>
+                  <button onClick={handleLogout} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <LogOut size={18} />
+                  </button>
+                </div>
               ) : (
-                <button onClick={() => setIsLoggedIn(true)} className="text-sm font-medium hover:text-primary transition-colors">Crew Login</button>
+                <Link to="/login" className="text-sm font-medium bg-primary text-white px-6 py-2 rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                  Crew Login
+                </Link>
               )}
             </nav>
 
@@ -72,22 +101,25 @@ const App: React.FC = () => {
                 <CalendarDays size={24} /> Schedule
               </Link>
               {isLoggedIn ? (
-                <Link to="/dashboard" className="text-2xl font-bold text-primary" onClick={() => setIsMenuOpen(false)}>Pilot Portal</Link>
+                <>
+                  <Link 
+                    to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'} 
+                    className="text-2xl font-bold text-primary" 
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {userRole === 'pilot' ? 'Pilot Portal' : 'Crew Portal'}
+                  </Link>
+                  <button 
+                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 text-destructive font-semibold mt-auto text-xl"
+                  >
+                    <LogOut size={24} /> Sign Out
+                  </button>
+                </>
               ) : (
-                <button 
-                  onClick={() => { setIsLoggedIn(true); setIsMenuOpen(false); }} 
-                  className="text-left text-2xl font-bold"
-                >
+                <Link to="/login" className="text-2xl font-bold text-primary" onClick={() => setIsMenuOpen(false)}>
                   Crew Login
-                </button>
-              )}
-              {isLoggedIn && (
-                <button 
-                  onClick={() => { setIsLoggedIn(false); setIsMenuOpen(false); }}
-                  className="flex items-center gap-2 text-destructive font-semibold mt-auto"
-                >
-                  <LogOut size={20} /> Sign Out
-                </button>
+                </Link>
               )}
             </nav>
           </div>
@@ -96,7 +128,9 @@ const App: React.FC = () => {
         <main className="flex flex-col flex-grow">
           <Routes>
             <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/dashboard" element={isLoggedIn && userRole === 'pilot' ? <Dashboard /> : <Navigate to="/login" />} />
+            <Route path="/crew-dashboard" element={isLoggedIn && userRole === 'crew' ? <CrewDashboard /> : <Navigate to="/login" />} />
             <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
           </Routes>
         </main>

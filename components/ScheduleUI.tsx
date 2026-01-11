@@ -2,7 +2,7 @@
 import React from 'react';
 import { 
   Calendar, Clock, MapPin, Plane, Users, GraduationCap, 
-  MessageSquare, Edit2, Trash2, Tag, Info
+  MessageSquare, Edit2, Trash2, Tag, Info, AlertCircle
 } from 'lucide-react';
 
 export type ScheduleItemType = 'flight' | 'training' | 'social' | 'meeting';
@@ -16,6 +16,7 @@ export interface ScheduleItem {
   location: string;
   description: string;
   attendees?: number;
+  requiresCrew?: boolean;
 }
 
 const typeConfig = {
@@ -29,9 +30,10 @@ interface ScheduleCardProps {
   item: ScheduleItem;
   onEdit?: (item: ScheduleItem) => void;
   onDelete?: (id: string) => void;
+  onClaim?: (id: string) => void;
 }
 
-export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDelete }) => {
+export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDelete, onClaim }) => {
   const config = typeConfig[item.type];
   const Icon = config.icon;
 
@@ -53,32 +55,43 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDele
                   {item.attendees} Registered
                 </span>
               )}
+              {item.requiresCrew && (
+                <span className="text-[10px] font-bold bg-destructive/10 text-destructive px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                  <AlertCircle size={10} /> Crew Needed
+                </span>
+              )}
             </div>
             <h3 className="text-xl font-bold mt-1 group-hover:text-primary transition-colors">{item.title}</h3>
           </div>
           
-          {(onEdit || onDelete) && (
-            <div className="flex items-center gap-1">
-              {onEdit && (
-                <button 
-                  onClick={() => onEdit(item)}
-                  className="p-2 hover:bg-primary/10 rounded-xl text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                  title="Edit Event"
-                >
-                  <Edit2 size={16} />
-                </button>
-              )}
-              {onDelete && (
-                <button 
-                  onClick={() => onDelete(item.id)}
-                  className="p-2 hover:bg-destructive/10 rounded-xl text-destructive transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                  title="Delete Event"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            {onClaim && item.requiresCrew && (
+              <button 
+                onClick={() => onClaim(item.id)}
+                className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
+              >
+                Claim Shift
+              </button>
+            )}
+            {onEdit && (
+              <button 
+                onClick={() => onEdit(item)}
+                className="p-2 hover:bg-primary/10 rounded-xl text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                title="Edit Event"
+              >
+                <Edit2 size={16} />
+              </button>
+            )}
+            {onDelete && (
+              <button 
+                onClick={() => onDelete(item.id)}
+                className="p-2 hover:bg-destructive/10 rounded-xl text-destructive transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                title="Delete Event"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6 text-sm">
@@ -122,6 +135,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
       time: '06:00',
       location: '',
       description: '',
+      requiresCrew: false,
     }
   );
 
@@ -201,6 +215,19 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
             className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
         </div>
+      </div>
+
+      <div className="flex items-center gap-3 bg-muted/30 p-4 rounded-xl">
+        <input 
+          type="checkbox" 
+          id="requiresCrew"
+          checked={formData.requiresCrew}
+          onChange={(e) => setFormData({ ...formData, requiresCrew: e.target.checked })}
+          className="w-5 h-5 accent-primary cursor-pointer"
+        />
+        <label htmlFor="requiresCrew" className="text-sm font-bold cursor-pointer select-none">
+          Flag as "Crew Needed" (Open shift for club members)
+        </label>
       </div>
 
       <div className="space-y-2">
