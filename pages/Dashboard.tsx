@@ -1,15 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   CloudSun, Wind, Navigation, AlertTriangle, 
   CheckCircle, ListChecks, MessageSquareText,
   Clock, MapPin, Search, Plane, ChevronRight,
-  PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText
+  PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
+  Mail, Phone, Award, Filter
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 
+type TabType = 'status' | 'checklists' | 'logs' | 'crew';
+
+interface CrewMember {
+  id: string;
+  name: string;
+  role: 'Pilot' | 'Ground Crew';
+  experience: number;
+  contact: {
+    email: string;
+    phone: string;
+  };
+  certifications: string[];
+  bio: string;
+  imageUrl?: string;
+}
+
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'status' | 'checklists' | 'logs'>('status');
+  const [activeTab, setActiveTab] = useState<TabType>('status');
   const [briefing, setBriefing] = useState<string | null>(null);
   const [loadingBriefing, setLoadingBriefing] = useState(false);
   const [showWindAlert, setShowWindAlert] = useState(true);
@@ -49,6 +66,62 @@ const Dashboard: React.FC = () => {
     { id: '838', date: '2024-05-21', duration: '70', site: 'Riverside', notes: 'Quiet flight, early morning mist cleared by 07:00.', status: 'SIGNED OFF' },
   ]);
 
+  // Crew state
+  const [crewSearch, setCrewSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'All' | 'Pilot' | 'Ground Crew'>('All');
+  const [crewMembers] = useState<CrewMember[]>([
+    {
+      id: '1',
+      name: 'Sarah "Sky" Miller',
+      role: 'Pilot',
+      experience: 12,
+      contact: { email: 'sarah@freesun.net', phone: '+1 555-0101' },
+      certifications: ['Commercial LTA License', 'Flight Instructor', 'Night Rating'],
+      bio: 'Lifelong aviation enthusiast with over 1,500 flight hours across three continents. Specialist in high-altitude mountain flights.',
+      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200'
+    },
+    {
+      id: '2',
+      name: 'Mike Chen',
+      role: 'Ground Crew',
+      experience: 5,
+      contact: { email: 'mike@freesun.net', phone: '+1 555-0102' },
+      certifications: ['Crew Chief Certified', 'Emergency Response', 'Heavy Vehicle Op'],
+      bio: 'Precision-focused ground lead. Mikes team has the fastest inflation and recovery records in the club.',
+      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200'
+    },
+    {
+      id: '3',
+      name: 'David Thorne',
+      role: 'Pilot',
+      experience: 20,
+      contact: { email: 'thorne@freesun.net', phone: '+1 555-0103' },
+      certifications: ['Master Pilot LTA', 'Maintenance Technician', 'Safety Officer'],
+      bio: 'The "Grandmaster" of FreeSun. David has been flying since the club inception and leads our safety committee.',
+      imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200'
+    },
+    {
+      id: '4',
+      name: 'Elena Rodriguez',
+      role: 'Ground Crew',
+      experience: 3,
+      contact: { email: 'elena@freesun.net', phone: '+1 555-0104' },
+      certifications: ['Recovery Specialist', 'Radio Communications'],
+      bio: 'Expert navigator and recovery lead. Never lost a balloon, even in the dense morning fog of the valley.',
+      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
+    }
+  ]);
+
+  const filteredCrew = useMemo(() => {
+    return crewMembers.filter(member => {
+      const matchesSearch = member.name.toLowerCase().includes(crewSearch.toLowerCase()) || 
+                            member.bio.toLowerCase().includes(crewSearch.toLowerCase()) ||
+                            member.certifications.some(c => c.toLowerCase().includes(crewSearch.toLowerCase()));
+      const matchesRole = roleFilter === 'All' || member.role === roleFilter;
+      return matchesSearch && matchesRole;
+    });
+  }, [crewMembers, crewSearch, roleFilter]);
+
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [newLog, setNewLog] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -78,7 +151,6 @@ const Dashboard: React.FC = () => {
 
   const completedCount = checklists.filter(item => item.done).length;
 
-  // Placeholder forecast data
   const forecastData = [
     { day: 'Tomorrow', condition: 'Clear', temp: '72° / 54°', wind: '4-6 mph', icon: Sun },
     { day: 'Wednesday', condition: 'Partly Cloudy', temp: '69° / 52°', wind: '5-9 mph', icon: CloudSun },
@@ -118,25 +190,16 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             <span className="text-green-500 font-bold">• Active</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 p-1 bg-muted rounded-xl">
-          <button 
-            onClick={() => setActiveTab('status')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'status' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
-          >
-            Status
-          </button>
-          <button 
-            onClick={() => setActiveTab('checklists')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'checklists' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
-          >
-            Checklist
-          </button>
-          <button 
-            onClick={() => setActiveTab('logs')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'logs' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
-          >
-            Logs
-          </button>
+        <div className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto no-scrollbar">
+          {(['status', 'checklists', 'logs', 'crew'] as TabType[]).map((tab) => (
+            <button 
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -212,7 +275,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* AI Briefing Widget with Context Inputs */}
+            {/* AI Briefing Widget */}
             <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden">
               <div className="absolute -right-4 -top-4 text-primary/5">
                 <MessageSquareText size={120} />
@@ -294,13 +357,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                     </p>
                   </div>
                 )}
-              </div>
-              
-              <div className="mt-4 flex flex-wrap gap-4 text-xs font-semibold">
-                <span className="flex items-center gap-1 text-green-600"><CheckCircle size={14} /> VFR Conditions</span>
-                <span className={`flex items-center gap-1 ${isHighWind ? 'text-destructive font-bold' : 'text-orange-600'}`}>
-                  <AlertTriangle size={14} /> {isHighWind ? 'DANGEROUS GUSTS' : 'Potential Gusts at 2k ft'}
-                </span>
               </div>
             </div>
 
@@ -397,7 +453,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           </div>
 
-          {/* New Entry Form */}
           {isAddingLog && (
             <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
               <form onSubmit={handleAddLog} className="space-y-6">
@@ -498,6 +553,103 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'crew' && (
+        <div className="space-y-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2"><Users className="text-primary" /> Crew Directory</h2>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <input 
+                  type="text"
+                  placeholder="Search name, bio, or certs..."
+                  value={crewSearch}
+                  onChange={(e) => setCrewSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-muted/50 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                />
+              </div>
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <select 
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value as any)}
+                  className="pl-10 pr-4 py-2.5 bg-muted/50 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none cursor-pointer"
+                >
+                  <option value="All">All Roles</option>
+                  <option value="Pilot">Pilots</option>
+                  <option value="Ground Crew">Ground Crew</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {filteredCrew.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredCrew.map(member => (
+                <div key={member.id} className="bg-background border rounded-[2rem] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group">
+                  <div className="p-6 flex flex-col sm:flex-row gap-6">
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-muted/50 shadow-inner group-hover:scale-105 transition-transform">
+                      <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="space-y-3 flex-grow">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <h3 className="text-xl font-bold">{member.name}</h3>
+                          <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mt-0.5">
+                            {member.role === 'Pilot' ? <Plane size={12} /> : <Users size={12} />}
+                            {member.role}
+                          </div>
+                        </div>
+                        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                          {member.experience} Yrs Exp
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+                        <a href={`mailto:${member.contact.email}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                          <Mail size={12} /> {member.contact.email}
+                        </a>
+                        <a href={`tel:${member.contact.phone}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                          <Phone size={12} /> {member.contact.phone}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="px-6 pb-6 space-y-4">
+                    <div className="bg-muted/30 p-4 rounded-2xl">
+                      <p className="text-xs leading-relaxed text-foreground/80 italic">
+                        "{member.bio}"
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
+                        <Award size={10} /> Active Certifications
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {member.certifications.map((cert, idx) => (
+                          <span key={idx} className="bg-background border border-border text-[9px] font-bold px-2 py-1 rounded-md text-muted-foreground">
+                            {cert}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 text-center bg-muted/20 rounded-[3rem] border-2 border-dashed">
+              <Users size={48} className="mx-auto text-muted-foreground/30 mb-4" />
+              <h3 className="text-xl font-bold text-muted-foreground">No crew members found</h3>
+              <p className="text-sm text-muted-foreground/60">Try adjusting your search or filters</p>
+            </div>
+          )}
         </div>
       )}
     </div>
