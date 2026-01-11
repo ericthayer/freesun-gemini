@@ -4,7 +4,7 @@ import {
   CloudSun, Wind, Navigation, AlertTriangle, 
   CheckCircle, ListChecks, MessageSquareText,
   Clock, MapPin, Search, Plane, ChevronRight,
-  PlaneTakeoff, X, Sun, Cloud, Users, Timer
+  PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 
@@ -40,6 +40,35 @@ const Dashboard: React.FC = () => {
     { id: 7, text: "Emergency Kit Inventory", done: false },
     { id: 8, text: "Pax Safety Briefing Signed", done: false },
   ]);
+
+  // Logs state
+  const [logs, setLogs] = useState([
+    { id: '841', date: '2024-05-24', duration: '105', site: 'Land Site Delta', notes: 'Smooth landing, light crosswinds on approach.', status: 'SIGNED OFF' },
+    { id: '840', date: '2024-05-23', duration: '80', site: 'Valley Creek', notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.', status: 'SIGNED OFF' },
+    { id: '839', date: '2024-05-22', duration: '125', site: 'Hilltop Basin', notes: 'Challenging thermals near the ridge. Extra fuel used.', status: 'SIGNED OFF' },
+    { id: '838', date: '2024-05-21', duration: '70', site: 'Riverside', notes: 'Quiet flight, early morning mist cleared by 07:00.', status: 'SIGNED OFF' },
+  ]);
+
+  const [isAddingLog, setIsAddingLog] = useState(false);
+  const [newLog, setNewLog] = useState({
+    date: new Date().toISOString().split('T')[0],
+    duration: '60',
+    notes: '',
+    site: 'Manual Entry'
+  });
+
+  const handleAddLog = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = (parseInt(logs[0]?.id || '0') + 1).toString();
+    setLogs([{ ...newLog, id, status: 'PENDING REVIEW' }, ...logs]);
+    setIsAddingLog(false);
+    setNewLog({
+      date: new Date().toISOString().split('T')[0],
+      duration: '60',
+      notes: '',
+      site: 'Manual Entry'
+    });
+  };
 
   const toggleChecklist = (id: number) => {
     setChecklists(prev => prev.map(item => 
@@ -356,25 +385,116 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Flight History</h2>
-            <button className="text-sm text-primary font-bold">Export CSV</button>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setIsAddingLog(!isAddingLog)}
+                className="text-sm text-primary font-bold flex items-center gap-1 hover:underline"
+              >
+                {isAddingLog ? <X size={16} /> : <Plus size={16} />} 
+                {isAddingLog ? 'Cancel' : 'New Entry'}
+              </button>
+              <button className="text-sm text-muted-foreground font-bold hover:text-primary transition-colors">Export CSV</button>
+            </div>
           </div>
+
+          {/* New Entry Form */}
+          {isAddingLog && (
+            <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
+              <form onSubmit={handleAddLog} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
+                      <Calendar size={12} /> Flight Date
+                    </label>
+                    <input 
+                      type="date"
+                      required
+                      value={newLog.date}
+                      onChange={(e) => setNewLog({...newLog, date: e.target.value})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
+                      <Timer size={12} /> Duration (Minutes)
+                    </label>
+                    <input 
+                      type="number"
+                      required
+                      min="1"
+                      value={newLog.duration}
+                      onChange={(e) => setNewLog({...newLog, duration: e.target.value})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
+                    <FileText size={12} /> Flight Notes & Observations
+                  </label>
+                  <textarea 
+                    placeholder="Enter weather conditions, landing details, or maintenance observations..."
+                    value={newLog.notes}
+                    onChange={(e) => setNewLog({...newLog, notes: e.target.value})}
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setIsAddingLog(false)}
+                    className="px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/50 rounded-xl transition-all"
+                  >
+                    Discard
+                  </button>
+                  <button 
+                    type="submit"
+                    className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
+                  >
+                    Save Log Entry
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
           
-          <div className="space-y-3">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-muted/20 p-4 border rounded-2xl flex items-center justify-between group hover:bg-muted/40 transition-all cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center border shadow-sm group-hover:bg-primary/10">
-                    <PlaneTakeoff size={20} className="text-muted-foreground group-hover:text-primary" />
+          <div className="space-y-4">
+            {logs.map(log => (
+              <div key={log.id} className="bg-muted/20 p-5 border rounded-[1.5rem] group hover:bg-muted/40 transition-all cursor-pointer">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-background rounded-2xl flex items-center justify-center border shadow-sm group-hover:bg-primary/10 transition-colors">
+                      <PlaneTakeoff size={20} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <div>
+                      <div className="font-bold">Flight #FS-0{log.id}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-2">
+                        <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span className="opacity-20">•</span>
+                        <span className="flex items-center gap-1"><Timer size={10} /> {Math.floor(parseInt(log.duration) / 60)}h {parseInt(log.duration) % 60}m</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-bold">Flight #FS-0{842 - i}</div>
-                    <div className="text-xs text-muted-foreground">May {24 - i}, 2024 • 1h 45m duration</div>
+                  <div className="text-right">
+                    <div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center justify-end gap-1">
+                      <MapPin size={10} /> {log.site}
+                    </div>
+                    <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${
+                      log.status === 'SIGNED OFF' 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    }`}>
+                      {log.status}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-mono text-xs text-muted-foreground mb-1">Land Site Delta</div>
-                  <div className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block">SIGNED OFF</div>
-                </div>
+                {log.notes && (
+                  <div className="pl-16 mt-2 border-t pt-3 border-border/10">
+                    <p className="text-xs text-muted-foreground italic leading-relaxed">
+                      "{log.notes}"
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
