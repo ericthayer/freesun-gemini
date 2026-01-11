@@ -4,6 +4,12 @@ import {
   Calendar, Timer, MapPin, PlaneTakeoff, 
   ArrowUpDown, SortAsc, SortDesc, Archive, Trash2
 } from 'lucide-react';
+import { LogMediaGallery } from './LogMediaUI';
+
+export interface LogAttachment {
+  url: string;
+  type: 'image' | 'video';
+}
 
 export interface FlightLog {
   id: string;
@@ -12,6 +18,7 @@ export interface FlightLog {
   site: string;
   notes: string;
   status: string;
+  attachments?: LogAttachment[];
 }
 
 interface LogCardProps {
@@ -69,11 +76,18 @@ export const LogCard: React.FC<LogCardProps> = ({ log, onArchive }) => {
           )}
         </div>
       </div>
+      
       {log.notes && (
         <div className="pl-16 mt-2 border-t pt-3 border-border/10">
           <p className="text-xs text-muted-foreground italic leading-relaxed">
             "{log.notes}"
           </p>
+        </div>
+      )}
+
+      {log.attachments && log.attachments.length > 0 && (
+        <div className="pl-16 mt-4">
+          <LogMediaGallery attachments={log.attachments} />
         </div>
       )}
     </div>

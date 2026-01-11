@@ -10,7 +10,7 @@ import {
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
 import { WeatherCard, ForecastCard } from '../components/StatusUI';
-import { LogCard, LogSortBar, FlightLog, SortField, SortOrder } from '../components/LogsUI';
+import { LogCard, LogSortBar, FlightLog, SortField, SortOrder, LogAttachment } from '../components/LogsUI';
 import { ConfirmationModal } from '../components/CommonUI';
 import { MissionExportButton } from '../components/ExportUI';
 import { BriefingCard } from '../components/BriefingUI';
@@ -19,6 +19,7 @@ import { ImageUpload } from '../components/ImageUploadUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
 import { CrewProfileForm } from '../components/CrewProfileForm';
+import { LogMediaUpload } from '../components/LogMediaUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -102,8 +103,29 @@ const Dashboard: React.FC = () => {
 
   // Logs state
   const [logs, setLogs] = useState<FlightLog[]>([
-    { id: '841', date: '2024-05-24', duration: '105', site: 'Land Site Delta', notes: 'Smooth landing, light crosswinds on approach.', status: 'SIGNED OFF' },
-    { id: '840', date: '2024-05-23', duration: '80', site: 'Valley Creek', notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.', status: 'SIGNED OFF' },
+    { 
+      id: '841', 
+      date: '2024-05-24', 
+      duration: '105', 
+      site: 'Land Site Delta', 
+      notes: 'Smooth landing, light crosswinds on approach.', 
+      status: 'SIGNED OFF',
+      attachments: [
+        { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=200', type: 'image' },
+        { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=200', type: 'image' }
+      ]
+    },
+    { 
+      id: '840', 
+      date: '2024-05-23', 
+      duration: '80', 
+      site: 'Valley Creek', 
+      notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.', 
+      status: 'SIGNED OFF',
+      attachments: [
+        { url: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&q=80&w=200', type: 'image' }
+      ]
+    },
     { id: '839', date: '2024-05-22', duration: '125', site: 'Hilltop Basin', notes: 'Challenging thermals near the ridge. Extra fuel used.', status: 'SIGNED OFF' },
     { id: '838', date: '2024-05-21', duration: '70', site: 'Riverside', notes: 'Quiet flight, early morning mist cleared by 07:00.', status: 'SIGNED OFF' },
   ]);
@@ -204,11 +226,18 @@ const Dashboard: React.FC = () => {
   }, [crewMembers, crewSearch, roleFilter, minExpFilter, certTypeFilter]);
 
   const [isAddingLog, setIsAddingLog] = useState(false);
-  const [newLog, setNewLog] = useState({
+  const [newLog, setNewLog] = useState<{
+    date: string;
+    duration: string;
+    notes: string;
+    site: string;
+    attachments: LogAttachment[];
+  }>({
     date: new Date().toISOString().split('T')[0],
     duration: '60',
     notes: '',
-    site: 'Manual Entry'
+    site: 'Manual Entry',
+    attachments: []
   });
 
   const handleAddLog = (e: React.FormEvent) => {
@@ -220,7 +249,8 @@ const Dashboard: React.FC = () => {
       date: new Date().toISOString().split('T')[0],
       duration: '60',
       notes: '',
-      site: 'Manual Entry'
+      site: 'Manual Entry',
+      attachments: []
     });
   };
 
@@ -433,6 +463,11 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Calendar size={12} /> Flight Date</label><input type="date" required value={newLog.date} onChange={(e) => setNewLog({...newLog, date: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>
                   <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Timer size={12} /> Duration (Minutes)</label><input type="number" required min="1" value={newLog.duration} onChange={(e) => setNewLog({...newLog, duration: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>
                 </div>
+                
+                <LogMediaUpload 
+                  onMediaChange={(attachments) => setNewLog({ ...newLog, attachments })}
+                />
+
                 <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><FileText size={12} /> Flight Notes & Observations</label><textarea placeholder="Enter weather conditions, landing details, or maintenance observations..." value={newLog.notes} onChange={(e) => setNewLog({...newLog, notes: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" /></div>
                 <div className="flex justify-end gap-3"><button type="button" onClick={() => setIsAddingLog(false)} className="px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/50 rounded-xl transition-all">Discard</button><button type="submit" className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">Save Log Entry</button></div>
               </form>
