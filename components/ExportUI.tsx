@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Printer, Wind, Calendar, Clock, MapPin, Users, Plane } from 'lucide-react';
+import { FileText, Wind, Calendar, Clock, MapPin, Users, Plane } from 'lucide-react';
 
 export interface MissionData {
   launchTime: string;
@@ -30,26 +30,33 @@ export const MissionExportButton: React.FC<MissionExportButtonProps> = ({ data }
         Export Flight Manifest
       </button>
 
-      {/* Hidden Printable Area */}
-      <div className="hidden print:block fixed inset-0 bg-white text-black p-12 z-[9999]">
+      {/* 
+          CSS Strategy: Use a container that is invisible but NOT display:none on screen.
+          Tailwind 'hidden' is display:none, which usually prevents print engines from picking up the content.
+      */}
+      <div className="print:block pointer-events-none opacity-0 absolute top-0 left-0 w-0 h-0 overflow-hidden print:opacity-100 print:pointer-events-auto print:w-auto print:h-auto print:static">
         <style>{`
           @media print {
-            body * { visibility: hidden; }
-            #printable-manifest, #printable-manifest * { visibility: visible; }
-            #printable-manifest { 
-              position: absolute; 
-              left: 0; 
-              top: 0; 
-              width: 100%; 
-              height: 100%;
-              background: white !important;
-              color: black !important;
+            body > *:not(#printable-manifest-root) { 
+              display: none !important; 
             }
-            @page { size: auto; margin: 0; }
+            #printable-manifest-root { 
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: white !important;
+            }
+            @page { 
+              size: auto; 
+              margin: 20mm; 
+            }
           }
         `}</style>
         
-        <div id="printable-manifest" className="flex flex-col h-full bg-white font-sans p-10 border-[12px] border-slate-100">
+        <div id="printable-manifest-root" className="bg-white text-black font-sans p-10 border-[12px] border-slate-100 min-h-screen">
           {/* Header */}
           <div className="flex justify-between items-start border-b-4 border-black pb-8 mb-10">
             <div>
@@ -63,7 +70,7 @@ export const MissionExportButton: React.FC<MissionExportButtonProps> = ({ data }
             </div>
             <div className="text-right">
               <h2 className="text-2xl font-black text-slate-900 uppercase">Flight Mission Manifest</h2>
-              <p className="text-sm font-mono text-slate-500">ID: FS-{Math.random().toString(36).substr(2, 6).toUpperCase()}</p>
+              <p className="text-sm font-mono text-slate-500 uppercase">Status: AUTHORIZED</p>
             </div>
           </div>
 
@@ -113,7 +120,7 @@ export const MissionExportButton: React.FC<MissionExportButtonProps> = ({ data }
           </div>
 
           {/* Checklist Verification Block */}
-          <div className="mt-auto border-2 border-black p-8 rounded-2xl bg-slate-50">
+          <div className="mt-12 border-2 border-black p-8 rounded-2xl bg-slate-50">
             <h3 className="text-lg font-black uppercase mb-4 border-b border-black pb-2">Safety Certification</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-black rounded" /> <span className="text-sm font-bold">Pre-Flight Inspection Complete</span></div>
@@ -131,8 +138,8 @@ export const MissionExportButton: React.FC<MissionExportButtonProps> = ({ data }
             </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Generated via FreeSun Cloud Services • Elevate Your Perspective</p>
+          <div className="mt-20 text-center">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Generated via FreeSun Digital Ops Hub • Flight ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ import { WeatherCard, ForecastCard, SparkleIcon, Spinner } from '../components/S
 import { LogCard, LogSortBar, FlightLog, SortField, SortOrder } from '../components/LogsUI';
 import { ConfirmationModal } from '../components/CommonUI';
 import { MissionExportButton } from '../components/ExportUI';
+import { BriefingCard } from '../components/BriefingUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -22,6 +23,7 @@ const Dashboard: React.FC = () => {
   const [briefing, setBriefing] = useState<string | null>(null);
   const [loadingBriefing, setLoadingBriefing] = useState(false);
   const [showWindAlert, setShowWindAlert] = useState(true);
+  const [briefingConstraints, setBriefingConstraints] = useState('');
 
   // Pilot context for AI briefing
   const [pilotContext, setPilotContext] = useState({
@@ -212,7 +214,8 @@ Flight Configuration:
 - Passenger Count: ${pilotContext.passengers}
 - Intended Duration: ${pilotContext.duration} minutes
 Focus on safety risks, fuel management, and launch feasibility specific to this configuration and current conditions.`;
-      const result = await getFlightBriefing(prompt);
+      
+      const result = await getFlightBriefing(prompt, briefingConstraints);
       setBriefing(result);
     } catch (err) {
       setBriefing("Error fetching AI briefing. Check connectivity.");
@@ -276,42 +279,16 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
-            <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_1fr]">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h3 className="text-xl font-bold flex items-center gap-2"><SparkleIcon /> Smart Flight Briefing</h3>
-                <button 
-                  onClick={handleGenerateBriefing} 
-                  disabled={loadingBriefing} 
-                  className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
-                >
-                  {loadingBriefing && <Spinner size={14} />}
-                  {loadingBriefing ? 'Analyzing...' : 'Generate New Briefing'}
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Plane size={10} /> Balloon Type</label>
-                  <select value={pilotContext.balloon} onChange={(e) => setPilotContext({...pilotContext, balloon: e.target.value})} className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer">
-                    <option>SunChaser #04 (Medium)</option><option>DawnRider #01 (Small)</option><option>Atlas #09 (Large)</option><option>SkyGazer #02 (XL)</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Users size={10} /> Passengers</label>
-                  <select value={pilotContext.passengers} onChange={(e) => setPilotContext({...pilotContext, passengers: e.target.value})} className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer">
-                    <option>1 (Private)</option><option>2 (Couple)</option><option>4 (Standard)</option><option>6 (Group)</option><option>8+ (Large Group)</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Timer size={10} /> Duration (Min)</label>
-                  <select value={pilotContext.duration} onChange={(e) => setPilotContext({...pilotContext, duration: e.target.value})} className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer">
-                    <option value="45">45 Minutes</option><option value="60">60 Minutes</option><option value="90">90 Minutes</option><option value="120">120 Minutes</option>
-                  </select>
-                </div>
-              </div>
-              <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border border-primary/30 min-h-[160px] shadow-inner grid place-content-center">
-                {briefing ? <div className="animate-in fade-in slide-in-from-bottom-2"><p className="text-sm leading-relaxed whitespace-pre-wrap">{briefing}</p></div> : <div className="flex flex-col items-center justify-center text-center py-1"><Plane className="text-primary/30 mb-2 animate-bounce" /><p className="text-muted-foreground text-sm italic max-w-xs">Set your flight configuration above and request a briefing for specialized safety analysis.</p></div>}
-              </div>
-            </div>
+            <BriefingCard 
+              pilotContext={pilotContext}
+              setPilotContext={setPilotContext}
+              constraints={briefingConstraints}
+              setConstraints={setBriefingConstraints}
+              onGenerate={handleGenerateBriefing}
+              loading={loadingBriefing}
+              briefing={briefing}
+            />
+            
             <div className="bg-muted/30 border rounded-3xl p-6 flex flex-col">
               <div className="sticky top-[6rem]">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
