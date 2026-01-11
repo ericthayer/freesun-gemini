@@ -8,22 +8,9 @@ import {
   Mail, Phone, Award, Filter
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
+import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
-
-interface CrewMember {
-  id: string;
-  name: string;
-  role: 'Pilot' | 'Ground Crew';
-  experience: number;
-  contact: {
-    email: string;
-    phone: string;
-  };
-  certifications: string[];
-  bio: string;
-  imageUrl?: string;
-}
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('status');
@@ -40,7 +27,7 @@ const Dashboard: React.FC = () => {
 
   const [weatherData, setWeatherData] = useState({
     temp: '68°F',
-    wind: '18 mph', // Trigger high wind alert for demo
+    wind: '18 mph',
     direction: 'NW',
     visibility: '10 mi',
     cloudBase: '4,000 ft'
@@ -68,7 +55,10 @@ const Dashboard: React.FC = () => {
 
   // Crew state
   const [crewSearch, setCrewSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'All' | 'Pilot' | 'Ground Crew'>('All');
+  const [roleFilter, setRoleFilter] = useState('All');
+  const [minExpFilter, setMinExpFilter] = useState(0);
+  const [certTypeFilter, setCertTypeFilter] = useState('All');
+
   const [crewMembers] = useState<CrewMember[]>([
     {
       id: '1',
@@ -113,14 +103,23 @@ const Dashboard: React.FC = () => {
   ]);
 
   const filteredCrew = useMemo(() => {
+    // Fuzzy search: split by spaces and check if all terms match some field
+    const searchTerms = crewSearch.toLowerCase().trim().split(/\s+/).filter(t => t.length > 0);
+    
     return crewMembers.filter(member => {
-      const matchesSearch = member.name.toLowerCase().includes(crewSearch.toLowerCase()) || 
-                            member.bio.toLowerCase().includes(crewSearch.toLowerCase()) ||
-                            member.certifications.some(c => c.toLowerCase().includes(crewSearch.toLowerCase()));
+      // Fuzzy match logic
+      const searchableStr = `${member.name} ${member.role} ${member.bio} ${member.certifications.join(' ')}`.toLowerCase();
+      const matchesSearch = searchTerms.every(term => searchableStr.includes(term));
+      
       const matchesRole = roleFilter === 'All' || member.role === roleFilter;
-      return matchesSearch && matchesRole;
+      const matchesExp = member.experience >= minExpFilter;
+      const matchesCert = certTypeFilter === 'All' || member.certifications.some(c => 
+        c.toLowerCase().includes(certTypeFilter.toLowerCase())
+      );
+
+      return matchesSearch && matchesRole && matchesExp && matchesCert;
     });
-  }, [crewMembers, crewSearch, roleFilter]);
+  }, [crewMembers, crewSearch, roleFilter, minExpFilter, certTypeFilter]);
 
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [newLog, setNewLog] = useState({
@@ -205,7 +204,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
       {activeTab === 'status' && (
         <div className="space-y-6">
-          {/* High Wind Alert Banner */}
           {isHighWind && showWindAlert && (
             <div className="bg-destructive/15 border-2 border-destructive/30 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-3">
@@ -217,17 +215,12 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   <p className="text-sm text-destructive/80 font-medium">Surface winds are at {weatherData.wind}. Launch safety threshold exceeded (15 mph).</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setShowWindAlert(false)}
-                className="p-2 hover:bg-destructive/20 rounded-full text-destructive transition-colors"
-                aria-label="Dismiss alert"
-              >
+              <button onClick={() => setShowWindAlert(false)} className="p-2 hover:bg-destructive/20 rounded-full text-destructive transition-colors" aria-label="Dismiss alert">
                 <X size={18} />
               </button>
             </div>
           )}
 
-          {/* Weather Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className={`p-6 rounded-3xl border flex flex-col items-center justify-center text-center transition-colors ${isHighWind ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/50'}`}>
               <Wind className={`${isHighWind ? 'text-destructive' : 'text-primary'} mb-2`} size={32} />
@@ -251,7 +244,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           </div>
 
-          {/* 3-Day Forecast Section */}
           <div className="bg-muted/30 border rounded-3xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2">
               <Clock size={18} className="text-primary" /> 3-Day Launch Outlook
@@ -275,36 +267,20 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* AI Briefing Widget */}
             <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden">
               <div className="absolute -right-4 -top-4 text-primary/5">
                 <MessageSquareText size={120} />
               </div>
-              
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <SparkleIcon /> Smart Flight Briefing
-                </h3>
-                <button 
-                  onClick={handleGenerateBriefing}
-                  disabled={loadingBriefing}
-                  className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95"
-                >
+                <h3 className="text-xl font-bold flex items-center gap-2"><SparkleIcon /> Smart Flight Briefing</h3>
+                <button onClick={handleGenerateBriefing} disabled={loadingBriefing} className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95">
                   {loadingBriefing ? 'Analyzing...' : 'Generate New Briefing'}
                 </button>
               </div>
-
-              {/* Context Selection Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
-                    <Plane size={10} /> Balloon Type
-                  </label>
-                  <select 
-                    value={pilotContext.balloon}
-                    onChange={(e) => setPilotContext({...pilotContext, balloon: e.target.value})}
-                    className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-background/80 transition-colors"
-                  >
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Plane size={10} /> Balloon Type</label>
+                  <select value={pilotContext.balloon} onChange={(e) => setPilotContext({...pilotContext, balloon: e.target.value})} className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer">
                     <option>SunChaser #04 (Medium)</option>
                     <option>DawnRider #01 (Small)</option>
                     <option>Atlas #09 (Large)</option>
@@ -312,14 +288,8 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
-                    <Users size={10} /> Passengers
-                  </label>
-                  <select 
-                    value={pilotContext.passengers}
-                    onChange={(e) => setPilotContext({...pilotContext, passengers: e.target.value})}
-                    className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-background/80 transition-colors"
-                  >
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Users size={10} /> Passengers</label>
+                  <select value={pilotContext.passengers} onChange={(e) => setPilotContext({...pilotContext, passengers: e.target.value})} className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer">
                     <option>1 (Private)</option>
                     <option>2 (Couple)</option>
                     <option>4 (Standard)</option>
@@ -328,14 +298,8 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
-                    <Timer size={10} /> Duration (Min)
-                  </label>
-                  <select 
-                    value={pilotContext.duration}
-                    onChange={(e) => setPilotContext({...pilotContext, duration: e.target.value})}
-                    className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-background/80 transition-colors"
-                  >
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Timer size={10} /> Duration (Min)</label>
+                  <select value={pilotContext.duration} onChange={(e) => setPilotContext({...pilotContext, duration: e.target.value})} className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer">
                     <option value="45">45 Minutes</option>
                     <option value="60">60 Minutes</option>
                     <option value="90">90 Minutes</option>
@@ -343,7 +307,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   </select>
                 </div>
               </div>
-              
               <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border border-primary/10 min-h-[160px] shadow-inner">
                 {briefing ? (
                   <div className="animate-in fade-in slide-in-from-bottom-2">
@@ -352,15 +315,11 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center py-8">
                     <Plane className="text-primary/30 mb-2 animate-bounce" />
-                    <p className="text-muted-foreground text-sm italic max-w-xs">
-                      Set your flight configuration above and request a briefing for specialized safety analysis.
-                    </p>
+                    <p className="text-muted-foreground text-sm italic max-w-xs">Set your flight configuration above and request a briefing for specialized safety analysis.</p>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Next Flight Card */}
             <div className="bg-muted/30 border rounded-3xl p-6 flex flex-col">
               <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
               <div className="space-y-4 flex-grow">
@@ -377,9 +336,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   <span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span>
                 </div>
               </div>
-              <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">
-                View Flight Plan
-              </button>
+              <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>
             </div>
           </div>
         </div>
@@ -393,45 +350,18 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               {completedCount} / {checklists.length} Complete
             </span>
           </div>
-          
           <div className="space-y-3">
             {checklists.map(item => (
-              <div 
-                key={item.id} 
-                onClick={() => toggleChecklist(item.id)}
-                className={`p-5 border rounded-2xl flex items-center gap-4 transition-all duration-300 cursor-pointer select-none active:scale-[0.98] ${
-                  item.done 
-                    ? 'bg-green-500/5 border-green-500/30' 
-                    : 'bg-background hover:border-primary border-border'
-                }`}
-              >
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 transform ${
-                  item.done 
-                    ? 'bg-green-500 border-green-500 text-white scale-110' 
-                    : 'border-muted-foreground/30 scale-100'
-                }`}>
-                  {item.done && (
-                    <div className="animate-in zoom-in-50 duration-200">
-                      <CheckCircle size={16} />
-                    </div>
-                  )}
+              <div key={item.id} onClick={() => toggleChecklist(item.id)} className={`p-5 border rounded-2xl flex items-center gap-4 transition-all duration-300 cursor-pointer select-none active:scale-[0.98] ${item.done ? 'bg-green-500/5 border-green-500/30' : 'bg-background hover:border-primary border-border'}`}>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 transform ${item.done ? 'bg-green-500 border-green-500 text-white scale-110' : 'border-muted-foreground/30 scale-100'}`}>
+                  {item.done && <div className="animate-in zoom-in-50 duration-200"><CheckCircle size={16} /></div>}
                 </div>
-                <span className={`font-medium transition-all duration-300 ${item.done ? 'text-muted-foreground line-through opacity-70' : ''}`}>
-                  {item.text}
-                </span>
+                <span className={`font-medium transition-all duration-300 ${item.done ? 'text-muted-foreground line-through opacity-70' : ''}`}>{item.text}</span>
                 <ChevronRight className={`ml-auto text-muted-foreground transition-transform duration-300 ${item.done ? 'rotate-90 opacity-0' : ''}`} size={16} />
               </div>
             ))}
           </div>
-          
-          <button 
-            disabled={completedCount < checklists.length}
-            className={`w-full mt-6 py-4 font-black text-lg rounded-2xl shadow-lg transition-all active:scale-95 ${
-              completedCount === checklists.length 
-                ? 'bg-primary text-white shadow-primary/20 hover:bg-primary/90' 
-                : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
-            }`}
-          >
+          <button disabled={completedCount < checklists.length} className={`w-full mt-6 py-4 font-black text-lg rounded-2xl shadow-lg transition-all active:scale-95 ${completedCount === checklists.length ? 'bg-primary text-white shadow-primary/20 hover:bg-primary/90' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'}`}>
             {completedCount === checklists.length ? 'Submit Safe Launch Status' : `Complete ${checklists.length - completedCount} more items`}
           </button>
         </div>
@@ -442,77 +372,36 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Flight History</h2>
             <div className="flex gap-4">
-              <button 
-                onClick={() => setIsAddingLog(!isAddingLog)}
-                className="text-sm text-primary font-bold flex items-center gap-1 hover:underline"
-              >
-                {isAddingLog ? <X size={16} /> : <Plus size={16} />} 
-                {isAddingLog ? 'Cancel' : 'New Entry'}
+              <button onClick={() => setIsAddingLog(!isAddingLog)} className="text-sm text-primary font-bold flex items-center gap-1 hover:underline">
+                {isAddingLog ? <X size={16} /> : <Plus size={16} />} {isAddingLog ? 'Cancel' : 'New Entry'}
               </button>
               <button className="text-sm text-muted-foreground font-bold hover:text-primary transition-colors">Export CSV</button>
             </div>
           </div>
-
           {isAddingLog && (
             <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
               <form onSubmit={handleAddLog} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
-                      <Calendar size={12} /> Flight Date
-                    </label>
-                    <input 
-                      type="date"
-                      required
-                      value={newLog.date}
-                      onChange={(e) => setNewLog({...newLog, date: e.target.value})}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    />
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Calendar size={12} /> Flight Date</label>
+                    <input type="date" required value={newLog.date} onChange={(e) => setNewLog({...newLog, date: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
-                      <Timer size={12} /> Duration (Minutes)
-                    </label>
-                    <input 
-                      type="number"
-                      required
-                      min="1"
-                      value={newLog.duration}
-                      onChange={(e) => setNewLog({...newLog, duration: e.target.value})}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    />
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Timer size={12} /> Duration (Minutes)</label>
+                    <input type="number" required min="1" value={newLog.duration} onChange={(e) => setNewLog({...newLog, duration: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
-                    <FileText size={12} /> Flight Notes & Observations
-                  </label>
-                  <textarea 
-                    placeholder="Enter weather conditions, landing details, or maintenance observations..."
-                    value={newLog.notes}
-                    onChange={(e) => setNewLog({...newLog, notes: e.target.value})}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none"
-                  />
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><FileText size={12} /> Flight Notes & Observations</label>
+                  <textarea placeholder="Enter weather conditions, landing details, or maintenance observations..." value={newLog.notes} onChange={(e) => setNewLog({...newLog, notes: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" />
                 </div>
                 <div className="flex justify-end gap-3">
-                  <button 
-                    type="button"
-                    onClick={() => setIsAddingLog(false)}
-                    className="px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/50 rounded-xl transition-all"
-                  >
-                    Discard
-                  </button>
-                  <button 
-                    type="submit"
-                    className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
-                  >
-                    Save Log Entry
-                  </button>
+                  <button type="button" onClick={() => setIsAddingLog(false)} className="px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/50 rounded-xl transition-all">Discard</button>
+                  <button type="submit" className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">Save Log Entry</button>
                 </div>
               </form>
             </div>
           )}
-          
           <div className="space-y-4">
             {logs.map(log => (
               <div key={log.id} className="bg-muted/20 p-5 border rounded-[1.5rem] group hover:bg-muted/40 transition-all cursor-pointer">
@@ -531,25 +420,11 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center justify-end gap-1">
-                      <MapPin size={10} /> {log.site}
-                    </div>
-                    <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${
-                      log.status === 'SIGNED OFF' 
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                    }`}>
-                      {log.status}
-                    </div>
+                    <div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center justify-end gap-1"><MapPin size={10} /> {log.site}</div>
+                    <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${log.status === 'SIGNED OFF' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>{log.status}</div>
                   </div>
                 </div>
-                {log.notes && (
-                  <div className="pl-16 mt-2 border-t pt-3 border-border/10">
-                    <p className="text-xs text-muted-foreground italic leading-relaxed">
-                      "{log.notes}"
-                    </p>
-                  </div>
-                )}
+                {log.notes && <div className="pl-16 mt-2 border-t pt-3 border-border/10"><p className="text-xs text-muted-foreground italic leading-relaxed">"{log.notes}"</p></div>}
               </div>
             ))}
           </div>
@@ -558,96 +433,33 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
       {activeTab === 'crew' && (
         <div className="space-y-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2"><Users className="text-primary" /> Crew Directory</h2>
-            
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                <input 
-                  type="text"
-                  placeholder="Search name, bio, or certs..."
-                  value={crewSearch}
-                  onChange={(e) => setCrewSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-muted/50 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                />
-              </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                <select 
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value as any)}
-                  className="pl-10 pr-4 py-2.5 bg-muted/50 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none cursor-pointer"
-                >
-                  <option value="All">All Roles</option>
-                  <option value="Pilot">Pilots</option>
-                  <option value="Ground Crew">Ground Crew</option>
-                </select>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2 mt-2"><Users className="text-primary" /> Crew Directory</h2>
+            <div className="w-full md:max-w-xl">
+              <CrewFilterBar 
+                search={crewSearch}
+                onSearchChange={setCrewSearch}
+                roleFilter={roleFilter}
+                onRoleFilterChange={setRoleFilter}
+                expFilter={minExpFilter}
+                onExpFilterChange={setMinExpFilter}
+                certFilter={certTypeFilter}
+                onCertFilterChange={setCertTypeFilter}
+              />
             </div>
           </div>
 
           {filteredCrew.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {filteredCrew.map(member => (
-                <div key={member.id} className="bg-background border rounded-[2rem] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group">
-                  <div className="p-6 flex flex-col sm:flex-row gap-6">
-                    <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-muted/50 shadow-inner group-hover:scale-105 transition-transform">
-                      <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="space-y-3 flex-grow">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                          <h3 className="text-xl font-bold">{member.name}</h3>
-                          <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mt-0.5">
-                            {member.role === 'Pilot' ? <Plane size={12} /> : <Users size={12} />}
-                            {member.role}
-                          </div>
-                        </div>
-                        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
-                          {member.experience} Yrs Exp
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-                        <a href={`mailto:${member.contact.email}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                          <Mail size={12} /> {member.contact.email}
-                        </a>
-                        <a href={`tel:${member.contact.phone}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                          <Phone size={12} /> {member.contact.phone}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="px-6 pb-6 space-y-4">
-                    <div className="bg-muted/30 p-4 rounded-2xl">
-                      <p className="text-xs leading-relaxed text-foreground/80 italic">
-                        "{member.bio}"
-                      </p>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                        <Award size={10} /> Active Certifications
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {member.certifications.map((cert, idx) => (
-                          <span key={idx} className="bg-background border border-border text-[9px] font-bold px-2 py-1 rounded-md text-muted-foreground">
-                            {cert}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <CrewMemberCard key={member.id} member={member} />
               ))}
             </div>
           ) : (
             <div className="py-20 text-center bg-muted/20 rounded-[3rem] border-2 border-dashed">
               <Users size={48} className="mx-auto text-muted-foreground/30 mb-4" />
-              <h3 className="text-xl font-bold text-muted-foreground">No crew members found</h3>
-              <p className="text-sm text-muted-foreground/60">Try adjusting your search or filters</p>
+              <h3 className="text-xl font-bold text-muted-foreground">No crew members match your filters</h3>
+              <p className="text-sm text-muted-foreground/60">Try adjusting your search terms or filter criteria</p>
             </div>
           )}
         </div>
@@ -660,10 +472,7 @@ const SparkleIcon = () => (
   <span className="text-primary animate-pulse">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-      <path d="M5 3v4"/>
-      <path d="M19 17v4"/>
-      <path d="M3 5h4"/>
-      <path d="M17 19h4"/>
+      <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
     </svg>
   </span>
 );
