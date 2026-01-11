@@ -151,6 +151,7 @@ const Dashboard: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState('All');
   const [minExpFilter, setMinExpFilter] = useState(0);
   const [certTypeFilter, setCertTypeFilter] = useState('All');
+  const [availabilityFilter, setAvailabilityFilter] = useState('All');
   const [editingMember, setEditingMember] = useState<CrewMember | null>(null);
 
   const [crewMembers, setCrewMembers] = useState<CrewMember[]>([
@@ -208,7 +209,10 @@ const Dashboard: React.FC = () => {
       const matchesCert = certTypeFilter === 'All' || member.certifications.some(c =>
         c.toLowerCase().includes(certTypeFilter.toLowerCase())
       );
-      if (!matchesRole || !matchesExp || !matchesCert) return false;
+      const matchesAvailability = availabilityFilter === 'All' || member.availability === availabilityFilter;
+      
+      if (!matchesRole || !matchesExp || !matchesCert || !matchesAvailability) return false;
+      
       if (isSearching) {
         return calculateCrewRelevance(member, crewSearch) > -20;
       }
@@ -223,7 +227,7 @@ const Dashboard: React.FC = () => {
       });
     }
     return items;
-  }, [crewMembers, crewSearch, roleFilter, minExpFilter, certTypeFilter]);
+  }, [crewMembers, crewSearch, roleFilter, minExpFilter, certTypeFilter, availabilityFilter]);
 
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [newLog, setNewLog] = useState<{
@@ -506,6 +510,8 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 onExpFilterChange={setMinExpFilter}
                 certFilter={certTypeFilter}
                 onCertFilterChange={setCertTypeFilter}
+                availabilityFilter={availabilityFilter}
+                onAvailabilityFilterChange={setAvailabilityFilter}
               />
             </div>
           </div>

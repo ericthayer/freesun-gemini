@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2, CheckCircle2, Circle
+  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2, CheckCircle2, Circle, Activity
 } from 'lucide-react';
 
 export interface CrewMember {
@@ -123,13 +123,16 @@ interface CrewFilterBarProps {
   onExpFilterChange: (val: number) => void;
   certFilter: string;
   onCertFilterChange: (val: string) => void;
+  availabilityFilter: string;
+  onAvailabilityFilterChange: (val: string) => void;
 }
 
 export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
   search, onSearchChange,
   roleFilter, onRoleFilterChange,
   expFilter, onExpFilterChange,
-  certFilter, onCertFilterChange
+  certFilter, onCertFilterChange,
+  availabilityFilter, onAvailabilityFilterChange
 }) => {
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -144,7 +147,7 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
         />
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <select 
@@ -185,6 +188,19 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
             <option value="Safety">Safety / Response</option>
             <option value="Technician">Maintenance</option>
             <option value="Recovery">Recovery</option>
+          </select>
+        </div>
+
+        <div className="relative">
+          <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+          <select 
+            value={availabilityFilter}
+            onChange={(e) => onAvailabilityFilterChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-muted/50 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none cursor-pointer"
+          >
+            <option value="All">All Statuses</option>
+            <option value="available">Available Now</option>
+            <option value="busy">Busy / Off Duty</option>
           </select>
         </div>
       </div>
