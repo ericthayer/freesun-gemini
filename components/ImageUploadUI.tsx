@@ -1,6 +1,7 @@
 
 import React, { useRef, useState } from 'react';
 import { Camera, Upload, X, User } from 'lucide-react';
+import { validateImageFile } from '../utils/fileUtils';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -15,8 +16,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ currentImage, onImageC
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file.');
+      const validation = validateImageFile(file, 5);
+      
+      if (!validation.valid) {
+        alert(validation.error);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
       
