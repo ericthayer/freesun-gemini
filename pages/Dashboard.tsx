@@ -4,7 +4,7 @@ import {
   CloudSun, Wind, Navigation, AlertTriangle, 
   CheckCircle, ListChecks, MessageSquareText,
   Clock, MapPin, Search, Plane, ChevronRight,
-  PlaneTakeoff, X, Sun, Cloud
+  PlaneTakeoff, X, Sun, Cloud, Users, Timer
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 
@@ -14,9 +14,16 @@ const Dashboard: React.FC = () => {
   const [loadingBriefing, setLoadingBriefing] = useState(false);
   const [showWindAlert, setShowWindAlert] = useState(true);
   
+  // Pilot context for AI briefing
+  const [pilotContext, setPilotContext] = useState({
+    passengers: '4',
+    balloon: 'SunChaser #04 (Medium)',
+    duration: '90'
+  });
+
   const [weatherData, setWeatherData] = useState({
     temp: '68°F',
-    wind: '18 mph', // Changed to 18 to trigger the alert for demo purposes
+    wind: '18 mph', // Trigger high wind alert for demo
     direction: 'NW',
     visibility: '10 mi',
     cloudBase: '4,000 ft'
@@ -55,7 +62,14 @@ const Dashboard: React.FC = () => {
   const handleGenerateBriefing = async () => {
     setLoadingBriefing(true);
     try {
-      const prompt = `Generate a concise flight briefing for a balloon pilot. Current weather: ${weatherData.temp}, Wind: ${weatherData.wind} from ${weatherData.direction}. Visibility: ${weatherData.visibility}. Focus on safety risks and launch feasibility.`;
+      const prompt = `Generate a concise flight briefing for a balloon pilot.
+Current Weather: Temp: ${weatherData.temp}, Wind: ${weatherData.wind} from ${weatherData.direction}. Visibility: ${weatherData.visibility}.
+Flight Configuration:
+- Balloon: ${pilotContext.balloon}
+- Passenger Count: ${pilotContext.passengers}
+- Intended Duration: ${pilotContext.duration} minutes
+Focus on safety risks, fuel management, and launch feasibility specific to this configuration and current conditions.`;
+      
       const result = await getFlightBriefing(prompt);
       setBriefing(result);
     } catch (err) {
@@ -121,7 +135,7 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Weather Grid - Optimized for glanceability */}
+          {/* Weather Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className={`p-6 rounded-3xl border flex flex-col items-center justify-center text-center transition-colors ${isHighWind ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/50'}`}>
               <Wind className={`${isHighWind ? 'text-destructive' : 'text-primary'} mb-2`} size={32} />
@@ -169,38 +183,91 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* AI Briefing Widget */}
+            {/* AI Briefing Widget with Context Inputs */}
             <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden">
               <div className="absolute -right-4 -top-4 text-primary/5">
                 <MessageSquareText size={120} />
               </div>
-              <div className="flex items-center justify-between mb-4">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   <SparkleIcon /> Smart Flight Briefing
                 </h3>
                 <button 
                   onClick={handleGenerateBriefing}
                   disabled={loadingBriefing}
-                  className="bg-primary text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-primary/90 disabled:opacity-50"
+                  className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95"
                 >
-                  {loadingBriefing ? 'Analyzing...' : 'Refresh AI Analysis'}
+                  {loadingBriefing ? 'Analyzing...' : 'Generate New Briefing'}
                 </button>
               </div>
+
+              {/* Context Selection Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
+                    <Plane size={10} /> Balloon Type
+                  </label>
+                  <select 
+                    value={pilotContext.balloon}
+                    onChange={(e) => setPilotContext({...pilotContext, balloon: e.target.value})}
+                    className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-background/80 transition-colors"
+                  >
+                    <option>SunChaser #04 (Medium)</option>
+                    <option>DawnRider #01 (Small)</option>
+                    <option>Atlas #09 (Large)</option>
+                    <option>SkyGazer #02 (XL)</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
+                    <Users size={10} /> Passengers
+                  </label>
+                  <select 
+                    value={pilotContext.passengers}
+                    onChange={(e) => setPilotContext({...pilotContext, passengers: e.target.value})}
+                    className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-background/80 transition-colors"
+                  >
+                    <option>1 (Private)</option>
+                    <option>2 (Couple)</option>
+                    <option>4 (Standard)</option>
+                    <option>6 (Group)</option>
+                    <option>8+ (Large Group)</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
+                    <Timer size={10} /> Duration (Min)
+                  </label>
+                  <select 
+                    value={pilotContext.duration}
+                    onChange={(e) => setPilotContext({...pilotContext, duration: e.target.value})}
+                    className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-background/80 transition-colors"
+                  >
+                    <option value="45">45 Minutes</option>
+                    <option value="60">60 Minutes</option>
+                    <option value="90">90 Minutes</option>
+                    <option value="120">120 Minutes</option>
+                  </select>
+                </div>
+              </div>
               
-              <div className="bg-background/80 backdrop-blur p-4 rounded-2xl border border-primary/10 min-h-[120px]">
+              <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border border-primary/10 min-h-[160px] shadow-inner">
                 {briefing ? (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{briefing}</p>
+                  <div className="animate-in fade-in slide-in-from-bottom-2">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{briefing}</p>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center py-8">
                     <Plane className="text-primary/30 mb-2 animate-bounce" />
-                    <p className="text-muted-foreground text-sm italic">
-                      Request a briefing to analyze today's weather and terrain risks using Gemini Intelligence.
+                    <p className="text-muted-foreground text-sm italic max-w-xs">
+                      Set your flight configuration above and request a briefing for specialized safety analysis.
                     </p>
                   </div>
                 )}
               </div>
               
-              <div className="mt-4 flex gap-4 text-xs font-semibold">
+              <div className="mt-4 flex flex-wrap gap-4 text-xs font-semibold">
                 <span className="flex items-center gap-1 text-green-600"><CheckCircle size={14} /> VFR Conditions</span>
                 <span className={`flex items-center gap-1 ${isHighWind ? 'text-destructive font-bold' : 'text-orange-600'}`}>
                   <AlertTriangle size={14} /> {isHighWind ? 'DANGEROUS GUSTS' : 'Potential Gusts at 2k ft'}
@@ -218,14 +285,14 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center border-b pb-4">
                   <span className="text-sm text-muted-foreground">Passengers</span>
-                  <span className="font-bold">4 Adults</span>
+                  <span className="font-bold">{pilotContext.passengers} Adult(s)</span>
                 </div>
                 <div className="flex justify-between items-center border-b pb-4">
                   <span className="text-sm text-muted-foreground">Balloon</span>
-                  <span className="font-bold">SunChaser #04</span>
+                  <span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span>
                 </div>
               </div>
-              <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all">
+              <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">
                 View Flight Plan
               </button>
             </div>
