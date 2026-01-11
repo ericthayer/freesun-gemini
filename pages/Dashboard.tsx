@@ -6,11 +6,11 @@ import {
   Clock, MapPin, Search, Plane, ChevronRight,
   PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
   Mail, Phone, Award, Filter, Briefcase, GraduationCap,
-  // Fix: Added missing User icon import
   User
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
+import { WeatherCard, ForecastCard, SparkleIcon, Spinner } from '../components/StatusUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -220,48 +220,34 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               <button onClick={() => setShowWindAlert(false)} className="p-2 hover:bg-destructive/20 rounded-full text-destructive transition-colors"><X size={18} /></button>
             </div>
           )}
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className={`p-6 rounded-3xl border flex flex-col items-center justify-center text-center transition-colors ${isHighWind ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/50'}`}>
-              <Wind className={`${isHighWind ? 'text-destructive' : 'text-primary'} mb-2`} size={32} />
-              <div className={`text-2xl font-black ${isHighWind ? 'text-destructive' : ''}`}>{weatherData.wind}</div>
-              <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Surface Wind</div>
-            </div>
-            <div className="bg-muted/50 p-6 rounded-3xl border flex flex-col items-center justify-center text-center">
-              <Navigation className="text-primary mb-2" size={32} />
-              <div className="text-2xl font-black">{weatherData.direction}</div>
-              <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Direction</div>
-            </div>
-            <div className="bg-muted/50 p-6 rounded-3xl border flex flex-col items-center justify-center text-center">
-              <CloudSun className="text-primary mb-2" size={32} />
-              <div className="text-2xl font-black">{weatherData.temp}</div>
-              <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Ambient Temp</div>
-            </div>
-            <div className="bg-muted/50 p-6 rounded-3xl border flex flex-col items-center justify-center text-center">
-              <Search className="text-primary mb-2" size={32} />
-              <div className="text-2xl font-black">{weatherData.visibility}</div>
-              <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Visibility</div>
-            </div>
+            <WeatherCard icon={Wind} value={weatherData.wind} label="Surface Wind" isWarning={isHighWind} />
+            <WeatherCard icon={Navigation} value={weatherData.direction} label="Direction" />
+            <WeatherCard icon={CloudSun} value={weatherData.temp} label="Ambient Temp" />
+            <WeatherCard icon={Search} value={weatherData.visibility} label="Visibility" />
           </div>
+
           <div className="bg-muted/30 border rounded-3xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {forecastData.map((day, idx) => (
-                <div key={idx} className="bg-background/50 border border-border/50 p-4 rounded-2xl flex items-center justify-between md:flex-col md:items-start md:gap-2">
-                  <div className="flex items-center gap-3 md:w-full md:justify-between"><span className="font-bold text-sm">{day.day}</span><day.icon size={20} className="text-primary" /></div>
-                  <div className="text-right md:text-left md:w-full">
-                    <div className="text-sm font-semibold">{day.temp}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1"><Wind size={12} /> {day.wind}</div>
-                  </div>
-                </div>
+                <ForecastCard key={idx} {...day} />
               ))}
             </div>
           </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden">
               <div className="absolute -right-4 -top-4 text-primary/5"><MessageSquareText size={120} /></div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2"><SparkleIcon /> Smart Flight Briefing</h3>
-                <button onClick={handleGenerateBriefing} disabled={loadingBriefing} className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95">
+                <button 
+                  onClick={handleGenerateBriefing} 
+                  disabled={loadingBriefing} 
+                  className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  {loadingBriefing && <Spinner size={14} />}
                   {loadingBriefing ? 'Analyzing...' : 'Generate New Briefing'}
                 </button>
               </div>
@@ -442,15 +428,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     </div>
   );
 };
-
-const SparkleIcon = () => (
-  <span className="text-primary animate-pulse">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-      <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
-    </svg>
-  </span>
-);
 
 const Edit2Icon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">

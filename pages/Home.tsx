@@ -14,8 +14,8 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=2000" 
-            alt="Sunset background" 
+            src="https://assets.codepen.io/97621/IMG_8276.jpg?auto=compress&cs=tinysrgb&w=1920" 
+            alt="FreeSun Balloon Crew" 
             className="w-full h-full object-cover brightness-50 dark:brightness-[0.3]"
           />
         </div>
@@ -29,23 +29,21 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center text-white">
-          <h1 className="text-5xl md:text-8xl font-bold mb-6 tracking-tight">
-            Elevate Your <br />
-            <span className="text-primary italic">Perspective.</span>
+          <h1 className="text-5xl md:text-8xl font-bold mb-4 tracking-tight italic">
+            Rocky Mountain Fly
           </h1>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-slate-200">
-            Join the most exclusive community of ballooning enthusiasts. 
-            From luxury morning rides to pilot certification, we touch the sky.
+          <p className="text-lg md:text-xl max-w-3xl mx-auto mb-10 text-slate-300">
+            Join the most exclusive community of ballooning enthusiasts. From luxury morning rides to pilot certification, we touch the sky.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-all transform hover:scale-105">
-              Book a Flight
+              Join the crew
             </button>
             <Link 
               to={isLoggedIn ? "/dashboard" : "/"} 
               className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold rounded-full hover:bg-white/20 transition-all"
             >
-              Learn More
+              Learn about us
             </Link>
           </div>
         </div>
