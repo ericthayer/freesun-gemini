@@ -20,6 +20,7 @@ import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } 
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
 import { CrewProfileForm } from '../components/CrewProfileForm';
 import { LogMediaUpload } from '../components/LogMediaUI';
+import { LogDetailDrawer } from '../components/LogDetailDrawer';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -133,6 +134,7 @@ const Dashboard: React.FC = () => {
   const [logSortField, setLogSortField] = useState<SortField>('date');
   const [logSortOrder, setLogSortOrder] = useState<SortOrder>('desc');
   const [logToArchive, setLogToArchive] = useState<string | null>(null);
+  const [previewLog, setPreviewLog] = useState<FlightLog | null>(null);
 
   const sortedLogs = useMemo(() => {
     return [...logs].sort((a, b) => {
@@ -483,6 +485,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 key={log.id} 
                 log={log} 
                 onArchive={(id) => setLogToArchive(id)}
+                onPreview={(l) => setPreviewLog(l)}
               />
             ))}
             {sortedLogs.length === 0 && (
@@ -556,6 +559,12 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         message="Are you sure you want to archive this flight log? It will be removed from your active history list. This action can be reversed by a club administrator."
         confirmText="Archive Entry"
         variant="danger"
+      />
+
+      {/* Detail Previews */}
+      <LogDetailDrawer 
+        log={previewLog} 
+        onClose={() => setPreviewLog(null)} 
       />
     </div>
   );

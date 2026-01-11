@@ -2,7 +2,7 @@
 import React from 'react';
 import { 
   Calendar, Timer, MapPin, PlaneTakeoff, 
-  ArrowUpDown, SortAsc, SortDesc, Archive, Trash2
+  ArrowUpDown, SortAsc, SortDesc, Archive, Trash2, Eye
 } from 'lucide-react';
 import { LogMediaGallery } from './LogMediaUI';
 
@@ -24,14 +24,18 @@ export interface FlightLog {
 interface LogCardProps {
   log: FlightLog;
   onArchive?: (id: string) => void;
+  onPreview?: (log: FlightLog) => void;
 }
 
-export const LogCard: React.FC<LogCardProps> = ({ log, onArchive }) => {
+export const LogCard: React.FC<LogCardProps> = ({ log, onArchive, onPreview }) => {
   return (
-    <div className="bg-muted/20 p-5 border rounded-[1.5rem] group hover:bg-muted/40 transition-all cursor-pointer relative overflow-hidden">
-      <div className="flex items-center justify-between mb-3">
+    <div 
+      className="bg-muted/20 p-5 border rounded-[1.5rem] group hover:bg-muted/40 transition-all cursor-pointer relative overflow-hidden"
+      onClick={() => onPreview?.(log)}
+    >
+      <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-background rounded-2xl flex items-center justify-center border shadow-sm group-hover:bg-primary/10 transition-colors">
+          <div className="bg-background rounded-2xl flex items-center justify-center border shadow-sm group-hover:bg-primary/10 transition-colors">
             <PlaneTakeoff size={20} className="text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
           <div>
@@ -49,7 +53,7 @@ export const LogCard: React.FC<LogCardProps> = ({ log, onArchive }) => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-end gap-4">
           <div className="text-right">
             <div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center justify-end gap-1">
               <MapPin size={10} /> {log.site}
@@ -62,18 +66,30 @@ export const LogCard: React.FC<LogCardProps> = ({ log, onArchive }) => {
               {log.status}
             </div>
           </div>
-          {onArchive && (
+          <div className="flex items-center gap-2">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onArchive(log.id);
+                onPreview?.(log);
               }}
-              className="p-2 bg-background border rounded-xl text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-              title="Archive Flight Log"
+              className="p-2 bg-background border rounded-xl text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+              title="Quick Preview"
             >
-              <Trash2 size={16} />
+              <Eye size={16} />
             </button>
-          )}
+            {onArchive && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive(log.id);
+                }}
+                className="p-2 bg-background border rounded-xl text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                title="Archive Flight Log"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>          
         </div>
       </div>
       
