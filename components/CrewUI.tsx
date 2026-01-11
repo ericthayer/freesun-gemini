@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap 
+  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2
 } from 'lucide-react';
 
 export interface CrewMember {
@@ -20,11 +20,12 @@ export interface CrewMember {
 
 interface CrewMemberCardProps {
   member: CrewMember;
+  onEdit?: (member: CrewMember) => void;
 }
 
-export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member }) => {
+export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member, onEdit }) => {
   return (
-    <div className="bg-background border rounded-[2rem] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group">
+    <div className="bg-background border rounded-[2rem] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group relative">
       <div className="p-6 flex flex-col sm:flex-row gap-6">
         <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-muted/50 shadow-inner group-hover:scale-105 transition-transform">
           <img 
@@ -36,7 +37,18 @@ export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member }) => {
         <div className="space-y-3 flex-grow">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-xl font-bold">{member.name}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold">{member.name}</h3>
+                {onEdit && (
+                  <button 
+                    onClick={() => onEdit(member)}
+                    className="p-1.5 hover:bg-primary/10 rounded-lg text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    title="Edit Profile"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                )}
+              </div>
               <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mt-0.5">
                 {member.role === 'Pilot' ? <Plane size={12} /> : <Users size={12} />}
                 {member.role}
