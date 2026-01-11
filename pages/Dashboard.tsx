@@ -6,7 +6,7 @@ import {
   Clock, MapPin, Search, Plane, ChevronRight,
   PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
   Mail, Phone, Award, Filter, Briefcase, GraduationCap,
-  User, Camera, RefreshCw
+  User, Camera, RefreshCw, CalendarDays
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -19,8 +19,9 @@ import { calculateCrewRelevance } from '../utils/searchUtils';
 import { ImageUpload } from '../components/ImageUploadUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
+import { ScheduleItem, ScheduleCard, ScheduleForm } from '../components/ScheduleUI';
 
-type TabType = 'status' | 'checklists' | 'logs' | 'crew';
+type TabType = 'status' | 'checklists' | 'logs' | 'crew' | 'schedule';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('status');
@@ -55,12 +56,9 @@ const Dashboard: React.FC = () => {
     const updateWeather = async () => {
       setIsWeatherLoading(true);
       try {
-        // Use geolocation if available, otherwise fallback to base coords
         const coords = { lat: 38.2975, lon: -122.4579 };
-        
         const snapshot = await fetchLiveWeather(coords.lat, coords.lon);
         
-        // Update basic weather card values
         setWeatherData(prev => ({
           ...prev,
           temp: snapshot.temp,
@@ -68,10 +66,9 @@ const Dashboard: React.FC = () => {
           direction: snapshot.windDirection
         }));
 
-        // Detect new alerts
         const newAlerts = detectWeatherAlerts(snapshot, lastSnapshot.current);
         if (newAlerts.length > 0) {
-          setWeatherAlerts(prev => [...newAlerts, ...prev].slice(0, 5)); // Keep last 5 alerts
+          setWeatherAlerts(prev => [...newAlerts, ...prev].slice(0, 5));
         }
 
         lastSnapshot.current = snapshot;
@@ -82,14 +79,79 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    updateWeather(); // Initial fetch
-    intervalId = window.setInterval(updateWeather, 30000); // Update every 30s
+    updateWeather();
+    intervalId = window.setInterval(updateWeather, 30000);
 
     return () => clearInterval(intervalId);
   }, []);
 
   const dismissAlert = (id: string) => {
     setWeatherAlerts(prev => prev.filter(a => a.id !== id));
+  };
+
+  // Schedule State
+  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([
+    {
+      id: 's1',
+      type: 'flight',
+      title: 'Valley Mist Morning Ride',
+      date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+      time: '06:15',
+      location: 'South Ridge Launch Site',
+      description: 'Standard tourist flight for 4 passengers. Ground crew arrival at 05:30 for cold inflation.',
+      attendees: 4
+    },
+    {
+      id: 's2',
+      type: 'training',
+      title: 'Emergency Landing Drills',
+      date: new Date(Date.now() + 172800000).toISOString().split('T')[0],
+      time: '09:00',
+      location: 'West Field',
+      description: 'Mandatory session for all junior pilots. Focus on high-wind approach techniques.',
+      attendees: 12
+    },
+    {
+      id: 's3',
+      type: 'meeting',
+      title: 'Annual Safety Review',
+      date: new Date(Date.now() + 259200000).toISOString().split('T')[0],
+      time: '18:30',
+      location: 'Main Clubhouse',
+      description: 'Discussion of new FAA regulations and internal club maintenance logs for the winter season.',
+    }
+  ]);
+  const [isAddingEvent, setIsAddingEvent] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<ScheduleItem | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+
+  const sortedSchedule = useMemo(() => {
+    return [...scheduleItems].sort((a, b) => {
+      const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (dateCompare !== 0) return dateCompare;
+      return a.time.localeCompare(b.time);
+    });
+  }, [scheduleItems]);
+
+  const handleEventSubmit = (data: Partial<ScheduleItem>) => {
+    if (editingEvent) {
+      setScheduleItems(prev => prev.map(item => item.id === editingEvent.id ? { ...item, ...data } as ScheduleItem : item));
+      setEditingEvent(null);
+    } else {
+      const newItem: ScheduleItem = {
+        ...data as ScheduleItem,
+        id: Math.random().toString(36).substr(2, 9),
+      };
+      setScheduleItems(prev => [...prev, newItem]);
+      setIsAddingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = () => {
+    if (eventToDelete) {
+      setScheduleItems(prev => prev.filter(item => item.id !== eventToDelete));
+      setEventToDelete(null);
+    }
   };
 
   // Checklist state
@@ -184,25 +246,19 @@ const Dashboard: React.FC = () => {
 
   const filteredCrew = useMemo(() => {
     const isSearching = crewSearch.trim().length > 0;
-
     const items = crewMembers.filter(member => {
-      // Basic hard filters
       const matchesRole = roleFilter === 'All' || member.role === roleFilter;
       const matchesExp = member.experience >= minExpFilter;
       const matchesCert = certTypeFilter === 'All' || member.certifications.some(c =>
         c.toLowerCase().includes(certTypeFilter.toLowerCase())
       );
-      
       if (!matchesRole || !matchesExp || !matchesCert) return false;
-
-      // If searching, check if relevance is non-zero
       if (isSearching) {
-        return calculateCrewRelevance(member, crewSearch) > -20; // Allow some slack for multi-word
+        return calculateCrewRelevance(member, crewSearch) > -20;
       }
       return true;
     });
 
-    // If searching, sort by relevance
     if (isSearching) {
       return items.sort((a, b) => {
         const scoreA = calculateCrewRelevance(a, crewSearch);
@@ -210,7 +266,6 @@ const Dashboard: React.FC = () => {
         return scoreB - scoreA;
       });
     }
-
     return items;
   }, [crewMembers, crewSearch, roleFilter, minExpFilter, certTypeFilter]);
 
@@ -294,6 +349,14 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     }
   };
 
+  const tabs: {id: TabType, label: string, icon: any}[] = [
+    {id: 'status', label: 'Status', icon: CloudSun},
+    {id: 'schedule', label: 'Schedule', icon: CalendarDays},
+    {id: 'checklists', label: 'Checklists', icon: ListChecks},
+    {id: 'logs', label: 'Logs', icon: FileText},
+    {id: 'crew', label: 'Crew', icon: Users},
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl grid grid-rows-[auto_1fr] grow">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -305,13 +368,14 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
         </div>
         <div className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto no-scrollbar">
-          {(['status', 'checklists', 'logs', 'crew'] as TabType[]).map((tab) => (
+          {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              <tab.icon size={14} />
+              {tab.label}
             </button>
           ))}
         </div>
@@ -319,7 +383,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
       {activeTab === 'status' && (
         <div className="space-y-6 flex flex-col">
-          {/* New Real-time Weather Alerts Section */}
           <WeatherAlertsList alerts={weatherAlerts} onDismiss={dismissAlert} />
 
           {isHighWind && showWindAlert && weatherAlerts.length === 0 && (
@@ -391,6 +454,72 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'schedule' && (
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2"><CalendarDays className="text-primary" /> Club Schedule</h2>
+            <button 
+              onClick={() => {
+                setEditingEvent(null);
+                setIsAddingEvent(!isAddingEvent);
+              }} 
+              className="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 flex items-center gap-2"
+            >
+              {isAddingEvent ? <X size={16} /> : <Plus size={16} />}
+              {isAddingEvent ? 'Cancel' : 'New Schedule Item'}
+            </button>
+          </div>
+
+          {(isAddingEvent || editingEvent) && (
+            <div className="bg-muted/30 border-2 border-primary/30 rounded-[2rem] p-8 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  {editingEvent ? <Edit2Icon /> : <Plus className="text-primary" />}
+                  {editingEvent ? `Edit Event: ${editingEvent.title}` : 'Create New Event'}
+                </h3>
+                <button 
+                  onClick={() => {
+                    setIsAddingEvent(false);
+                    setEditingEvent(null);
+                  }}
+                  className="p-2 hover:bg-muted rounded-full"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <ScheduleForm 
+                initialData={editingEvent || undefined}
+                isEditing={!!editingEvent}
+                onSubmit={handleEventSubmit}
+                onCancel={() => {
+                  setIsAddingEvent(false);
+                  setEditingEvent(null);
+                }}
+              />
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {sortedSchedule.length > 0 ? (
+              sortedSchedule.map(item => (
+                <ScheduleCard 
+                  key={item.id} 
+                  item={item} 
+                  onEdit={setEditingEvent}
+                  onDelete={setEventToDelete}
+                />
+              ))
+            ) : (
+              <div className="py-20 text-center bg-muted/20 rounded-[3rem] border-2 border-dashed">
+                <CalendarDays size={48} className="mx-auto text-muted-foreground/30 mb-4" />
+                <h3 className="text-xl font-bold text-muted-foreground">No upcoming events</h3>
+                <p className="text-sm text-muted-foreground/60">The schedule is clear. Check back later or add a new session.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -489,7 +618,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               </div>
               <form onSubmit={handleEditSave} className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-8">
-                  {/* Image Upload Section */}
                   <div className="shrink-0 space-y-2 flex flex-col items-center">
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                       <Camera size={12} /> Profile Photo
@@ -502,8 +630,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                       JPG, PNG or GIF. Max 5MB recommended.
                     </p>
                   </div>
-
-                  {/* Fields Section */}
                   <div className="flex-grow space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -533,7 +659,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                     </div>
                   </div>
                 </div>
-                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><FileText size={12} /> Bio</label>
                   <textarea value={editingMember.bio} onChange={(e) => setEditingMember({...editingMember, bio: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[80px] resize-none" />
@@ -567,7 +692,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         </div>
       )}
 
-      {/* Reusable Confirmation Modal */}
+      {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={logToArchive !== null}
         onClose={() => setLogToArchive(null)}
@@ -575,6 +700,16 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         title="Archive Flight Log"
         message="Are you sure you want to archive this flight log? It will be removed from your active history list. This action can be reversed by a club administrator."
         confirmText="Archive Entry"
+        variant="danger"
+      />
+
+      <ConfirmationModal
+        isOpen={eventToDelete !== null}
+        onClose={() => setEventToDelete(null)}
+        onConfirm={handleDeleteEvent}
+        title="Delete Schedule Item"
+        message="Are you sure you want to remove this event from the schedule? This action cannot be undone."
+        confirmText="Delete Event"
         variant="danger"
       />
     </div>
