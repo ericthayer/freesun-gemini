@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2
+  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2, CheckCircle2, Circle
 } from 'lucide-react';
 
 export interface CrewMember {
@@ -16,14 +16,18 @@ export interface CrewMember {
   certifications: string[];
   bio: string;
   imageUrl?: string;
+  availability: 'available' | 'busy';
 }
 
 interface CrewMemberCardProps {
   member: CrewMember;
   onEdit?: (member: CrewMember) => void;
+  onToggleAvailability?: (id: string) => void;
 }
 
-export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member, onEdit }) => {
+export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member, onEdit, onToggleAvailability }) => {
+  const isAvailable = member.availability === 'available';
+
   return (
     <div className="bg-background border rounded-[2rem] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group relative">
       <div className="p-6 flex flex-col sm:flex-row gap-6">
@@ -35,7 +39,7 @@ export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member, onEdit }
           />
         </div>
         <div className="space-y-3 flex-grow">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-bold">{member.name}</h3>
@@ -54,8 +58,24 @@ export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member, onEdit }
                 {member.role}
               </div>
             </div>
-            <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
-              {member.experience} Yrs Exp
+            
+            <div className="flex flex-col items-end gap-2">
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                {member.experience} Yrs Exp
+              </div>
+              
+              {/* Availability Toggle */}
+              <button
+                onClick={() => onToggleAvailability?.(member.id)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                  isAvailable 
+                    ? 'bg-green-500/10 border-green-500/30 text-green-600' 
+                    : 'bg-muted border-border text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {isAvailable ? <CheckCircle2 size={10} className="animate-pulse" /> : <Circle size={10} />}
+                {isAvailable ? 'Available Now' : 'Busy'}
+              </button>
             </div>
           </div>
           

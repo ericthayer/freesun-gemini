@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  CloudSun, Wind, Navigation, AlertTriangle, 
+import {
+  CloudSun, Wind, Navigation, AlertTriangle,
   CheckCircle, ListChecks, MessageSquareText,
   Clock, MapPin, Search, Plane, ChevronRight,
   PlaneTakeoff, X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
@@ -11,6 +11,8 @@ import {
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
 import { WeatherCard, ForecastCard, SparkleIcon, Spinner } from '../components/StatusUI';
+import { LogCard, LogSortBar, FlightLog, SortField, SortOrder } from '../components/LogsUI';
+import { ConfirmationModal } from '../components/CommonUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -19,7 +21,7 @@ const Dashboard: React.FC = () => {
   const [briefing, setBriefing] = useState<string | null>(null);
   const [loadingBriefing, setLoadingBriefing] = useState(false);
   const [showWindAlert, setShowWindAlert] = useState(true);
-  
+
   // Pilot context for AI briefing
   const [pilotContext, setPilotContext] = useState({
     passengers: '4',
@@ -48,12 +50,28 @@ const Dashboard: React.FC = () => {
   ]);
 
   // Logs state
-  const [logs, setLogs] = useState([
+  const [logs, setLogs] = useState<FlightLog[]>([
     { id: '841', date: '2024-05-24', duration: '105', site: 'Land Site Delta', notes: 'Smooth landing, light crosswinds on approach.', status: 'SIGNED OFF' },
     { id: '840', date: '2024-05-23', duration: '80', site: 'Valley Creek', notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.', status: 'SIGNED OFF' },
     { id: '839', date: '2024-05-22', duration: '125', site: 'Hilltop Basin', notes: 'Challenging thermals near the ridge. Extra fuel used.', status: 'SIGNED OFF' },
     { id: '838', date: '2024-05-21', duration: '70', site: 'Riverside', notes: 'Quiet flight, early morning mist cleared by 07:00.', status: 'SIGNED OFF' },
   ]);
+
+  const [logSortField, setLogSortField] = useState<SortField>('date');
+  const [logSortOrder, setLogSortOrder] = useState<SortOrder>('desc');
+  const [logToArchive, setLogToArchive] = useState<string | null>(null);
+
+  const sortedLogs = useMemo(() => {
+    return [...logs].sort((a, b) => {
+      let comparison = 0;
+      if (logSortField === 'date') {
+        comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+      } else if (logSortField === 'duration') {
+        comparison = parseInt(a.duration) - parseInt(b.duration);
+      }
+      return logSortOrder === 'desc' ? -comparison : comparison;
+    });
+  }, [logs, logSortField, logSortOrder]);
 
   // Crew state
   const [crewSearch, setCrewSearch] = useState('');
@@ -71,7 +89,8 @@ const Dashboard: React.FC = () => {
       contact: { email: 'sarah@freesun.net', phone: '+1 555-0101' },
       certifications: ['Commercial LTA License', 'Flight Instructor', 'Night Rating'],
       bio: 'Lifelong aviation enthusiast with over 1,500 flight hours across three continents. Specialist in high-altitude mountain flights.',
-      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200'
+      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
+      availability: 'available'
     },
     {
       id: '2',
@@ -81,7 +100,8 @@ const Dashboard: React.FC = () => {
       contact: { email: 'mike@freesun.net', phone: '+1 555-0102' },
       certifications: ['Crew Chief Certified', 'Emergency Response', 'Heavy Vehicle Op'],
       bio: 'Precision-focused ground lead. Mikes team has the fastest inflation and recovery records in the club.',
-      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200'
+      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
+      availability: 'busy'
     },
     {
       id: '3',
@@ -91,7 +111,8 @@ const Dashboard: React.FC = () => {
       contact: { email: 'thorne@freesun.net', phone: '+1 555-0103' },
       certifications: ['Master Pilot LTA', 'Maintenance Technician', 'Safety Officer'],
       bio: 'The "Grandmaster" of FreeSun. David has been flying since the club inception and leads our safety committee.',
-      imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200'
+      imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
+      availability: 'available'
     },
     {
       id: '4',
@@ -101,7 +122,8 @@ const Dashboard: React.FC = () => {
       contact: { email: 'elena@freesun.net', phone: '+1 555-0104' },
       certifications: ['Recovery Specialist', 'Radio Communications'],
       bio: 'Expert navigator and recovery lead. Never lost a balloon, even in the dense morning fog of the valley.',
-      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200'
+      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+      availability: 'available'
     }
   ]);
 
@@ -112,7 +134,7 @@ const Dashboard: React.FC = () => {
       const matchesSearch = searchTerms.every(term => searchableStr.includes(term));
       const matchesRole = roleFilter === 'All' || member.role === roleFilter;
       const matchesExp = member.experience >= minExpFilter;
-      const matchesCert = certTypeFilter === 'All' || member.certifications.some(c => 
+      const matchesCert = certTypeFilter === 'All' || member.certifications.some(c =>
         c.toLowerCase().includes(certTypeFilter.toLowerCase())
       );
       return matchesSearch && matchesRole && matchesExp && matchesCert;
@@ -147,8 +169,23 @@ const Dashboard: React.FC = () => {
     setEditingMember(null);
   };
 
+  const handleToggleAvailability = (id: string) => {
+    setCrewMembers(prev => prev.map(m => 
+      m.id === id 
+        ? { ...m, availability: m.availability === 'available' ? 'busy' : 'available' } 
+        : m
+    ));
+  };
+
+  const handleConfirmArchive = () => {
+    if (logToArchive) {
+      setLogs(prev => prev.filter(log => log.id !== logToArchive));
+      setLogToArchive(null);
+    }
+  };
+
   const toggleChecklist = (id: number) => {
-    setChecklists(prev => prev.map(item => 
+    setChecklists(prev => prev.map(item =>
       item.id === id ? { ...item, done: !item.done } : item
     ));
   };
@@ -195,7 +232,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         </div>
         <div className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto no-scrollbar">
           {(['status', 'checklists', 'logs', 'crew'] as TabType[]).map((tab) => (
-            <button 
+            <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
@@ -220,7 +257,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               <button onClick={() => setShowWindAlert(false)} className="p-2 hover:bg-destructive/20 rounded-full text-destructive transition-colors"><X size={18} /></button>
             </div>
           )}
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <WeatherCard icon={Wind} value={weatherData.wind} label="Surface Wind" isWarning={isHighWind} />
             <WeatherCard icon={Navigation} value={weatherData.direction} label="Direction" />
@@ -239,7 +276,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden">
-              <div className="absolute -right-4 -top-4 text-primary/5"><MessageSquareText size={120} /></div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2"><SparkleIcon /> Smart Flight Briefing</h3>
                 <button 
@@ -308,11 +344,21 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
       {activeTab === 'logs' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h2 className="text-2xl font-bold">Flight History</h2>
-            <div className="flex gap-4">
-              <button onClick={() => setIsAddingLog(!isAddingLog)} className="text-sm text-primary font-bold flex items-center gap-1 hover:underline">{isAddingLog ? <X size={16} /> : <Plus size={16} />} {isAddingLog ? 'Cancel' : 'New Entry'}</button>
-              <button className="text-sm text-muted-foreground font-bold hover:text-primary transition-colors">Export CSV</button>
+            <div className="flex flex-wrap items-center gap-4">
+              <LogSortBar 
+                sortField={logSortField}
+                sortOrder={logSortOrder}
+                onSortChange={(field, order) => {
+                  setLogSortField(field);
+                  setLogSortOrder(order);
+                }}
+              />
+              <div className="flex gap-4">
+                <button onClick={() => setIsAddingLog(!isAddingLog)} className="text-sm text-primary font-bold flex items-center gap-1 hover:underline">{isAddingLog ? <X size={16} /> : <Plus size={16} />} {isAddingLog ? 'Cancel' : 'New Entry'}</button>
+                <button className="text-sm text-muted-foreground font-bold hover:text-primary transition-colors">Export CSV</button>
+              </div>
             </div>
           </div>
           {isAddingLog && (
@@ -328,21 +374,20 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           )}
           <div className="space-y-4">
-            {logs.map(log => (
-              <div key={log.id} className="bg-muted/20 p-5 border rounded-[1.5rem] group hover:bg-muted/40 transition-all cursor-pointer">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-background rounded-2xl flex items-center justify-center border shadow-sm group-hover:bg-primary/10 transition-colors"><PlaneTakeoff size={20} className="text-muted-foreground group-hover:text-primary transition-colors" /></div>
-                    <div><div className="font-bold">Flight #FS-0{log.id}</div><div className="text-xs text-muted-foreground flex items-center gap-2"><span className="flex items-center gap-1"><Calendar size={10} /> {new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span><span className="opacity-20">•</span><span className="flex items-center gap-1"><Timer size={10} /> {Math.floor(parseInt(log.duration) / 60)}h {parseInt(log.duration) % 60}m</span></div></div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center justify-end gap-1"><MapPin size={10} /> {log.site}</div>
-                    <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${log.status === 'SIGNED OFF' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>{log.status}</div>
-                  </div>
-                </div>
-                {log.notes && <div className="pl-16 mt-2 border-t pt-3 border-border/10"><p className="text-xs text-muted-foreground italic leading-relaxed">"{log.notes}"</p></div>}
-              </div>
+            {sortedLogs.map(log => (
+              <LogCard 
+                key={log.id} 
+                log={log} 
+                onArchive={(id) => setLogToArchive(id)}
+              />
             ))}
+            {sortedLogs.length === 0 && (
+              <div className="py-20 text-center bg-muted/20 rounded-[3rem] border-2 border-dashed">
+                <FileText size={48} className="mx-auto text-muted-foreground/30 mb-4" />
+                <h3 className="text-xl font-bold text-muted-foreground">No flight logs found</h3>
+                <p className="text-sm text-muted-foreground/60">Start a new flight or adjust your filters</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -413,7 +458,12 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           {filteredCrew.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {filteredCrew.map(member => (
-                <CrewMemberCard key={member.id} member={member} onEdit={setEditingMember} />
+                <CrewMemberCard 
+                  key={member.id} 
+                  member={member} 
+                  onEdit={setEditingMember} 
+                  onToggleAvailability={handleToggleAvailability}
+                />
               ))}
             </div>
           ) : (
@@ -425,13 +475,24 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           )}
         </div>
       )}
+
+      {/* Reusable Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={logToArchive !== null}
+        onClose={() => setLogToArchive(null)}
+        onConfirm={handleConfirmArchive}
+        title="Archive Flight Log"
+        message="Are you sure you want to archive this flight log? It will be removed from your active history list. This action can be reversed by a club administrator."
+        confirmText="Archive Entry"
+        variant="danger"
+      />
     </div>
   );
 };
 
 const Edit2Icon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
+    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
   </svg>
 );
 
