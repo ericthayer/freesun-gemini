@@ -221,7 +221,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="container mx-auto px-4 py-8 max-w-5xl grid grid-rows-[auto_1fr] grow">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Welcome, Pilot</h1>
@@ -244,7 +244,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
       </div>
 
       {activeTab === 'status' && (
-        <div className="space-y-6">
+        <div className="space-y-6 flex flex-col">
           {isHighWind && showWindAlert && (
             <div className="bg-destructive/15 border-2 border-destructive/30 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-3">
@@ -274,8 +274,8 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
+            <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_1fr]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-xl font-bold flex items-center gap-2"><SparkleIcon /> Smart Flight Briefing</h3>
                 <button 
@@ -307,18 +307,20 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   </select>
                 </div>
               </div>
-              <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border border-primary/10 min-h-[160px] shadow-inner">
-                {briefing ? <div className="animate-in fade-in slide-in-from-bottom-2"><p className="text-sm leading-relaxed whitespace-pre-wrap">{briefing}</p></div> : <div className="flex flex-col items-center justify-center h-full text-center py-8"><Plane className="text-primary/30 mb-2 animate-bounce" /><p className="text-muted-foreground text-sm italic max-w-xs">Set your flight configuration above and request a briefing for specialized safety analysis.</p></div>}
+              <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border border-primary/30 min-h-[160px] shadow-inner grid place-content-center">
+                {briefing ? <div className="animate-in fade-in slide-in-from-bottom-2"><p className="text-sm leading-relaxed whitespace-pre-wrap">{briefing}</p></div> : <div className="flex flex-col items-center justify-center text-center py-1"><Plane className="text-primary/30 mb-2 animate-bounce" /><p className="text-muted-foreground text-sm italic max-w-xs">Set your flight configuration above and request a briefing for specialized safety analysis.</p></div>}
               </div>
             </div>
             <div className="bg-muted/30 border rounded-3xl p-6 flex flex-col">
-              <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
-              <div className="space-y-4 flex-grow">
-                <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Launch Time</span><span className="font-bold">06:15 AM</span></div>
-                <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
-                <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
+              <div className="sticky top-[6rem]">
+                <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
+                <div className="space-y-4 flex-grow">
+                  <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Launch Time</span><span className="font-bold">06:15 AM</span></div>
+                  <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
+                  <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
+                </div>
+                <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>
               </div>
-              <button className="mt-6 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>
             </div>
           </div>
         </div>

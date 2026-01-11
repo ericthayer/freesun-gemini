@@ -25,7 +25,7 @@ const App: React.FC = () => {
       <div className={`min-h-screen flex flex-col ${theme}`}>
         {/* Top Navigation */}
         <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container max-w-[1400] h-16 pr-4 pl-5 flex items-center justify-between">
+          <div className="container max-w-[1400] mx-auto h-16 pr-4 pl-5 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <span className="bg-primary p-1.5 rounded-lg text-primary-foreground">
                 <Wind size={20} />
@@ -93,7 +93,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        <main className="flex-grow">
+        <main className="flex flex-col flex-grow">
           <Routes>
             <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
             <Route path="/dashboard" element={<Dashboard />} />

@@ -1,4 +1,4 @@
-# 🎈 FreeSun Hot Air Ballooning Club Redesign
+# 🎈 FreeSun Hot Air Ballooning Club
 
 Welcome to the future of FreeSun. This project is a high-performance, mobile-first redesign of the FreeSun Hot Air Ballooning Club's digital presence. It features a stunning public landing page and a specialized **Pilot & Crew Dashboard** powered by **Gemini AI**.
 
