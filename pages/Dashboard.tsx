@@ -4,7 +4,7 @@ import {
   CloudSun, Wind, Navigation, AlertTriangle, 
   CheckCircle, ListChecks, MessageSquareText,
   Clock, MapPin, Search, Plane, ChevronRight,
-  PlaneTakeoff, X
+  PlaneTakeoff, X, Sun, Cloud
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 
@@ -21,6 +21,13 @@ const Dashboard: React.FC = () => {
     visibility: '10 mi',
     cloudBase: '4,000 ft'
   });
+
+  // Placeholder forecast data
+  const forecastData = [
+    { day: 'Tomorrow', condition: 'Clear', temp: '72° / 54°', wind: '4-6 mph', icon: Sun },
+    { day: 'Wednesday', condition: 'Partly Cloudy', temp: '69° / 52°', wind: '5-9 mph', icon: CloudSun },
+    { day: 'Thursday', condition: 'Cloudy', temp: '64° / 48°', wind: '8-12 mph', icon: Cloud },
+  ];
 
   const windSpeedValue = parseInt(weatherData.wind) || 0;
   const isHighWind = windSpeedValue > 15;
@@ -115,6 +122,29 @@ const Dashboard: React.FC = () => {
               <Search className="text-primary mb-2" size={32} />
               <div className="text-2xl font-black">{weatherData.visibility}</div>
               <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Visibility</div>
+            </div>
+          </div>
+
+          {/* 3-Day Forecast Section */}
+          <div className="bg-muted/30 border rounded-3xl p-6">
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              <Clock size={18} className="text-primary" /> 3-Day Launch Outlook
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {forecastData.map((day, idx) => (
+                <div key={idx} className="bg-background/50 border border-border/50 p-4 rounded-2xl flex items-center justify-between md:flex-col md:items-start md:gap-2">
+                  <div className="flex items-center gap-3 md:w-full md:justify-between">
+                    <span className="font-bold text-sm">{day.day}</span>
+                    <day.icon size={20} className="text-primary" />
+                  </div>
+                  <div className="text-right md:text-left md:w-full">
+                    <div className="text-sm font-semibold">{day.temp}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Wind size={12} /> {day.wind}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
