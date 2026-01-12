@@ -31,10 +31,10 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
   };
 
   return (
-    <section className="mt-12 space-y-6">
+    <section className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-2xl font-black italic tracking-tight flex items-center gap-2">
+          <h3 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Users className="text-primary" /> Crew Connect
           </h3>
           <p className="text-sm text-muted-foreground">Search and coordinate with pilots and ground crew in real-time.</p>
