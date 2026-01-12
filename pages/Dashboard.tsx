@@ -353,14 +353,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border border-primary/20">
                 <Plane size={10} /> Pilot
               </span>
-            </div>
-            <button 
-              onClick={() => setShowTutorial(true)}
-              className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
-              title="Show Tutorial"
-            >
-              <HelpCircle size={18} />
-            </button>
+            </div>            
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <MapPin size={14} /> Chatfield State Park (N 39.5448°, W 105.0874°)
@@ -378,6 +371,13 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               {tab.label}
             </button>
           ))}
+          <button 
+            onClick={() => setShowTutorial(true)}
+            className="p-2 mr-1 ml-auto bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
+            title="Show Tutorial"
+          >
+            <HelpCircle size={18} />
+          </button>
         </div>
       </div>
 
@@ -536,9 +536,9 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
       {activeTab === 'crew' && (
         <div className="space-y-8">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div className="flex flex-col justify-between gap-6">
             <h2 className="text-2xl font-bold flex items-center gap-2 mt-2"><Users className="text-primary" /> Crew Directory</h2>
-            <div className="w-full md:max-w-xl">
+            <div className="w-full">
               <CrewFilterBar 
                 search={crewSearch}
                 onSearchChange={setCrewSearch}
@@ -555,7 +555,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           {filteredCrew.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {filteredCrew.map(member => (
                 <CrewMemberCard 
                   key={member.id} 

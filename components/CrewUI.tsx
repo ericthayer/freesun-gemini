@@ -135,8 +135,8 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
   availabilityFilter, onAvailabilityFilterChange
 }) => {
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="relative w-full">
+    <div className="flex flex-col lg:flex-row gap-4 w-full grow">
+      <div className="relative w-full lg:max-w-fit">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
         <input 
           type="text"
@@ -147,8 +147,8 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
         />
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="relative">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 grow">
+        <div className="relative flex">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <select 
             value={roleFilter}
@@ -161,7 +161,7 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
           </select>
         </div>
 
-        <div className="relative">
+        <div className="relative flex">
           <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <select 
             value={expFilter}
@@ -175,7 +175,7 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
           </select>
         </div>
 
-        <div className="relative">
+        <div className="relative flex">
           <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <select 
             value={certFilter}
@@ -191,7 +191,7 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
           </select>
         </div>
 
-        <div className="relative">
+        <div className="relative flex">
           <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <select 
             value={availabilityFilter}
