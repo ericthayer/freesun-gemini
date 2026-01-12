@@ -17,68 +17,101 @@ export interface WeatherAlert {
 }
 
 /**
- * Simulates fetching data from a live weather API.
- * In a production app, this would use fetch() with an API key from OpenWeatherMap or similar.
+ * Converts wind degrees to cardinal direction strings.
+ */
+const getCardinalDirection = (angle: number): string => {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return directions[Math.round(angle / 45) % 8];
+};
+
+/**
+ * Fetches real-time weather data from OpenWeatherMap API.
+ * Maps the response to the WeatherSnapshot format used by the Pilot Dashboard.
  */
 export const fetchLiveWeather = async (lat: number, lon: number, apiKey: string): Promise<WeatherSnapshot> => {
-  // Log usage of apiKey to prepare for real-world integration
-  if (!apiKey) {
-    console.warn("fetchLiveWeather: Missing API Key for weather service.");
+  if (!apiKey || apiKey === 'FREE_SUN_MOCK_KEY') {
+    // Graceful fallback for development if key is missing or is the mock placeholder
+    console.warn("Weather API Key is missing or invalid. Using safety-first default values.");
+    return {
+      temp: '68°F',
+      windSpeed: 0,
+      windDirection: 'CALM',
+      visibility: '10 mi',
+      timestamp: Date.now(),
+      hasStormCell: false
+    };
   }
 
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`
+    );
 
-  // Mock data generation with some randomness to simulate "real-time" changes
-  const baseWind = 12;
-  const randomShift = Math.random();
-  
-  return {
-    temp: `${65 + Math.floor(Math.random() * 5)}°F`,
-    windSpeed: baseWind + (randomShift > 0.8 ? 8 : Math.floor(Math.random() * 4)), // Occasional gust
-    windDirection: randomShift > 0.9 ? 'W' : 'NW', // Occasional direction shift
-    visibility: '10 mi',
-    timestamp: Date.now(),
-    hasStormCell: randomShift > 0.95 // 5% chance of a storm cell appearing in mock
-  };
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Weather Service Error: ${response.status} - ${errorData.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // OpenWeatherMap visibility is in meters. 1609.34 meters = 1 mile.
+    const visibilityInMiles = data.visibility ? Math.round(data.visibility / 1609.34) : 10;
+    
+    // Check for thunderstorm activity (Weather codes 2xx indicate Thunderstorms)
+    const weatherId = data.weather?.[0]?.id || 800;
+    const hasStormCell = weatherId >= 200 && weatherId < 300;
+
+    return {
+      temp: `${Math.round(data.main.temp)}°F`,
+      windSpeed: Math.round(data.wind.speed),
+      windDirection: getCardinalDirection(data.wind.deg),
+      visibility: `${visibilityInMiles} mi`,
+      timestamp: Date.now(), // Use local time of receipt for trend analysis
+      hasStormCell: hasStormCell
+    };
+  } catch (err) {
+    console.error("Critical Weather Fetch Failure:", err);
+    throw err; // Re-throw to be handled by the UI layer (Dashboard.tsx)
+  }
 };
 
 /**
  * Logic to detect rapid changes between two weather snapshots.
+ * This is critical for hot air balloon safety as trends can indicate inbound hazards.
  */
 export const detectWeatherAlerts = (current: WeatherSnapshot, previous: WeatherSnapshot | null): WeatherAlert[] => {
   const alerts: WeatherAlert[] = [];
   if (!previous) return alerts;
 
-  // 1. Detect Rapid Wind Increase (> 5mph shift)
+  // 1. Detect Rapid Wind Increase (> 5mph shift) - critical for landing safely
   if (current.windSpeed - previous.windSpeed >= 5) {
     alerts.push({
       id: `wind-inc-${current.timestamp}`,
       type: 'RAPID_INCREASE',
       severity: 'high',
-      message: `Rapid wind increase detected: +${current.windSpeed - previous.windSpeed} mph in last interval.`,
+      message: `Rapid wind increase detected: +${current.windSpeed - previous.windSpeed} mph in last interval. Check landing feasibility.`,
       timestamp: current.timestamp
     });
   }
 
-  // 2. Detect Direction Shift
-  if (current.windDirection !== previous.windDirection) {
+  // 2. Detect Direction Shift - affects navigation and planned flight path
+  if (current.windDirection !== previous.windDirection && previous.windDirection !== 'CALM') {
     alerts.push({
       id: `wind-shift-${current.timestamp}`,
       type: 'WIND_SHIFT',
       severity: 'medium',
-      message: `Wind shift: Direction changed from ${previous.windDirection} to ${current.windDirection}.`,
+      message: `Significant wind shift: Direction changed from ${previous.windDirection} to ${current.windDirection}.`,
       timestamp: current.timestamp
     });
   }
 
-  // 3. Detect Storm Cells
+  // 3. Detect Storm Cells - immediate grounding required for balloons
   if (current.hasStormCell) {
     alerts.push({
       id: `storm-${current.timestamp}`,
       type: 'STORM_CELL',
       severity: 'high',
-      message: 'Inbound storm cell detected within 5 miles. Immediate grounding advised.',
+      message: 'Convective storm activity detected in your operational zone. Immediate landing/grounding advised.',
       timestamp: current.timestamp
     });
   }
