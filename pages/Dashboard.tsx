@@ -348,7 +348,12 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">Welcome, Pilot</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">Welcome, Sarah</h1>
+              <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border border-primary/20">
+                <Plane size={10} /> Pilot
+              </span>
+            </div>
             <button 
               onClick={() => setShowTutorial(true)}
               className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"

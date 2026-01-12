@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   User, Calendar, Plane, Award, MapPin, Mail, Phone, 
   Settings, LogOut, CheckCircle2, Circle, Clock, ChevronRight,
-  Briefcase, X, ArrowRight, AlertCircle
+  Briefcase, X, ArrowRight, AlertCircle, Users
 } from 'lucide-react';
 import { CrewMember } from '../components/CrewUI';
 import { CrewProfileForm } from '../components/CrewProfileForm';
@@ -96,8 +96,14 @@ const CrewDashboard: React.FC = () => {
                 <img src={me.imageUrl} alt={me.name} className="w-full h-full object-cover" />
               </div>
               
-              <h1 className="text-2xl font-bold mb-1">{me.name}</h1>
-              <div className="bg-primary/10 text-primary px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-2xl font-bold">{me.name}</h1>
+                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-primary/20 flex items-center gap-1">
+                  <Users size={10} /> Crew
+                </span>
+              </div>
+              
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-6">
                 {me.role}
               </div>
 
