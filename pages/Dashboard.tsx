@@ -5,7 +5,7 @@ import {
   CheckCircle, ListChecks,
   Clock, MapPin, Search, ChevronRight,
   X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
-  RefreshCw, Plane
+  RefreshCw, Plane, HelpCircle
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -21,6 +21,7 @@ import { CrewProfileForm } from '../components/CrewProfileForm';
 import { LogMediaUpload } from '../components/LogMediaUI';
 import { LogDetailDrawer } from '../components/LogDetailDrawer';
 import { Drawer } from '../components/DrawerUI';
+import { TutorialOverlay } from '../components/TutorialOverlay';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -30,6 +31,21 @@ const Dashboard: React.FC = () => {
   const [loadingBriefing, setLoadingBriefing] = useState(false);
   const [showWindAlert, setShowWindAlert] = useState(true);
   const [briefingConstraints, setBriefingConstraints] = useState('');
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Check for first-time user
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('freesun_tutorial_complete');
+    if (!hasSeenTutorial) {
+      const timer = setTimeout(() => setShowTutorial(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const completeTutorial = () => {
+    localStorage.setItem('freesun_tutorial_complete', 'true');
+    setShowTutorial(false);
+  };
 
   // Pilot context for AI briefing
   const [pilotContext, setPilotContext] = useState({
@@ -327,15 +343,26 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow">
+      {showTutorial && <TutorialOverlay onClose={completeTutorial} />}
+      
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Welcome, Pilot</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold">Welcome, Pilot</h1>
+            <button 
+              onClick={() => setShowTutorial(true)}
+              className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
+              title="Show Tutorial"
+            >
+              <HelpCircle size={18} />
+            </button>
+          </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <MapPin size={14} /> Chatfield State Park (N 39.5448°, W 105.0874°)
             <span className="text-green-500 font-bold">• Active</span>
           </div>
         </div>
-        <div className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto no-scrollbar">
+        <div id="navigation-tabs" className="flex items-center gap-1 p-1 bg-muted rounded-xl overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -366,7 +393,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div id="weather-section" className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <WeatherCard icon={Wind} value={weatherData.wind} label="Surface Wind" isWarning={isHighWind} />
             <WeatherCard icon={Navigation} value={weatherData.direction} label="Direction" />
             <WeatherCard icon={CloudSun} value={weatherData.temp} label="Ambient Temp" />
@@ -389,17 +416,19 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
-            <BriefingCard 
-              pilotContext={pilotContext}
-              setPilotContext={setPilotContext}
-              constraints={briefingConstraints}
-              setConstraints={setBriefingConstraints}
-              onGenerate={handleGenerateBriefing}
-              loading={loadingBriefing}
-              briefing={briefing}
-            />
+            <div id="briefing-section" className="lg:col-span-2">
+              <BriefingCard 
+                pilotContext={pilotContext}
+                setPilotContext={setPilotContext}
+                constraints={briefingConstraints}
+                setConstraints={setBriefingConstraints}
+                onGenerate={handleGenerateBriefing}
+                loading={loadingBriefing}
+                briefing={briefing}
+              />
+            </div>
             
-            <div className="bg-muted/30 border border-primary/30 rounded-3xl p-6 flex flex-col">
+            <div id="mission-section" className="bg-muted/30 border border-primary/30 rounded-3xl p-6 flex flex-col">
               <div className="sticky top-[6rem]">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
                 <div className="space-y-4 flex-grow">
