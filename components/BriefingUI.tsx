@@ -27,7 +27,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
   briefing
 }) => {
   return (
-    <div className="lg:col-span-2 bg-muted/30 border border-primary/30 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_auto_1fr]">
+    <div className="lg:col-span-2 bg-muted/30 border dark:border-primary/30 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_auto_1fr]">
       <div className="absolute -right-4 -top-4 text-primary/5 pointer-events-none">
         <MessageSquareText size={120} />
       </div>
@@ -50,7 +50,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
           <select 
             value={pilotContext.balloon} 
             onChange={(e) => setPilotContext({...pilotContext, balloon: e.target.value})} 
-            className="bg-background/80 border border-primary/35 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+            className="bg-background/80 border dark:border-primary/30 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
           >
             <option>SunChaser #04 (Medium)</option>
             <option>DawnRider #01 (Small)</option>
@@ -63,7 +63,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
           <select 
             value={pilotContext.passengers} 
             onChange={(e) => setPilotContext({...pilotContext, passengers: e.target.value})} 
-            className="bg-background/80 border border-primary/35 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+            className="bg-background/80 border dark:border-primary/30 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
           >
             <option>1 (Private)</option>
             <option>2 (Couple)</option>
@@ -77,7 +77,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
           <select 
             value={pilotContext.duration} 
             onChange={(e) => setPilotContext({...pilotContext, duration: e.target.value})} 
-            className="bg-background/80 border border-primary/35 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+            className="bg-background/80 border dark:border-primary/30 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
           >
             <option value="45">45 Minutes</option>
             <option value="60">60 Minutes</option>
@@ -97,12 +97,12 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
             placeholder="e.g. Avoid high-traffic areas, no water crossings, stay below 3000ft..."
             value={constraints}
             onChange={(e) => setConstraints(e.target.value)}
-            className="w-full bg-background/80 border border-primary/35 rounded-lg px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
+            className="w-full bg-background/80 border dark:border-primary/30 rounded-lg px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
           />
         </div>
       </div>
 
-      <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border border-primary/30 min-h-[160px] shadow-inner grid place-content-center overflow-y-auto">
+      <div className="bg-background/80 backdrop-blur p-5 rounded-2xl border dark:border-primary/30 min-h-[160px] shadow-inner grid place-content-center overflow-y-auto">
         {briefing ? (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{briefing}</p>
