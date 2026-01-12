@@ -56,7 +56,7 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
         {filteredMembers.map(member => (
           <div 
             key={member.id} 
-            className="bg-muted/30 border border-primary/20 rounded-[2rem] p-5 hover:bg-muted/50 transition-all group relative overflow-hidden"
+            className="bg-muted/30 border border-primary/30 rounded-[2rem] p-5 hover:bg-muted/50 transition-all group relative overflow-hidden"
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary/20 shrink-0">
