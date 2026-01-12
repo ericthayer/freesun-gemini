@@ -5,7 +5,7 @@ import {
   CheckCircle, ListChecks,
   Clock, MapPin, Search, ChevronRight,
   X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
-  Mail, Phone, RefreshCw, Camera, User, Briefcase
+  RefreshCw, Plane
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -15,12 +15,12 @@ import { ConfirmationModal } from '../components/CommonUI';
 import { MissionExportButton } from '../components/ExportUI';
 import { BriefingCard } from '../components/BriefingUI';
 import { calculateCrewRelevance } from '../utils/searchUtils';
-import { ImageUpload } from '../components/ImageUploadUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
 import { CrewProfileForm } from '../components/CrewProfileForm';
 import { LogMediaUpload } from '../components/LogMediaUI';
 import { LogDetailDrawer } from '../components/LogDetailDrawer';
+import { Drawer } from '../components/DrawerUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -58,7 +58,6 @@ const Dashboard: React.FC = () => {
       setIsWeatherLoading(true);
       try {
         const coords = { lat: 38.2975, lon: -122.4579 };
-        // Placeholder API key or environment variable for real weather API
         const weatherApiKey = (process.env as any).WEATHER_API_KEY || 'FREE_SUN_MOCK_KEY';
         const snapshot = await fetchLiveWeather(coords.lat, coords.lon, weatherApiKey);
         
@@ -521,16 +520,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           </div>
 
-          {editingMember && (
-            <div className="p-2 animate-in zoom-in-95 duration-200">
-               <CrewProfileForm 
-                  member={editingMember} 
-                  onUpdate={handleEditSave} 
-                  onCancel={() => setEditingMember(null)}
-                />
-            </div>
-          )}
-
           {filteredCrew.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {filteredCrew.map(member => (
@@ -551,6 +540,21 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           )}
         </div>
       )}
+
+      {/* Profile Edit Drawer */}
+      <Drawer 
+        isOpen={!!editingMember} 
+        onClose={() => setEditingMember(null)} 
+        title={editingMember ? `Edit Profile: ${editingMember.name}` : 'Edit Profile'}
+      >
+        {editingMember && (
+          <CrewProfileForm 
+            member={editingMember} 
+            onUpdate={handleEditSave} 
+            onCancel={() => setEditingMember(null)}
+          />
+        )}
+      </Drawer>
 
       {/* Confirmation Modals */}
       <ConfirmationModal
