@@ -11,6 +11,7 @@ import { ScheduleItem, ScheduleCard } from '../components/ScheduleUI';
 import { WeatherCard, ForecastCard } from '../components/StatusUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
+import { CrewConnect } from '../components/CrewConnectUI';
 
 type CrewTabType = 'status' | 'profile' | 'schedule' | 'settings';
 
@@ -28,18 +29,56 @@ const CrewDashboard: React.FC = () => {
     visibility: '10 mi'
   });
 
+  // Shared Crew Data Mock
+  const allCrewMembers: CrewMember[] = [
+    {
+      id: '1',
+      name: 'Sarah "Sky" Miller',
+      role: 'Pilot',
+      experience: 12,
+      contact: { email: 'sarah@freesun.net', phone: '+1 555-0101' },
+      certifications: ['Commercial LTA License', 'Flight Instructor', 'Night Rating'],
+      bio: 'Lifelong aviation enthusiast with over 1,500 flight hours.',
+      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
+      availability: 'available'
+    },
+    {
+      id: '2',
+      name: 'Mike Chen',
+      role: 'Ground Crew',
+      experience: 5,
+      contact: { email: 'mike@freesun.net', phone: '+1 555-0102' },
+      certifications: ['Crew Chief Certified', 'Emergency Response'],
+      bio: 'Precision-focused ground lead.',
+      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
+      availability: 'busy'
+    },
+    {
+      id: '3',
+      name: 'David Thorne',
+      role: 'Pilot',
+      experience: 20,
+      contact: { email: 'thorne@freesun.net', phone: '+1 555-0103' },
+      certifications: ['Master Pilot LTA', 'Maintenance Technician'],
+      bio: 'The "Grandmaster" of FreeSun.',
+      imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
+      availability: 'available'
+    },
+    {
+      id: '4',
+      name: 'Elena Rodriguez',
+      role: 'Ground Crew',
+      experience: 3,
+      contact: { email: 'elena@freesun.net', phone: '+1 555-0104' },
+      certifications: ['Recovery Specialist', 'Radio Communications'],
+      bio: 'Expert navigator and recovery lead. Specialist in high-wind envelope recovery.',
+      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+      availability: 'available'
+    }
+  ];
+
   // Simulating the "logged-in" crew member
-  const [me, setMe] = useState<CrewMember>({
-    id: '4',
-    name: 'Elena Rodriguez',
-    role: 'Ground Crew',
-    experience: 3,
-    contact: { email: 'elena@freesun.net', phone: '+1 555-0104' },
-    certifications: ['Recovery Specialist', 'Radio Communications', 'FAA Ground Handling'],
-    bio: 'Expert navigator and recovery lead. Specialist in high-wind envelope recovery and vineyard landing zones.',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
-    availability: 'available'
-  });
+  const [me, setMe] = useState<CrewMember>(allCrewMembers[3]);
 
   // Assignments
   const [myAssignments] = useState<ScheduleItem[]>([
@@ -171,7 +210,7 @@ const CrewDashboard: React.FC = () => {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* My Profile Card (Col-span 2) */}
             <div className="lg:col-span-2 bg-muted/30 border border-primary/30 rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col">
                <div className="absolute -right-4 -top-4 text-primary/5 pointer-events-none">
@@ -278,6 +317,9 @@ const CrewDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* New Crew Connect Section (Global Search & Communication) */}
+          <CrewConnect members={allCrewMembers} />
         </div>
       )}
 
