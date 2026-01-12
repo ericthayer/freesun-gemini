@@ -58,7 +58,9 @@ const Dashboard: React.FC = () => {
       setIsWeatherLoading(true);
       try {
         const coords = { lat: 38.2975, lon: -122.4579 };
-        const snapshot = await fetchLiveWeather(coords.lat, coords.lon);
+        // Placeholder API key or environment variable for real weather API
+        const weatherApiKey = (process.env as any).WEATHER_API_KEY || 'FREE_SUN_MOCK_KEY';
+        const snapshot = await fetchLiveWeather(coords.lat, coords.lon, weatherApiKey);
         
         setWeatherData(prev => ({
           ...prev,

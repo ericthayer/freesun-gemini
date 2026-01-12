@@ -20,7 +20,12 @@ export interface WeatherAlert {
  * Simulates fetching data from a live weather API.
  * In a production app, this would use fetch() with an API key from OpenWeatherMap or similar.
  */
-export const fetchLiveWeather = async (lat: number, lon: number): Promise<WeatherSnapshot> => {
+export const fetchLiveWeather = async (lat: number, lon: number, apiKey: string): Promise<WeatherSnapshot> => {
+  // Log usage of apiKey to prepare for real-world integration
+  if (!apiKey) {
+    console.warn("fetchLiveWeather: Missing API Key for weather service.");
+  }
+
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 800));
 
