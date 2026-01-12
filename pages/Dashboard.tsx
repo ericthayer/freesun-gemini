@@ -405,7 +405,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             <WeatherCard icon={Search} value={weatherData.visibility} label="Visibility" />
           </div>
 
-          <div className="bg-muted/30 border border-primary/30 rounded-3xl p-6">
+          <div className="bg-muted/30 border dark:border-primary/30 rounded-3xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold flex items-center gap-2"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-1 rounded-lg">
@@ -433,7 +433,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               />
             </div>
             
-            <div id="mission-section" className="bg-muted/30 border border-primary/30 rounded-3xl p-6 flex flex-col">
+            <div id="mission-section" className="bg-muted/30 border dark:border-primary/30 rounded-3xl p-6 flex flex-col">
               <div className="sticky top-[6rem]">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
                 <div className="space-y-4 flex-grow">
@@ -498,7 +498,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           </div>
           {isAddingLog && (
-            <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
+            <div className="bg-muted/30 border-2 border-dashed dark:border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
               <form onSubmit={handleAddLog} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Calendar size={12} /> Flight Date</label><input type="date" required value={newLog.date} onChange={(e) => setNewLog({...newLog, date: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>

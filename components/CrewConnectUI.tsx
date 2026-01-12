@@ -31,10 +31,10 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
   };
 
   return (
-    <section className="space-y-6">
+    <section className="mt-12 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h3 className="text-2xl font-black italic tracking-tight flex items-center gap-2">
             <Users className="text-primary" /> Crew Connect
           </h3>
           <p className="text-sm text-muted-foreground">Search and coordinate with pilots and ground crew in real-time.</p>
@@ -56,7 +56,7 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
         {filteredMembers.map(member => (
           <div 
             key={member.id} 
-            className="bg-muted/30 border border-primary/30 rounded-[2rem] p-5 hover:bg-muted/50 transition-all group relative overflow-hidden"
+            className="bg-muted/30 border border-primary/20 rounded-[2rem] p-5 hover:bg-muted/50 transition-all group relative overflow-hidden"
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary/20 shrink-0">

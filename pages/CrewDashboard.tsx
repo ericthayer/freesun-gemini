@@ -182,7 +182,7 @@ const CrewDashboard: React.FC = () => {
 
       {/* Status Tab (Overview) */}
       {activeTab === 'status' && (
-        <div className="gap-6 flex flex-col">
+        <div className="space-y-6 flex flex-col">
           <WeatherAlertsList alerts={weatherAlerts} onDismiss={(id) => setWeatherAlerts(prev => prev.filter(a => a.id !== id))} />
 
           {/* Metric Cards Strip */}
@@ -319,9 +319,7 @@ const CrewDashboard: React.FC = () => {
           </div>
 
           {/* New Crew Connect Section (Global Search & Communication) */}
-          <div className="mt-6">
-            <CrewConnect members={allCrewMembers} />
-          </div>
+          <CrewConnect members={allCrewMembers} />
         </div>
       )}
 

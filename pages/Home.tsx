@@ -33,7 +33,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
             </button>
             <Link 
               to={isLoggedIn ? "/dashboard" : "/"} 
-              className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-600 text-primary font-bold rounded-xl hover:bg-white/20 transition-all"
+              className="w-full sm:w-auto px-8 py-4 bg-white border text-primary font-bold rounded-xl hover:bg-gray-200 transition-all transform hover:scale-105"
             >
               Learn about us
             </Link>
@@ -50,8 +50,8 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl bg-muted/50 border border-slate-800 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
+            <div className="p-8 rounded-3xl bg-muted/50 border dark:border-primary/30 hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-primary/10 dark:bg-background/60 rounded-xl flex items-center justify-center text-primary mb-6">
                 <Shield size={24} />
               </div>
               <h3 className="text-xl font-bold mb-3">Safety First</h3>
@@ -60,8 +60,8 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
               </p>
             </div>
             
-            <div className="p-8 rounded-3xl bg-muted/50 border border-slate-800 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
+            <div className="p-8 rounded-3xl bg-muted/50 border dark:border-primary/30 hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-primary/10 dark:bg-background/60 rounded-xl flex items-center justify-center text-primary mb-6">
                 <MapPin size={24} />
               </div>
               <h3 className="text-xl font-bold mb-3">Unique Locations</h3>
@@ -70,8 +70,8 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
               </p>
             </div>
 
-            <div className="p-8 rounded-3xl bg-muted/50 border border-slate-800 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
+            <div className="p-8 rounded-3xl bg-muted/50 border dark:border-primary/30 hover:shadow-xl transition-all">
+              <div className="w-12 h-12 bg-primary/10 dark:bg-background/60 rounded-xl flex items-center justify-center text-primary mb-6">
                 <Sparkles size={24} />
               </div>
               <h3 className="text-xl font-bold mb-3">Pilot Training</h3>
