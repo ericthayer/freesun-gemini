@@ -10,7 +10,7 @@ interface WeatherCardProps {
 }
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({ icon: Icon, value, label, isWarning }) => (
-  <div className={`p-6 rounded-3xl border flex flex-col items-center justify-center text-center transition-colors ${isWarning ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/50'}`}>
+  <div className={`p-6 rounded-3xl bg-muted/30 border border-primary/30 flex flex-col items-center justify-center text-center transition-colors ${isWarning ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/50'}`}>
     <Icon className={`${isWarning ? 'text-destructive' : 'text-primary'} mb-2`} size={32} />
     <div className={`text-2xl font-black ${isWarning ? 'text-destructive' : ''}`}>{value}</div>
     <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{label}</div>
@@ -25,7 +25,7 @@ interface ForecastCardProps {
 }
 
 export const ForecastCard: React.FC<ForecastCardProps> = ({ day, temp, wind, icon: Icon }) => (
-  <div className="bg-background/50 border border-border/50 p-4 rounded-2xl flex items-center justify-between md:flex-col md:items-start md:gap-2">
+  <div className="bg-background/50 border border-primary/30 p-4 rounded-2xl flex items-center justify-between md:flex-col md:items-start md:gap-2">
     <div className="flex items-center gap-3 md:w-full md:justify-between">
       <span className="font-bold text-sm">{day}</span>
       <Icon size={20} className="text-primary" />

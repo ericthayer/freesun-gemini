@@ -327,12 +327,12 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl grid grid-rows-[auto_1fr] grow">
+    <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Welcome, Pilot</h1>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <MapPin size={14} /> Sonoma Field Base (N 38.2975, W 122.4579)
+            <MapPin size={14} /> Chatfield State Park (N 39.5448°, W 105.0874°)
             <span className="text-green-500 font-bold">• Active</span>
           </div>
         </div>
@@ -355,7 +355,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           <WeatherAlertsList alerts={weatherAlerts} onDismiss={dismissAlert} />
 
           {isHighWind && showWindAlert && weatherAlerts.length === 0 && (
-            <div className="bg-destructive/15 border-2 border-destructive/30 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+            <div className="bg-destructive/25 border-destructive/50 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-3">
                 <div className="bg-destructive text-destructive-foreground p-2 rounded-full"><AlertTriangle size={20} /></div>
                 <div>
@@ -374,7 +374,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             <WeatherCard icon={Search} value={weatherData.visibility} label="Visibility" />
           </div>
 
-          <div className="bg-muted/30 border rounded-3xl p-6">
+          <div className="bg-muted/30 border border-primary/30 rounded-3xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold flex items-center gap-2"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-1 rounded-lg">
@@ -400,13 +400,13 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               briefing={briefing}
             />
             
-            <div className="bg-muted/30 border rounded-3xl p-6 flex flex-col">
+            <div className="bg-muted/30 border border-primary/30 rounded-3xl p-6 flex flex-col">
               <div className="sticky top-[6rem]">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
                 <div className="space-y-4 flex-grow">
-                  <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Launch Time</span><span className="font-bold">06:15 AM</span></div>
-                  <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
-                  <div className="flex justify-between items-center border-b pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
+                  <div className="flex justify-between items-center border-b border-primary/50 pb-4"><span className="text-sm text-muted-foreground">Launch Time</span><span className="font-bold">06:15 AM</span></div>
+                  <div className="flex justify-between items-center border-b border-primary/50 pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
+                  <div className="flex justify-between items-center border-b border-primary/50 pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
                 </div>
                 <div className="flex flex-col gap-2 mt-6">
                   <button className="w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>

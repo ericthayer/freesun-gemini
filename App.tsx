@@ -39,7 +39,7 @@ const App: React.FC = () => {
     <HashRouter>
       <div className={`min-h-screen flex flex-col ${theme}`}>
         {/* Top Navigation */}
-        <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-b-slate-700">
+        <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-b-slate-800">
           <div className="container max-w-[1400] mx-auto h-16 px-4 md:px-8 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <span className="bg-primary p-1.5 rounded-lg text-primary-foreground">
@@ -68,7 +68,7 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <Link to="/login" className="text-sm font-medium bg-primary text-white px-6 py-2 rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                <Link to="/login" className="text-sm font-medium bg-primary text-white px-6 py-2 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
                   Crew Login
                 </Link>
               )}
@@ -135,7 +135,7 @@ const App: React.FC = () => {
           </Routes>
         </main>
 
-        <footer className="border-t bg-muted/30 py-12">
+        <footer className="border-t border-t-slate-800 bg-muted/30 py-12">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="col-span-1 md:col-span-2">

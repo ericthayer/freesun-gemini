@@ -28,12 +28,12 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
             Join the most exclusive community of ballooning enthusiasts. From luxury morning rides to pilot certification, we touch the sky.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-all transform hover:scale-105">
+            <button className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all transform hover:scale-105">
               Join the crew
             </button>
             <Link 
               to={isLoggedIn ? "/dashboard" : "/"} 
-              className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold rounded-full hover:bg-white/20 transition-all"
+              className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-600 text-primary font-bold rounded-xl hover:bg-white/20 transition-all"
             >
               Learn about us
             </Link>
@@ -50,7 +50,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl bg-muted/50 border hover:shadow-xl transition-all">
+            <div className="p-8 rounded-3xl bg-muted/50 border border-slate-800 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
                 <Shield size={24} />
               </div>
@@ -60,7 +60,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
               </p>
             </div>
             
-            <div className="p-8 rounded-3xl bg-muted/50 border hover:shadow-xl transition-all">
+            <div className="p-8 rounded-3xl bg-muted/50 border border-slate-800 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
                 <MapPin size={24} />
               </div>
@@ -70,7 +70,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
               </p>
             </div>
 
-            <div className="p-8 rounded-3xl bg-muted/50 border hover:shadow-xl transition-all">
+            <div className="p-8 rounded-3xl bg-muted/50 border border-slate-800 hover:shadow-xl transition-all">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6">
                 <Sparkles size={24} />
               </div>
@@ -112,7 +112,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       {/* Booking CTA */}
       <section className="py-24">
         <div className="container mx-auto px-4">
-          <div className="bg-primary rounded-[3rem] p-12 text-primary-foreground relative overflow-hidden text-center">
+          <div className="bg-gradient-to-r bg-gradient-to-r from-cyan-700 to-indigo-800 rounded-[3rem] p-12 text-primary-foreground relative overflow-hidden text-center">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Wind size={200} />
             </div>

@@ -27,7 +27,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
   briefing
 }) => {
   return (
-    <div className="lg:col-span-2 bg-primary/5 border-primary/20 border-2 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_auto_1fr]">
+    <div className="lg:col-span-2 bg-muted/30 border border-primary/30 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_auto_1fr]">
       <div className="absolute -right-4 -top-4 text-primary/5 pointer-events-none">
         <MessageSquareText size={120} />
       </div>
@@ -37,20 +37,20 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
         <button 
           onClick={onGenerate} 
           disabled={loading} 
-          className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+          className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
         >
           {loading && <Spinner size={14} />}
           {loading ? 'Analyzing...' : 'Generate New Briefing'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 relative z-10">
-        <div className="flex flex-col gap-1.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 relative z-10">
+        <div className="flex flex-col gap-2">
           <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Plane size={10} /> Balloon Type</label>
           <select 
             value={pilotContext.balloon} 
             onChange={(e) => setPilotContext({...pilotContext, balloon: e.target.value})} 
-            className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+            className="bg-background/80 border border-primary/35 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
           >
             <option>SunChaser #04 (Medium)</option>
             <option>DawnRider #01 (Small)</option>
@@ -58,12 +58,12 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
             <option>SkyGazer #02 (XL)</option>
           </select>
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Users size={10} /> Passengers</label>
           <select 
             value={pilotContext.passengers} 
             onChange={(e) => setPilotContext({...pilotContext, passengers: e.target.value})} 
-            className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+            className="bg-background/80 border border-primary/35 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
           >
             <option>1 (Private)</option>
             <option>2 (Couple)</option>
@@ -72,12 +72,12 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
             <option>8+ (Large Group)</option>
           </select>
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1"><Timer size={10} /> Duration (Min)</label>
           <select 
             value={pilotContext.duration} 
             onChange={(e) => setPilotContext({...pilotContext, duration: e.target.value})} 
-            className="bg-background/50 border border-primary/10 rounded-xl px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+            className="bg-background/80 border border-primary/35 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-primary outline-none cursor-pointer"
           >
             <option value="45">45 Minutes</option>
             <option value="60">60 Minutes</option>
@@ -88,7 +88,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
       </div>
 
       <div className="mb-6 relative z-10">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground ml-1 flex items-center gap-1">
             <AlertOctagon size={10} /> Operational Constraints (Optional Refinement)
           </label>
@@ -97,7 +97,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
             placeholder="e.g. Avoid high-traffic areas, no water crossings, stay below 3000ft..."
             value={constraints}
             onChange={(e) => setConstraints(e.target.value)}
-            className="w-full bg-background/50 border border-primary/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:ring-1 focus:ring-primary outline-none"
+            className="w-full bg-background/80 border border-primary/35 rounded-lg px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-primary outline-none"
           />
         </div>
       </div>
@@ -109,7 +109,7 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center py-8 w-full">
-            <Plane className="text-primary/30 mb-2 animate-bounce" />
+            <Plane className="text-primary/40 mb-2 animate-bounce" />
             <p className="text-muted-foreground text-sm italic max-w-xs">
               Configure flight details and any safety constraints above to generate your specialized AI briefing.
             </p>
