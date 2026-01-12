@@ -110,9 +110,9 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       </section>
 
       {/* Booking CTA */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="bg-gradient-to-r bg-gradient-to-r from-cyan-700 to-indigo-800 rounded-[3rem] p-12 text-primary-foreground relative overflow-hidden text-center">
+      <section className="bg-gradient-to-r bg-gradient-to-r from-cyan-700 to-indigo-800 px-12 py-20">
+        <div className="container w-full px-4">
+          <div className="text-primary-foreground relative overflow-hidden text-center">
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Wind size={200} />
             </div>
@@ -120,7 +120,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
             <p className="text-lg mb-10 max-w-xl mx-auto opacity-90">
               Slots fill up months in advance. Join the waiting list or book your private morning today.
             </p>
-            <button className="px-12 py-5 bg-white text-primary font-black text-xl rounded-full hover:bg-slate-100 transition-all flex items-center gap-2 mx-auto">
+            <button className="px-12 py-5 bg-white text-primary font-black text-xl rounded-xl hover:bg-slate-100 transition-all flex items-center gap-2 mx-auto">
               Inquire Now <ArrowRight />
             </button>
           </div>
