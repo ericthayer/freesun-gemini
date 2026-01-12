@@ -182,7 +182,7 @@ const CrewDashboard: React.FC = () => {
 
       {/* Status Tab (Overview) */}
       {activeTab === 'status' && (
-        <div className="space-y-6 flex flex-col">
+        <div className="gap-6 flex flex-col">
           <WeatherAlertsList alerts={weatherAlerts} onDismiss={(id) => setWeatherAlerts(prev => prev.filter(a => a.id !== id))} />
 
           {/* Metric Cards Strip */}
@@ -194,7 +194,7 @@ const CrewDashboard: React.FC = () => {
           </div>
 
           {/* Launch Outlook */}
-          <div className="bg-muted/30 border border-primary/30 rounded-[2rem] p-6">
+          <div className="bg-muted/30 border dark:border-primary/30 rounded-[2rem] p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold flex items-center gap-2 text-lg"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-1 rounded-lg">
@@ -212,7 +212,7 @@ const CrewDashboard: React.FC = () => {
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* My Profile Card (Col-span 2) */}
-            <div className="lg:col-span-2 bg-muted/30 border border-primary/30 rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col">
+            <div className="lg:col-span-2 bg-muted/30 border dark:border-primary/30 rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col">
                <div className="absolute -right-4 -top-4 text-primary/5 pointer-events-none">
                 <Users size={160} />
               </div>
@@ -274,7 +274,7 @@ const CrewDashboard: React.FC = () => {
             </div>
 
             {/* Upcoming Duty Card (Col-span 1) */}
-            <div className="bg-muted/30 border border-primary/30 rounded-[2.5rem] p-6 flex flex-col">
+            <div className="bg-muted/30 border dark:border-primary/30 rounded-[2.5rem] p-6 flex flex-col">
               <div className="sticky top-[6rem]">
                 <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Clock size={18} className="text-primary" /> Active Assignments</h3>
                 
@@ -319,7 +319,9 @@ const CrewDashboard: React.FC = () => {
           </div>
 
           {/* New Crew Connect Section (Global Search & Communication) */}
-          <CrewConnect members={allCrewMembers} />
+          <div className="mt-4">
+            <CrewConnect members={allCrewMembers} />
+          </div>
         </div>
       )}
 

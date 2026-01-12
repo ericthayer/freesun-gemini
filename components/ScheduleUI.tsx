@@ -38,7 +38,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDele
   const Icon = config.icon;
 
   return (
-    <div className="bg-background border rounded-[2rem] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-xl transition-all duration-300 group relative">
+    <div className="bg-background border dark:border-primary/30 rounded-[2rem] p-6 flex flex-col sm:flex-row gap-6 hover:shadow-xl transition-all duration-300 group relative">
       <div className={`w-16 h-16 shrink-0 rounded-2xl ${config.bg} flex items-center justify-center ${config.color} group-hover:scale-110 transition-transform`}>
         <Icon size={32} />
       </div>
@@ -109,7 +109,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onEdit, onDele
           </div>
         </div>
 
-        <div className="pt-2 border-t border-border/10">
+        <div className="pt-2 border-t dark:border-primary/30">
           <p className="text-sm text-muted-foreground line-clamp-2">
             {item.description}
           </p>
@@ -154,7 +154,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
           <select 
             value={formData.type}
             onChange={(e) => setFormData({ ...formData, type: e.target.value as ScheduleItemType })}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
+            className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
           >
             <option value="flight">Planned Flight</option>
             <option value="training">Training Session</option>
@@ -172,7 +172,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
             placeholder="e.g. Sunrise Run Over Valley"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
         </div>
       </div>
@@ -187,7 +187,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
             required
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
         </div>
         <div className="space-y-2">
@@ -199,7 +199,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
             required
             value={formData.time}
             onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
         </div>
         <div className="space-y-2">
@@ -212,7 +212,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
             placeholder="e.g. Field Base Alpha"
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
         </div>
       </div>
@@ -238,7 +238,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({ initialData, onSubmi
           placeholder="Detailed agenda, specific pilot requirements, or meeting points..."
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none"
+          className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none"
         />
       </div>
 

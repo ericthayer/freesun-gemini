@@ -85,7 +85,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ onClose }) => 
       />
 
       {/* Tutorial Card */}
-      <div className="relative bg-card border shadow-2xl rounded-[2.5rem] w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500">
+      <div className="relative bg-card border dark:border-primary/30 shadow-2xl rounded-[2.5rem] w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500">
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-muted">
           <div 

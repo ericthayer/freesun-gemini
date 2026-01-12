@@ -75,7 +75,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
                 required 
                 value={formData.name} 
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+                className="w-full bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
               />
             </div>
             <div className="space-y-2">
@@ -85,7 +85,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
               <select 
                 value={formData.role} 
                 onChange={(e) => setFormData({ ...formData, role: e.target.value as any })} 
-                className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
+                className="w-full bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
               >
                 <option value="Pilot">Pilot</option>
                 <option value="Ground Crew">Ground Crew</option>
@@ -102,7 +102,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
               required 
               value={formData.contact.email} 
               onChange={(e) => setFormData({ ...formData, contact: { ...formData.contact, email: e.target.value } })} 
-              className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+              className="w-full bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
             />
           </div>
 
@@ -116,7 +116,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
                 required 
                 value={formData.contact.phone} 
                 onChange={(e) => setFormData({ ...formData, contact: { ...formData.contact, phone: e.target.value } })} 
-                className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+                className="w-full bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
               />
             </div>
             <div className="space-y-2">
@@ -129,7 +129,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
                 min="0" 
                 value={formData.experience} 
                 onChange={(e) => setFormData({ ...formData, experience: parseInt(e.target.value) || 0 })} 
-                className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+                className="w-full bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
               />
             </div>
           </div>
@@ -142,7 +142,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
         </label>
         <div className="flex flex-wrap gap-2 mb-2">
           {formData.certifications.map((cert) => (
-            <span key={cert} className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-xl text-xs font-bold border border-primary/20 group">
+            <span key={cert} className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-xl text-xs font-bold border dark:border-primary/30 group">
               {cert}
               <button 
                 type="button" 
@@ -161,7 +161,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
             value={newCert}
             onChange={(e) => setNewCert(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCert())}
-            className="flex-grow bg-muted/50 border border-border rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="flex-grow bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
           <button 
             type="button"
@@ -181,7 +181,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
           value={formData.bio} 
           onChange={(e) => setFormData({ ...formData, bio: e.target.value })} 
           placeholder="Brief summary of experience and flight philosophy..."
-          className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[120px] resize-none" 
+          className="w-full bg-muted/50 border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[120px] resize-none" 
         />
       </div>
 

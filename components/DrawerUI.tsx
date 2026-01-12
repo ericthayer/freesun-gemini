@@ -33,9 +33,9 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, title, children
       
       {/* Panel */}
       <div 
-        className={`absolute top-0 right-0 h-full w-full max-w-lg bg-card border-l shadow-2xl transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`absolute top-0 right-0 h-full w-full max-w-lg bg-card border-l dark:border-primary/30 shadow-2xl transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="p-6 border-b flex items-center justify-between bg-muted/20">
+        <div className="p-6 border-b dark:border-primary/30 flex items-center justify-between bg-muted/20">
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
           <button 
             onClick={onClose}

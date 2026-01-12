@@ -15,7 +15,7 @@ export const LogMediaGallery: React.FC<LogMediaGalleryProps> = ({ attachments })
       {attachments.map((item, index) => (
         <div 
           key={index} 
-          className="relative w-20 h-20 rounded-xl overflow-hidden border border-border group/media bg-muted shadow-sm"
+          className="relative w-20 h-20 rounded-xl overflow-hidden border dark:border-primary/30 group/media bg-muted shadow-sm"
         >
           {item.type === 'image' ? (
             <img src={item.url} alt={`Log media ${index}`} className="w-full h-full object-cover group-hover/media:scale-110 transition-transform duration-500" />

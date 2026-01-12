@@ -97,7 +97,7 @@ const Schedule: React.FC<SchedulePageProps> = ({ isLoggedIn }) => {
       </div>
 
       {(isAddingEvent || editingEvent) && isLoggedIn && (
-        <div className="bg-muted/30 border-2 border-primary/30 rounded-[2rem] p-8 mb-12 animate-in zoom-in-95 duration-200 shadow-xl">
+        <div className="bg-muted/30 border dark:border-primary/30 rounded-[2rem] p-8 mb-12 animate-in zoom-in-95 duration-200 shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold flex items-center gap-2">
               {editingEvent ? <Edit2Icon /> : <Plus className="text-primary" />}

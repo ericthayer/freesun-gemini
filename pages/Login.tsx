@@ -37,7 +37,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       </div>
 
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative">
-        <div className="bg-background border shadow-2xl rounded-[3rem] p-10 relative z-10 overflow-hidden">
+        <div className="bg-background border dark:border-primary/30 shadow-2xl rounded-[3rem] p-10 relative z-10 overflow-hidden">
           {/* Close Button */}
           <button 
             onClick={handleClose}
@@ -73,7 +73,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 />
               </div>
 
-              <div className="mt-8 text-center border-t border-border/50 pt-8">
+              <div className="mt-3 text-center pt-8">
                 <button 
                   onClick={() => setView('signup')}
                   className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:opacity-80 transition-all group"
@@ -111,7 +111,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
           )}
 
-          <div className="mt-10 pt-6 border-t flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+          <div className="mt-10 pt-6 border-t dark:border-primary/30 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
             <ShieldCheck size={14} />
             Secure Aeronautical Access
           </div>

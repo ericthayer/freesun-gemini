@@ -122,7 +122,7 @@ interface LogSortBarProps {
 export const LogSortBar: React.FC<LogSortBarProps> = ({ sortField, sortOrder, onSortChange }) => {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border">
+      <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border dark:border-primary/30">
         <button
           onClick={() => onSortChange('date', sortField === 'date' && sortOrder === 'desc' ? 'asc' : 'desc')}
           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${

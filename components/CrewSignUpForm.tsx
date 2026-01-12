@@ -41,7 +41,7 @@ export const CrewSignUpForm: React.FC<CrewSignUpFormProps> = ({ onBack, onSucces
             type="text" 
             required 
             placeholder="e.g. Jean-Pierre Blanchard"
-            className="w-full bg-muted/50 border border-border rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+            className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
           />
         </div>
 
@@ -53,7 +53,7 @@ export const CrewSignUpForm: React.FC<CrewSignUpFormProps> = ({ onBack, onSucces
             type="email" 
             required 
             placeholder="pilot@example.com"
-            className="w-full bg-muted/50 border border-border rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+            className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
           />
         </div>
 
@@ -62,7 +62,7 @@ export const CrewSignUpForm: React.FC<CrewSignUpFormProps> = ({ onBack, onSucces
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
               <Globe size={12} /> Interest
             </label>
-            <select className="w-full bg-muted/50 border border-border rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none cursor-pointer">
+            <select className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none cursor-pointer">
               <option>Pilot Track</option>
               <option>Ground Crew</option>
               <option>Recovery Ops</option>
@@ -72,7 +72,7 @@ export const CrewSignUpForm: React.FC<CrewSignUpFormProps> = ({ onBack, onSucces
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
               <Briefcase size={12} /> Experience
             </label>
-            <select className="w-full bg-muted/50 border border-border rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none cursor-pointer">
+            <select className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none cursor-pointer">
               <option>Novice</option>
               <option>1-3 Years</option>
               <option>4-7 Years</option>
@@ -87,7 +87,7 @@ export const CrewSignUpForm: React.FC<CrewSignUpFormProps> = ({ onBack, onSucces
           </label>
           <textarea 
             placeholder="Why do you want to fly with FreeSun?"
-            className="w-full bg-muted/50 border border-border rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[80px] resize-none"
+            className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[80px] resize-none"
           />
         </div>
 
@@ -97,7 +97,7 @@ export const CrewSignUpForm: React.FC<CrewSignUpFormProps> = ({ onBack, onSucces
           className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>Submit Application <Send size={18} /></>
           )}

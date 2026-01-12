@@ -12,7 +12,7 @@ export const WeatherAlertsList: React.FC<WeatherAlertsProps> = ({ alerts, onDism
   if (alerts.length === 0) return null;
 
   return (
-    <div className="space-y-3 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="animate-in fade-in slide-in-from-top-4 duration-500">
       {alerts.map((alert) => (
         <div 
           key={alert.id}

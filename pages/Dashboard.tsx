@@ -5,7 +5,7 @@ import {
   CheckCircle, ListChecks,
   Clock, MapPin, Search, ChevronRight,
   X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
-  RefreshCw, Plane, HelpCircle
+  RefreshCw, Plane, HelpCircle, Activity
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -32,6 +32,7 @@ const Dashboard: React.FC = () => {
   const [showWindAlert, setShowWindAlert] = useState(true);
   const [briefingConstraints, setBriefingConstraints] = useState('');
   const [showTutorial, setShowTutorial] = useState(false);
+  const [isSimulationMode, setIsSimulationMode] = useState(false);
 
   // Check for first-time user
   useEffect(() => {
@@ -71,12 +72,35 @@ const Dashboard: React.FC = () => {
     let intervalId: number;
 
     const updateWeather = async () => {
+      if (isSimulationMode) {
+        // Handle simulation state
+        setWeatherData(prev => ({
+          ...prev,
+          wind: '22 mph',
+          direction: 'N (GUSTING)'
+        }));
+
+        const simAlert: WeatherAlert = {
+          id: 'sim-wind',
+          type: 'RAPID_INCREASE',
+          severity: 'high',
+          message: 'SIMULATED: Extreme surface winds detected. Abort launch window.',
+          timestamp: Date.now()
+        };
+
+        setWeatherAlerts(prev => {
+          if (prev.some(a => a.id === 'sim-wind')) return prev;
+          return [simAlert, ...prev];
+        });
+        return;
+      }
+
       setIsWeatherLoading(true);
       try {
         const coords = { lat: 38.2975, lon: -122.4579 };
         const weatherApiKey = (process.env as any).WEATHER_API_KEY || 'FREE_SUN_MOCK_KEY';
         const snapshot = await fetchLiveWeather(coords.lat, coords.lon, weatherApiKey);
-        
+
         setWeatherData(prev => ({
           ...prev,
           temp: snapshot.temp,
@@ -101,7 +125,7 @@ const Dashboard: React.FC = () => {
     intervalId = window.setInterval(updateWeather, 30000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isSimulationMode]);
 
   const dismissAlert = (id: string) => {
     setWeatherAlerts(prev => prev.filter(a => a.id !== id));
@@ -121,24 +145,24 @@ const Dashboard: React.FC = () => {
 
   // Logs state
   const [logs, setLogs] = useState<FlightLog[]>([
-    { 
-      id: '841', 
-      date: '2024-05-24', 
-      duration: '105', 
-      site: 'Land Site Delta', 
-      notes: 'Smooth landing, light crosswinds on approach.', 
+    {
+      id: '841',
+      date: '2024-05-24',
+      duration: '105',
+      site: 'Land Site Delta',
+      notes: 'Smooth landing, light crosswinds on approach.',
       status: 'SIGNED OFF',
       attachments: [
         { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=200', type: 'image' },
         { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=200', type: 'image' }
       ]
     },
-    { 
-      id: '840', 
-      date: '2024-05-23', 
-      duration: '80', 
-      site: 'Valley Creek', 
-      notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.', 
+    {
+      id: '840',
+      date: '2024-05-23',
+      duration: '80',
+      site: 'Valley Creek',
+      notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.',
       status: 'SIGNED OFF',
       attachments: [
         { url: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&q=80&w=200', type: 'image' }
@@ -229,9 +253,9 @@ const Dashboard: React.FC = () => {
         c.toLowerCase().includes(certTypeFilter.toLowerCase())
       );
       const matchesAvailability = availabilityFilter === 'All' || member.availability === availabilityFilter;
-      
+
       if (!matchesRole || !matchesExp || !matchesCert || !matchesAvailability) return false;
-      
+
       if (isSearching) {
         return calculateCrewRelevance(member, crewSearch) > -20;
       }
@@ -283,9 +307,9 @@ const Dashboard: React.FC = () => {
   };
 
   const handleToggleAvailability = (id: string) => {
-    setCrewMembers(prev => prev.map(m => 
-      m.id === id 
-        ? { ...m, availability: m.availability === 'available' ? 'busy' : 'available' } 
+    setCrewMembers(prev => prev.map(m =>
+      m.id === id
+        ? { ...m, availability: m.availability === 'available' ? 'busy' : 'available' }
         : m
     ));
   };
@@ -312,7 +336,7 @@ const Dashboard: React.FC = () => {
   ];
 
   const windSpeedValue = parseInt(weatherData.wind) || 0;
-  const isHighWind = windSpeedValue > 15;
+  const isHighWind = windSpeedValue > 15 || isSimulationMode;
 
   const handleGenerateBriefing = async () => {
     setLoadingBriefing(true);
@@ -324,7 +348,7 @@ Flight Configuration:
 - Passenger Count: ${pilotContext.passengers}
 - Intended Duration: ${pilotContext.duration} minutes
 Focus on safety risks, fuel management, and launch feasibility specific to this configuration and current conditions.`;
-      
+
       const result = await getFlightBriefing(prompt, briefingConstraints);
       setBriefing(result);
     } catch (err) {
@@ -334,26 +358,25 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     }
   };
 
-  const tabs: {id: TabType, label: string, icon: any}[] = [
-    {id: 'status', label: 'Status', icon: CloudSun},
-    {id: 'checklists', label: 'Checklists', icon: ListChecks},
-    {id: 'logs', label: 'Logs', icon: FileText},
-    {id: 'crew', label: 'Crew', icon: Users},
+  const tabs: { id: TabType, label: string, icon: any }[] = [
+    { id: 'status', label: 'Status', icon: CloudSun },
+    { id: 'checklists', label: 'Checklists', icon: ListChecks },
+    { id: 'logs', label: 'Logs', icon: FileText },
+    { id: 'crew', label: 'Crew', icon: Users },
   ];
 
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow">
-      {showTutorial && <TutorialOverlay onClose={completeTutorial} />}
-      
+      {/* {showTutorial && <TutorialOverlay onClose={completeTutorial} />} */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold">Welcome, Sarah</h1>
-              <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border border-primary/20">
+              <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border dark:border-primary/30">
                 <Plane size={10} /> Pilot
               </span>
-            </div>            
+            </div>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <MapPin size={14} /> Chatfield State Park (N 39.5448°, W 105.0874°)
@@ -371,7 +394,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               {tab.label}
             </button>
           ))}
-          <button 
+          <button
             onClick={() => setShowTutorial(true)}
             className="p-2 mr-1 ml-auto bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
             title="Show Tutorial"
@@ -406,11 +429,27 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           </div>
 
           <div className="bg-muted/30 border dark:border-primary/30 rounded-3xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold flex items-center gap-2"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-1 rounded-lg">
+            <div className="flex items-center justify-between mb-4 gap-4">
+              <h3 className="font-bold flex items-center gap-2 text-lg"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground bg-muted px-2 py-1 rounded-lg mr-auto">
                 {isWeatherLoading ? <RefreshCw size={10} className="animate-spin text-primary" /> : <div className="w-2 h-2 rounded-full bg-green-500" />}
                 Live Sync {isWeatherLoading ? 'Updating' : 'Active'}
+              </div>
+              {/* Simulation Toggle Bar */}
+              <div className="flex items-center justify-end gap-3 mb-2 ml-auto px-1">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  <Activity size={14} className={isSimulationMode ? "text-destructive animate-pulse" : "text-primary"} />
+                  Simulation Mode
+                </div>
+                <button
+                  onClick={() => {
+                    setIsSimulationMode(!isSimulationMode);
+                    if (isSimulationMode) setWeatherAlerts(prev => prev.filter(a => a.id !== 'sim-wind'));
+                  }}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${isSimulationMode ? 'bg-destructive' : 'bg-muted'}`}
+                >
+                  <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${isSimulationMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -422,7 +461,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 grow">
             <div id="briefing-section" className="lg:col-span-2">
-              <BriefingCard 
+              <BriefingCard
                 pilotContext={pilotContext}
                 setPilotContext={setPilotContext}
                 constraints={briefingConstraints}
@@ -432,18 +471,18 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 briefing={briefing}
               />
             </div>
-            
+
             <div id="mission-section" className="bg-muted/30 border dark:border-primary/30 rounded-3xl p-6 flex flex-col">
               <div className="sticky top-[6rem]">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} /> Next Mission</h3>
                 <div className="space-y-4 flex-grow">
-                  <div className="flex justify-between items-center border-b border-primary/50 pb-4"><span className="text-sm text-muted-foreground">Launch Time</span><span className="font-bold">06:15 AM</span></div>
-                  <div className="flex justify-between items-center border-b border-primary/50 pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
-                  <div className="flex justify-between items-center border-b border-primary/50 pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
+                  <div className="flex justify-between items-center border-b dark:border-primary/30 pb-4"><span className="text-sm text-muted-foreground">Launch Time</span><span className="font-bold">06:15 AM</span></div>
+                  <div className="flex justify-between items-center border-b dark:border-primary/30 pb-4"><span className="text-sm text-muted-foreground">Passengers</span><span className="font-bold">{pilotContext.passengers} Adult(s)</span></div>
+                  <div className="flex justify-between items-center border-b dark:border-primary/30 pb-4"><span className="text-sm text-muted-foreground">Balloon</span><span className="font-bold truncate max-w-[120px]" title={pilotContext.balloon}>{pilotContext.balloon}</span></div>
                 </div>
                 <div className="flex flex-col gap-2 mt-6">
                   <button className="w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all active:scale-[0.98]">View Flight Plan</button>
-                  <MissionExportButton 
+                  <MissionExportButton
                     data={{
                       launchTime: "06:15 AM",
                       passengers: `${pilotContext.passengers} Adult(s)`,
@@ -465,8 +504,8 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           <div className="flex items-center justify-between mb-4"><h2 className="text-2xl font-bold flex items-center gap-2"><ListChecks /> Pre-Flight Checklist</h2><span className="text-sm bg-muted px-2 py-1 rounded font-bold transition-all">{completedCount} / {checklists.length} Complete</span></div>
           <div className="space-y-3">
             {checklists.map(item => (
-              <div key={item.id} onClick={() => toggleChecklist(item.id)} className={`p-5 border rounded-2xl flex items-center gap-4 transition-all duration-300 cursor-pointer select-none active:scale-[0.98] ${item.done ? 'bg-green-500/5 border-green-500/30' : 'bg-background hover:border-primary border-border'}`}>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 transform ${item.done ? 'bg-green-500 border-green-500 text-white scale-110' : 'border-muted-foreground/30 scale-100'}`}>{item.done && <div className="animate-in zoom-in-50 duration-200"><CheckCircle size={16} /></div>}</div>
+              <div key={item.id} onClick={() => toggleChecklist(item.id)} className={`p-5 border dark:border-primary/30 rounded-2xl flex items-center gap-4 transition-all duration-300 cursor-pointer select-none active:scale-[0.98] ${item.done ? 'bg-green-500/5 border-green-500/30' : 'bg-background hover:border-primary dark:border-primary/30'}`}>
+                <div className={`w-6 h-6 rounded-full border dark:border-primary/30 flex items-center justify-center transition-all duration-300 transform ${item.done ? 'bg-green-500 border-green-500 text-white scale-110' : 'border-muted-foreground/30 scale-100'}`}>{item.done && <div className="animate-in zoom-in-50 duration-200"><CheckCircle size={16} /></div>}</div>
                 <span className={`font-medium transition-all duration-300 ${item.done ? 'text-muted-foreground line-through opacity-70' : ''}`}>{item.text}</span>
                 <ChevronRight className={`ml-auto text-muted-foreground transition-transform duration-300 ${item.done ? 'rotate-90 opacity-0' : ''}`} size={16} />
               </div>
@@ -483,7 +522,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h2 className="text-2xl font-bold">Flight History</h2>
             <div className="flex flex-wrap items-center gap-4">
-              <LogSortBar 
+              <LogSortBar
                 sortField={logSortField}
                 sortOrder={logSortOrder}
                 onSortChange={(field, order) => {
@@ -498,27 +537,27 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             </div>
           </div>
           {isAddingLog && (
-            <div className="bg-muted/30 border-2 border-dashed dark:border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
+            <div className="bg-muted/30 border-2 border-dashed border-primary/30 rounded-[2rem] p-6 animate-in zoom-in-95 duration-200">
               <form onSubmit={handleAddLog} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Calendar size={12} /> Flight Date</label><input type="date" required value={newLog.date} onChange={(e) => setNewLog({...newLog, date: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>
-                  <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Timer size={12} /> Duration (Minutes)</label><input type="number" required min="1" value={newLog.duration} onChange={(e) => setNewLog({...newLog, duration: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>
+                  <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Calendar size={12} /> Flight Date</label><input type="date" required value={newLog.date} onChange={(e) => setNewLog({ ...newLog, date: e.target.value })} className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>
+                  <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><Timer size={12} /> Duration (Minutes)</label><input type="number" required min="1" value={newLog.duration} onChange={(e) => setNewLog({ ...newLog, duration: e.target.value })} className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" /></div>
                 </div>
-                
-                <LogMediaUpload 
+
+                <LogMediaUpload
                   onMediaChange={(attachments) => setNewLog({ ...newLog, attachments })}
                 />
 
-                <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><FileText size={12} /> Flight Notes & Observations</label><textarea placeholder="Enter weather conditions, landing details, or maintenance observations..." value={newLog.notes} onChange={(e) => setNewLog({...newLog, notes: e.target.value})} className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" /></div>
+                <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1"><FileText size={12} /> Flight Notes & Observations</label><textarea placeholder="Enter weather conditions, landing details, or maintenance observations..." value={newLog.notes} onChange={(e) => setNewLog({ ...newLog, notes: e.target.value })} className="w-full bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" /></div>
                 <div className="flex justify-end gap-3"><button type="button" onClick={() => setIsAddingLog(false)} className="px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/50 rounded-xl transition-all">Discard</button><button type="submit" className="px-8 py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">Save Log Entry</button></div>
               </form>
             </div>
           )}
           <div className="space-y-4">
             {sortedLogs.map(log => (
-              <LogCard 
-                key={log.id} 
-                log={log} 
+              <LogCard
+                key={log.id}
+                log={log}
                 onArchive={(id) => setLogToArchive(id)}
                 onPreview={(l) => setPreviewLog(l)}
               />
@@ -539,7 +578,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           <div className="flex flex-col justify-between gap-6">
             <h2 className="text-2xl font-bold flex items-center gap-2 mt-2"><Users className="text-primary" /> Crew Directory</h2>
             <div className="w-full">
-              <CrewFilterBar 
+              <CrewFilterBar
                 search={crewSearch}
                 onSearchChange={setCrewSearch}
                 roleFilter={roleFilter}
@@ -557,10 +596,10 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
           {filteredCrew.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
               {filteredCrew.map(member => (
-                <CrewMemberCard 
-                  key={member.id} 
-                  member={member} 
-                  onEdit={setEditingMember} 
+                <CrewMemberCard
+                  key={member.id}
+                  member={member}
+                  onEdit={setEditingMember}
                   onToggleAvailability={handleToggleAvailability}
                 />
               ))}
@@ -576,15 +615,15 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
       )}
 
       {/* Profile Edit Drawer */}
-      <Drawer 
-        isOpen={!!editingMember} 
-        onClose={() => setEditingMember(null)} 
+      <Drawer
+        isOpen={!!editingMember}
+        onClose={() => setEditingMember(null)}
         title={editingMember ? `Edit Profile: ${editingMember.name}` : 'Edit Profile'}
       >
         {editingMember && (
-          <CrewProfileForm 
-            member={editingMember} 
-            onUpdate={handleEditSave} 
+          <CrewProfileForm
+            member={editingMember}
+            onUpdate={handleEditSave}
             onCancel={() => setEditingMember(null)}
           />
         )}
@@ -602,9 +641,9 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
       />
 
       {/* Detail Previews */}
-      <LogDetailDrawer 
-        log={previewLog} 
-        onClose={() => setPreviewLog(null)} 
+      <LogDetailDrawer
+        log={previewLog}
+        onClose={() => setPreviewLog(null)}
       />
     </div>
   );

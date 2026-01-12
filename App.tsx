@@ -58,7 +58,7 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <Link 
                     to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'} 
-                    className="text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition-all flex items-center gap-2"
+                    className="text-sm font-medium text-primary bg-primary/20 px-4 py-2 rounded-lg hover:bg-primary/30 transition-all flex items-center gap-2"
                   >
                     <User size={14} />
                     {userRole === 'pilot' ? 'Pilot Portal' : 'Crew Portal'}
@@ -68,7 +68,7 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <Link to="/login" className="text-sm font-medium bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-all">
+                <Link to="/login" className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all">
                   Crew Login
                 </Link>
               )}

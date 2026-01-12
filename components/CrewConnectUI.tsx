@@ -31,10 +31,10 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
   };
 
   return (
-    <section className="mt-12 space-y-6">
+    <section className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h3 className="text-2xl font-black italic tracking-tight flex items-center gap-2">
+          <h3 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Users className="text-primary" /> Crew Connect
           </h3>
           <p className="text-sm text-muted-foreground">Search and coordinate with pilots and ground crew in real-time.</p>
@@ -47,7 +47,7 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
             placeholder="Search name, role, or certification..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3.5 bg-muted/50 border border-primary/20 rounded-[1.5rem] text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/60"
+            className="w-full pl-12 pr-4 py-3.5 bg-muted/50 border dark:border-primary/30 rounded-[1.5rem] text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/60"
           />
         </div>
       </div>
@@ -56,7 +56,7 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
         {filteredMembers.map(member => (
           <div 
             key={member.id} 
-            className="bg-muted/30 border border-primary/20 rounded-[2rem] p-5 hover:bg-muted/50 transition-all group relative overflow-hidden"
+            className="bg-muted/30 border dark:border-primary/30 rounded-[2rem] p-5 hover:bg-muted/50 transition-all group relative overflow-hidden"
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary/20 shrink-0">
@@ -111,10 +111,10 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
       {activeChat && (
         <div className="fixed inset-0 z-[150] flex items-end justify-center sm:items-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setActiveChat(null)} />
-          <div className="relative bg-card border shadow-2xl rounded-[2.5rem] w-full max-w-md overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
-            <div className="p-6 bg-muted/50 border-b flex items-center justify-between">
+          <div className="relative bg-card border dark:border-primary/30 shadow-2xl rounded-[2.5rem] w-full max-w-md overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
+            <div className="p-6 bg-muted/50 border-b dark:border-primary/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-primary/20">
+                <div className="w-10 h-10 rounded-xl overflow-hidden border dark:border-primary/30">
                   <img src={activeChat.imageUrl} alt={activeChat.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
@@ -129,7 +129,7 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
             
             <div className="p-6 h-[200px] bg-background/50 flex flex-col justify-end">
               <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest mb-4">Starting Secure Transmission</p>
-              <div className="bg-muted p-3 rounded-2xl rounded-bl-none text-sm max-w-[80%] self-start border">
+              <div className="bg-muted p-3 rounded-2xl rounded-bl-none text-sm max-w-[80%] self-start border border dark:border-primary/30 ">
                 Establishing radio-link with {activeChat.role} station...
               </div>
             </div>
@@ -141,7 +141,7 @@ export const CrewConnect: React.FC<CrewConnectProps> = ({ members }) => {
                 placeholder="Type your transmission..."
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
-                className="flex-grow bg-background border border-primary/20 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                className="flex-grow bg-background border dark:border-primary/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               />
               <button 
                 type="submit"
