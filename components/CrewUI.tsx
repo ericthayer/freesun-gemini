@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2, CheckCircle2, Circle, Activity
+  Users, Plane, Mail, Phone, Award, Search, Filter, Briefcase, GraduationCap, Edit2, CheckCircle2, Circle, Activity, RotateCcw
 } from 'lucide-react';
 
 export interface CrewMember {
@@ -125,6 +125,7 @@ interface CrewFilterBarProps {
   onCertFilterChange: (val: string) => void;
   availabilityFilter: string;
   onAvailabilityFilterChange: (val: string) => void;
+  onClearAll: () => void;
 }
 
 export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
@@ -132,25 +133,12 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
   roleFilter, onRoleFilterChange,
   expFilter, onExpFilterChange,
   certFilter, onCertFilterChange,
-  availabilityFilter, onAvailabilityFilterChange
+  availabilityFilter, onAvailabilityFilterChange,
+  onClearAll
 }) => {
   return (
     <div className="flex flex-col gap-4 w-full grow">
-      {/*<div className="flex flex-col md:flex-ro md:justify-between gap-4 w-full grow">
-        <h2 className="text-2xl font-bold flex items-center gap-2 whitespace-nowrap"><Users className="text-primary" /> Crew Directory</h2>
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-          <input 
-            type="text"
-            placeholder="Search by name, bio, or keywords (e.g. 'pilot instructor')..."
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-muted/50 border dark:border-primary/30 rounded-2xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-          />
-        </div>
-      </div>*/}
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 grow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 grow">
         <div className="relative flex">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
           <input 
@@ -216,6 +204,14 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
             <option value="busy">Busy / Off Duty</option>
           </select>
         </div>
+
+        <button 
+          onClick={onClearAll}
+          className="p-3 bg-muted/50 border dark:border-primary/30 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all flex items-center justify-center shrink-0"
+          title="Clear All Filters"
+        >
+          <RotateCcw size={16} />
+        </button>
       </div>
     </div>
   );

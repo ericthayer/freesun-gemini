@@ -384,6 +384,14 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     { id: 'crew', label: 'Crew', icon: Users },
   ];
 
+  const handleClearFilters = () => {
+    setCrewSearch('');
+    setRoleFilter('All');
+    setMinExpFilter(0);
+    setCertTypeFilter('All');
+    setAvailabilityFilter('All');
+  };
+
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow">
       <ContextualTutorial 
@@ -642,6 +650,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                   onCertFilterChange={setCertTypeFilter}
                   availabilityFilter={availabilityFilter}
                   onAvailabilityFilterChange={setAvailabilityFilter}
+                  onClearAll={handleClearFilters}
                 />
               </div>
             </div>
