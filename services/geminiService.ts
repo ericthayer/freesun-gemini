@@ -6,14 +6,14 @@ export const getFlightBriefing = async (prompt: string, constraints?: string): P
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const finalPrompt = constraints 
-      ? `${prompt}\n\nCRITICAL OPERATIONAL CONSTRAINTS TO OBSERVE: ${constraints}`
+      ? `${prompt}\n\nCRITICAL OPERATIONAL & NEGATIVE CONSTRAINTS (AVOID THESE): ${constraints}`
       : prompt;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: finalPrompt,
       config: {
-        systemInstruction: "You are an expert aeronautical safety officer and balloon pilot consultant. Provide brief, high-contrast, easy-to-read flight briefings. Use bullet points. Highlight major risks in ALL CAPS. If constraints are provided, prioritize them as absolute safety requirements. Keep it professional and action-oriented for field operations.",
+        systemInstruction: "You are an expert aeronautical safety officer and balloon pilot consultant. Provide brief, high-contrast, easy-to-read flight briefings. Use bullet points. Highlight major risks in ALL CAPS. If constraints are provided, especially negative ones (e.g., 'avoid', 'do not', 'stay away'), prioritize them as absolute safety requirements and explicitly mention how to mitigate those risks. Keep it professional and action-oriented for field operations.",
         temperature: 0.7,
         topP: 0.8,
         thinkingConfig: { thinkingBudget: 0 }

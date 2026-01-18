@@ -40,13 +40,13 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-300">
             <button 
               onClick={() => setIsSignUpModalOpen(true)}
-              className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black text-lg rounded-2xl hover:bg-primary/90 transition-all transform hover:scale-105 shadow-xl shadow-primary/20"
+              className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black text-lg rounded-2xl hover:bg-primary/90 transition-all transform hover:scale-105"
             >
               Join the crew
             </button>
             <button 
               onClick={scrollToAbout}
-              className="w-full sm:w-auto px-10 py-5 bg-white border text-primary font-black text-lg rounded-2xl hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
+              className="w-full sm:w-auto px-10 py-5 bg-white text-primary font-black text-lg rounded-2xl hover:bg-gray-100 transition-all transform hover:scale-105"
             >
               Learn about us
             </button>

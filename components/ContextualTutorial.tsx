@@ -84,7 +84,7 @@ export const ContextualTutorial: React.FC<ContextualTutorialProps> = ({ steps, o
                 y={targetRect.top - 10}
                 width={targetRect.width + 20}
                 height={targetRect.height + 20}
-                rx="25"
+                rx="20"
                 fill="black"
                 className="transition-all duration-500 ease-in-out"
               />

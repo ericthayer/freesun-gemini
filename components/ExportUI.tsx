@@ -24,7 +24,7 @@ export const MissionExportButton: React.FC<MissionExportButtonProps> = ({ data }
     <>
       <button 
         onClick={handlePrint}
-        className="w-full py-3 border dark:border-primary/30 text-primary font-bold rounded-xl hover:bg-primary/5 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+        className="w-full py-3 px-4 border dark:border-primary/30 text-primary font-bold rounded-xl hover:bg-primary/5 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
       >
         <FileText size={18} className="group-hover:scale-110 transition-transform" />
         Export Flight Manifest
