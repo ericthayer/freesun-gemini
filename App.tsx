@@ -10,6 +10,10 @@ import Dashboard from './pages/Dashboard';
 import Schedule from './pages/Schedule';
 import Login from './pages/Login';
 import CrewDashboard from './pages/CrewDashboard';
+import SafetyRecords from './pages/SafetyRecords';
+import Fleet from './pages/Fleet';
+import BecomePilot from './pages/BecomePilot';
+import Events from './pages/Events';
 import { useTheme } from './hooks/useTheme';
 
 type UserRole = 'pilot' | 'crew' | null;
@@ -132,6 +136,10 @@ const App: React.FC = () => {
             <Route path="/dashboard" element={isLoggedIn && userRole === 'pilot' ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/crew-dashboard" element={isLoggedIn && userRole === 'crew' ? <CrewDashboard /> : <Navigate to="/login" />} />
             <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
+            <Route path="/safety" element={<SafetyRecords />} />
+            <Route path="/fleet" element={<Fleet />} />
+            <Route path="/become-a-pilot" element={<BecomePilot />} />
+            <Route path="/events" element={<Events />} />
           </Routes>
         </main>
 
@@ -148,10 +156,10 @@ const App: React.FC = () => {
               <div>
                 <h4 className="font-semibold mb-4">Club</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">Safety Records</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Our Fleet</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Become a Pilot</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Member Events</a></li>
+                  <li><Link to="/safety" className="hover:text-primary transition-colors">Safety Records</Link></li>
+                  <li><Link to="/fleet" className="hover:text-primary transition-colors">Our Fleet</Link></li>
+                  <li><Link to="/become-a-pilot" className="hover:text-primary transition-colors">Become a Pilot</Link></li>
+                  <li><Link to="/events" className="hover:text-primary transition-colors">Member Events</Link></li>
                 </ul>
               </div>
               <div>
