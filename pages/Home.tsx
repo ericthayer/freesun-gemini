@@ -97,7 +97,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       </section>
 
       {/* About Us Section */}
-      <section id="about-us" className="py-32 bg-muted/20 scroll-mt-20">
+      <section id="about-us" className="py-24 bg-muted/20 scroll-mt-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2 relative">
@@ -105,7 +105,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/10 rounded-[2rem] -z-10 animate-pulse delay-700" />
               <div className="rounded-[3rem] overflow-hidden border-8 border-background shadow-2xl transform -rotate-2">
                 <img 
-                  src="https://assets.codepen.io/97621/img-ballooning-1763.jpg?width=1200" 
+                  src="https://assets.codepen.io/97621/img-ballooning-2408_1.jpg?width=1360&height=1814&format=webp" 
                   alt="FreeSun Team" 
                   className="w-full h-full object-cover aspect-[4/5]"
                 />
@@ -158,7 +158,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       </section>
 
       {/* Gallery Section */}
-      <section className="py-24 bg-background">
+      <section className="pt-8 pb-32 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
              <h2 className="text-3xl md:text-5xl font-bold mb-4">Aerial Perspectives</h2>

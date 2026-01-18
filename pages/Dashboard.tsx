@@ -367,6 +367,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow">
+      // Uncomment to display Pilot Tutorial
       {/* {showTutorial && <TutorialOverlay onClose={completeTutorial} />} */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>

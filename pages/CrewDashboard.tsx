@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   User, Calendar, Plane, Award, MapPin, Mail, Phone, 
   Settings, LogOut, CheckCircle2, Circle, Clock, ChevronRight,
-  Briefcase, X, ArrowRight, AlertCircle, Users, CloudSun, Wind, Navigation, Search, RefreshCw, Sun, Cloud, Bell, Globe, Shield
+  Briefcase, X, ArrowRight, AlertCircle, Users, CloudSun, Wind, Navigation, Search, RefreshCw, Sun, Cloud, Bell, Globe, Shield, HelpCircle
 } from 'lucide-react';
 import { CrewMember } from '../components/CrewUI';
 import { CrewProfileForm } from '../components/CrewProfileForm';
@@ -12,6 +12,7 @@ import { WeatherCard, ForecastCard } from '../components/StatusUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
 import { CrewConnect } from '../components/CrewConnectUI';
+import { CrewTutorialOverlay } from '../components/CrewTutorialOverlay';
 
 type CrewTabType = 'status' | 'profile' | 'schedule' | 'settings';
 
@@ -19,7 +20,22 @@ const CrewDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<CrewTabType>('status');
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [weatherAlerts, setWeatherAlerts] = useState<WeatherAlert[]>([]);
+  const [showTutorial, setShowTutorial] = useState(false);
   const lastSnapshot = useRef<WeatherSnapshot | null>(null);
+
+  // Check for first-time user
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('freesun_crew_tutorial_complete');
+    if (!hasSeenTutorial) {
+      const timer = setTimeout(() => setShowTutorial(true), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const completeTutorial = () => {
+    localStorage.setItem('freesun_crew_tutorial_complete', 'true');
+    setShowTutorial(false);
+  };
 
   // Weather State
   const [weatherData, setWeatherData] = useState({
@@ -151,6 +167,8 @@ const CrewDashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow animate-in fade-in duration-500">
       
+      {showTutorial && <CrewTutorialOverlay onClose={completeTutorial} />}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
@@ -177,6 +195,13 @@ const CrewDashboard: React.FC = () => {
               {tab.label}
             </button>
           ))}
+          <button
+            onClick={() => setShowTutorial(true)}
+            className="p-2 ml-2 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
+            title="Show Tutorial"
+          >
+            <HelpCircle size={18} />
+          </button>
         </div>
       </div>
 
