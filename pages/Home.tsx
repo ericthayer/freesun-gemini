@@ -55,7 +55,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       </section>
 
       {/* Features / Benefits */}
-      <section className="py-24 bg-background">
+      <section className="pt-32 pb-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Why FreeSun?</h2>
@@ -97,7 +97,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       </section>
 
       {/* About Us Section */}
-      <section id="about-us" className="py-24 bg-muted/20 scroll-mt-10">
+      <section id="about-us" className="pt-12 pb-24 bg-muted/20 scroll-mt-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2 relative">
@@ -158,7 +158,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
       </section>
 
       {/* Gallery Section */}
-      <section className="pt-8 pb-32 bg-background">
+      <section className="pt-16 pb-32 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
              <h2 className="text-3xl md:text-5xl font-bold mb-4">Aerial Perspectives</h2>
