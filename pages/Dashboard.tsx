@@ -22,6 +22,7 @@ import { LogMediaUpload } from '../components/LogMediaUI';
 import { LogDetailDrawer } from '../components/LogDetailDrawer';
 import { Drawer } from '../components/DrawerUI';
 import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
+import { MaintenanceHub, MaintenanceEntry } from '../components/MaintenanceUI';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -35,6 +36,25 @@ const Dashboard: React.FC = () => {
   const [isSimulationMode, setIsSimulationMode] = useState(false);
   const [isManifestGenerated, setIsManifestGenerated] = useState(false);
   const [isGeneratingManifest, setIsGeneratingManifest] = useState(false);
+
+  // Maintenance State
+  const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceEntry[]>([
+    {
+      id: 'm1',
+      balloonName: 'SunChaser #04 (Medium)',
+      date: '2024-05-15',
+      serviceType: '100-Hour Inspection',
+      partsUsed: 'Burner hoses, load ring gaskets',
+      notes: 'Structural integrity verified. Fuel pressure optimal at all ports.',
+      technician: 'Sarah Miller'
+    }
+  ]);
+
+  const balloonsList = ['SunChaser #04 (Medium)', 'DawnRider #01 (Small)', 'Atlas #09 (Large)', 'SkyGazer #02 (XL)'];
+
+  const handleAddMaintenance = (log: MaintenanceEntry) => setMaintenanceLogs([log, ...maintenanceLogs]);
+  const handleUpdateMaintenance = (updated: MaintenanceEntry) => setMaintenanceLogs(maintenanceLogs.map(l => l.id === updated.id ? updated : l));
+  const handleDeleteMaintenance = (id: string) => setMaintenanceLogs(maintenanceLogs.filter(l => l.id !== id));
 
   // Pilot Tutorial Steps
   const pilotTutorialSteps: TutorialStep[] = [
@@ -674,6 +694,15 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
             )}
           </div>
         )}
+
+        {/* Maintenance Hub Section */}
+        <MaintenanceHub 
+          logs={maintenanceLogs}
+          onAdd={handleAddMaintenance}
+          onUpdate={handleUpdateMaintenance}
+          onDelete={handleDeleteMaintenance}
+          balloons={balloonsList}
+        />
       </div>
 
       {/* Global Drawers & Modals */}
