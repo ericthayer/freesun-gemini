@@ -5,7 +5,7 @@ import {
   CheckCircle, ListChecks,
   Clock, MapPin, Search, ChevronRight,
   X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
-  RefreshCw, Plane, HelpCircle, Activity
+  RefreshCw, Plane, HelpCircle, Activity, Sparkles
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -22,6 +22,7 @@ import { LogMediaUpload } from '../components/LogMediaUI';
 import { LogDetailDrawer } from '../components/LogDetailDrawer';
 import { Drawer } from '../components/DrawerUI';
 import { TutorialOverlay } from '../components/TutorialOverlay';
+import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -34,9 +35,37 @@ const Dashboard: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [isSimulationMode, setIsSimulationMode] = useState(false);
 
+  // Pilot Tutorial Steps
+  const pilotTutorialSteps: TutorialStep[] = [
+    {
+      targetId: "weather-section",
+      title: "Weather Intelligence",
+      description: "Real-time surface winds and visibility are monitored every 30 seconds. High-wind warnings will pulse if safety limits are exceeded.",
+      icon: <Wind size={32} />
+    },
+    {
+      targetId: "briefing-section",
+      title: "AI Flight Assistant",
+      description: "Powered by Gemini, this tool generates complex flight risk assessments based on your current weather and specific balloon configuration.",
+      icon: <Sparkles size={32} />
+    },
+    {
+      targetId: "navigation-tabs",
+      title: "Mission Logistics",
+      description: "Quickly toggle between active pre-flight checklists, historical logs, and the global crew directory.",
+      icon: <ListChecks size={32} />
+    },
+    {
+      targetId: "mission-section",
+      title: "Export Control",
+      description: "Finalize and export your mission manifest. This document is formatted for official safety handovers and chase vehicle coordination.",
+      icon: <FileText size={32} />
+    }
+  ];
+
   // Check for first-time user
   useEffect(() => {
-    const hasSeenTutorial = localStorage.getItem('freesun_tutorial_complete');
+    const hasSeenTutorial = localStorage.getItem('freesun_pilot_contextual_tutorial_complete');
     if (!hasSeenTutorial) {
       const timer = setTimeout(() => setShowTutorial(true), 1500);
       return () => clearTimeout(timer);
@@ -44,7 +73,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const completeTutorial = () => {
-    localStorage.setItem('freesun_tutorial_complete', 'true');
+    localStorage.setItem('freesun_pilot_contextual_tutorial_complete', 'true');
     setShowTutorial(false);
   };
 
@@ -73,7 +102,6 @@ const Dashboard: React.FC = () => {
 
     const updateWeather = async () => {
       if (isSimulationMode) {
-        // Handle simulation state
         setWeatherData(prev => ({
           ...prev,
           wind: '22 mph',
@@ -367,8 +395,13 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
 
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow">
-      // Uncomment to display Pilot Tutorial
-      {/* {showTutorial && <TutorialOverlay onClose={completeTutorial} />} */}
+      
+      <ContextualTutorial 
+        isOpen={showTutorial} 
+        steps={pilotTutorialSteps} 
+        onClose={completeTutorial} 
+      />
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -436,7 +469,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 {isWeatherLoading ? <RefreshCw size={10} className="animate-spin text-primary" /> : <div className="w-2 h-2 rounded-full bg-green-500" />}
                 Live Sync {isWeatherLoading ? 'Updating' : 'Active'}
               </div>
-              {/* Simulation Toggle Bar */}
               <div className="flex items-center justify-end gap-3 mb-2 ml-auto px-1">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   <Activity size={14} className={isSimulationMode ? "text-destructive animate-pulse" : "text-primary"} />
@@ -615,7 +647,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         </div>
       )}
 
-      {/* Profile Edit Drawer */}
       <Drawer
         isOpen={!!editingMember}
         onClose={() => setEditingMember(null)}
@@ -630,7 +661,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         )}
       </Drawer>
 
-      {/* Confirmation Modals */}
       <ConfirmationModal
         isOpen={logToArchive !== null}
         onClose={() => setLogToArchive(null)}
@@ -641,7 +671,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         variant="danger"
       />
 
-      {/* Detail Previews */}
       <LogDetailDrawer
         log={previewLog}
         onClose={() => setPreviewLog(null)}
