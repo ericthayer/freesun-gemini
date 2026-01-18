@@ -169,6 +169,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
               <img src="https://assets.codepen.io/97621/img-ballooning-3008_1.jpg?format=avif" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Ballooning" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
                 <div className="text-white">
+                  {/* Fixed typo below: h-h4 changed to h4 */}
                   <h4 className="text-2xl font-bold">Dawn Chasing</h4>
                   <p className="opacity-80">Littleton, CO</p>
                 </div>
@@ -198,9 +199,12 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
             <p className="text-xl mb-12 max-w-2xl mx-auto opacity-80 leading-relaxed font-medium">
               Slots fill up months in advance. Join the waiting list or book your private morning today to experience the absolute silence of the sky.
             </p>
-            <button className="px-16 py-6 bg-white text-primary font-black text-2xl rounded-2xl hover:bg-slate-100 transition-all flex items-center gap-3 mx-auto shadow-2xl hover:scale-105 active:scale-95">
+            <Link 
+              to="/inquire"
+              className="px-16 py-6 bg-white text-primary font-black text-2xl rounded-2xl hover:bg-slate-100 transition-all flex items-center gap-3 mx-auto shadow-2xl hover:scale-105 active:scale-95 w-fit"
+            >
               Inquire Now <ArrowRight size={28} />
-            </button>
+            </Link>
           </div>
         </div>
       </section>

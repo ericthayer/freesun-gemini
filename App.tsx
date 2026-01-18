@@ -14,6 +14,7 @@ import SafetyRecords from './pages/SafetyRecords';
 import Fleet from './pages/Fleet';
 import BecomePilot from './pages/BecomePilot';
 import Events from './pages/Events';
+import Inquiry from './pages/Inquiry';
 import { useTheme } from './hooks/useTheme';
 
 type UserRole = 'pilot' | 'crew' | null;
@@ -140,6 +141,7 @@ const App: React.FC = () => {
             <Route path="/fleet" element={<Fleet />} />
             <Route path="/become-a-pilot" element={<BecomePilot />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/inquire" element={<Inquiry />} />
           </Routes>
         </main>
 
