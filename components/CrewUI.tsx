@@ -135,19 +135,32 @@ export const CrewFilterBar: React.FC<CrewFilterBarProps> = ({
   availabilityFilter, onAvailabilityFilterChange
 }) => {
   return (
-    <div className="flex flex-col lg:flex-row gap-4 w-full grow">
-      <div className="relative w-full lg:max-w-fit">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-        <input 
-          type="text"
-          placeholder="Search by name, bio, or keywords (e.g. 'pilot instructor')..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-muted/50 border dark:border-primary/30 rounded-2xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-        />
-      </div>
+    <div className="flex flex-col gap-4 w-full grow">
+      {/*<div className="flex flex-col md:flex-ro md:justify-between gap-4 w-full grow">
+        <h2 className="text-2xl font-bold flex items-center gap-2 whitespace-nowrap"><Users className="text-primary" /> Crew Directory</h2>
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+          <input 
+            type="text"
+            placeholder="Search by name, bio, or keywords (e.g. 'pilot instructor')..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-muted/50 border dark:border-primary/30 rounded-2xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+          />
+        </div>
+      </div>*/}
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 grow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 grow">
+        <div className="relative flex">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+          <input 
+            type="text"
+            placeholder="Search by name, bio, or keywords (e.g. 'pilot instructor')..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-muted/50 border dark:border-primary/30 rounded-2xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+          />
+      </div>
         <div className="relative flex">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <select 
