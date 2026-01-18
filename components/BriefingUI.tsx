@@ -28,16 +28,13 @@ export const BriefingCard: React.FC<BriefingUIProps> = ({
 }) => {
   return (
     <div className="lg:col-span-2 bg-muted/30 border dark:border-primary/30 rounded-3xl p-6 relative overflow-hidden grid grid-rows-[auto_auto_auto_1fr]">
-      <div className="absolute -right-4 -top-4 text-primary/5 pointer-events-none">
-        <MessageSquareText size={120} />
-      </div>
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
         <h3 className="text-xl font-bold flex items-center gap-2"><SparkleIcon /> Smart Flight Briefing</h3>
         <button 
           onClick={onGenerate} 
           disabled={loading} 
-          className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+          className="bg-primary text-white text-xs font-bold px-6 py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"
         >
           {loading && <Spinner size={14} />}
           {loading ? 'Analyzing...' : 'Generate New Briefing'}
