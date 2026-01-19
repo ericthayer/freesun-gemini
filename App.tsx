@@ -15,6 +15,7 @@ import Fleet from './pages/Fleet';
 import BecomePilot from './pages/BecomePilot';
 import Events from './pages/Events';
 import Inquiry from './pages/Inquiry';
+import UserPortal from './pages/UserPortal';
 import { useTheme } from './hooks/useTheme';
 import { AdminMenu } from './components/AdminMenu';
 import { SettingsDrawer } from './components/SettingsDrawer';
@@ -116,11 +117,11 @@ const App: React.FC = () => {
               {isLoggedIn ? (
                 <>
                   <Link 
-                    to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'} 
+                    to="/portal" 
                     className="text-2xl font-bold text-primary" 
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {userRole === 'pilot' ? 'Pilot Portal' : 'Crew Portal'}
+                    My Portal
                   </Link>
                   <button 
                     onClick={() => setIsSettingsOpen(true)}
@@ -150,6 +151,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="/dashboard" element={isLoggedIn && userRole === 'pilot' ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/crew-dashboard" element={isLoggedIn && userRole === 'crew' ? <CrewDashboard /> : <Navigate to="/login" />} />
+            <Route path="/portal" element={isLoggedIn ? <UserPortal /> : <Navigate to="/login" />} />
             <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
             <Route path="/safety" element={<SafetyRecords />} />
             <Route path="/fleet" element={<Fleet />} />

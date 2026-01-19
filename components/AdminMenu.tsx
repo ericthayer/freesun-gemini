@@ -55,7 +55,7 @@ export const AdminMenu: React.FC<AdminMenuProps> = ({
           
           <div className="p-2 space-y-1">
             <Link 
-              to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'}
+              to="/portal"
               onClick={() => setIsOpen(false)}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item"
             >
