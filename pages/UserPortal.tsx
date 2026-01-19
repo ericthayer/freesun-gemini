@@ -4,20 +4,29 @@ import {
   Award, Plane, Timer, MapPin, 
   ChevronRight, Calendar, Star, 
   ShieldCheck, ArrowUpRight, History,
-  TrendingUp, Users, Target
+  TrendingUp, Users, Target, Wrench,
+  Wind
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const UserPortal: React.FC = () => {
+interface UserPortalProps {
+  userRole: 'pilot' | 'crew';
+}
+
+const UserPortal: React.FC<UserPortalProps> = ({ userRole }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Mock personal data
-  const userData = {
+  // Content configuration based on role
+  const isPilot = userRole === 'pilot';
+
+  const pilotData = {
     name: "Sarah Miller",
     role: "Chief Pilot",
     since: "2012",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400",
+    quote: "Pushing the ceiling of what's possible in the mountain air. Every sunrise is a new lesson in tranquility.",
     stats: [
       { label: "Flight Hours", value: "1,540", icon: Timer },
       { label: "Missions", value: "412", icon: Plane },
@@ -28,8 +37,38 @@ const UserPortal: React.FC = () => {
       { title: "Master of the Rockies", date: "June 2023", icon: Star, color: "text-amber-500" },
       { title: "1000h Service", date: "Sept 2022", icon: Award, color: "text-blue-500" },
       { title: "Night Ops Certified", date: "Jan 2021", icon: ShieldCheck, color: "text-purple-500" },
-    ]
+    ],
+    rank: "Level 22 Senior Pilot",
+    rankTarget: "Master Pilot Rank",
+    rankProgress: 82,
+    rankText: "You need 14 more instruction hours and one seasonal evaluation to achieve the next seniority rank."
   };
+
+  const crewData = {
+    name: "Elena Rodriguez",
+    role: "Ground Crew Lead",
+    since: "2021",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400",
+    quote: "Precision on the ground is the bedrock of safety in the sky. Every inflation is a masterpiece of coordination.",
+    stats: [
+      { label: "Missions Helped", value: "210", icon: Users },
+      { label: "Safety Checks", value: "845", icon: ShieldCheck },
+      { label: "Hangar Hours", value: "1,200", icon: Wrench },
+      { label: "Shift Reliability", value: "98%", icon: Target },
+    ],
+    achievements: [
+      { title: "Recovery Specialist", date: "Oct 2023", icon: MapPin, color: "text-green-500" },
+      // Added missing Wind import and unified 'iconColor' to 'color' to match the rendering loop
+      { title: "Cold Inflation Pro", date: "Dec 2022", icon: Wind, color: "text-sky-500" },
+      { title: "Elite Ground Team", date: "Aug 2021", icon: Award, color: "text-amber-500" },
+    ],
+    rank: "Level 12 Operations Lead",
+    rankTarget: "Crew Chief Certification",
+    rankProgress: 65,
+    rankText: "Complete 3 more high-wind recovery deployments and the advanced radio-comm seminar to qualify for Chief status."
+  };
+
+  const data = isPilot ? pilotData : crewData;
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-20 max-w-6xl animate-in fade-in duration-700">
@@ -38,39 +77,39 @@ const UserPortal: React.FC = () => {
         <div className="relative">
           <div className="w-32 h-32 md:w-48 md:h-48 rounded-[3rem] overflow-hidden border-8 border-muted/30 shadow-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400" 
-              alt={userData.name} 
+              src={data.avatar} 
+              alt={data.name} 
               className="w-full h-full object-cover"
             />
           </div>
           <div className="absolute -bottom-2 -right-2 bg-primary text-white p-3 rounded-2xl shadow-xl">
-            <Award size={24} />
+            {isPilot ? <Award size={24} /> : <Wrench size={24} />}
           </div>
         </div>
         
         <div className="text-center md:text-left space-y-4 pt-4">
           <div>
             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter leading-none mb-2">
-              {userData.name}
+              {data.name}
             </h1>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
               <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-primary/20">
-                {userData.role}
+                {data.role}
               </span>
               <span className="text-muted-foreground text-sm font-bold flex items-center gap-2">
-                <Calendar size={14} /> Active since {userData.since}
+                <Calendar size={14} /> Active since {data.since}
               </span>
             </div>
           </div>
           <p className="text-muted-foreground text-lg italic max-w-xl">
-            "Pushing the ceiling of what's possible in the mountain air. Every sunrise is a new lesson in tranquility."
+            "{data.quote}"
           </p>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-        {userData.stats.map((stat, i) => (
+        {data.stats.map((stat, i) => (
           <div key={i} className="bg-muted/30 border dark:border-primary/20 p-6 rounded-[2rem] hover:bg-muted/50 transition-all group">
             <stat.icon className="text-primary mb-4 group-hover:scale-110 transition-transform" size={24} />
             <div className="text-3xl font-black italic">{stat.value}</div>
@@ -88,9 +127,10 @@ const UserPortal: React.FC = () => {
             <Star className="text-primary" size={20} /> Professional Badges
           </h3>
           <div className="space-y-3">
-            {userData.achievements.map((ach, i) => (
+            {data.achievements.map((ach, i) => (
               <div key={i} className="flex items-center gap-4 p-4 bg-background border dark:border-primary/20 rounded-2xl group hover:border-primary/40 transition-all">
                 <div className={`p-3 rounded-xl bg-muted ${ach.color}`}>
+                  {/* @ts-ignore */}
                   <ach.icon size={24} />
                 </div>
                 <div>
@@ -113,12 +153,18 @@ const UserPortal: React.FC = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Link 
-                to="/dashboard" 
+                to={isPilot ? "/dashboard" : "/crew-dashboard"} 
                 className="group p-8 bg-primary text-white rounded-[2.5rem] shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all relative overflow-hidden"
               >
-                <Plane className="absolute -right-4 -bottom-4 text-white/10 w-32 h-32 rotate-12" />
-                <h4 className="text-2xl font-black italic mb-2 relative z-10">Pilot Dashboard</h4>
-                <p className="text-white/70 text-sm mb-6 relative z-10">Manage checklists, logs, and live weather telemetry.</p>
+                {isPilot ? (
+                  <Plane className="absolute -right-4 -bottom-4 text-white/10 w-32 h-32 rotate-12" />
+                ) : (
+                  <Users className="absolute -right-4 -bottom-4 text-white/10 w-32 h-32 rotate-12" />
+                )}
+                <h4 className="text-2xl font-black italic mb-2 relative z-10">{isPilot ? 'Pilot Dashboard' : 'Crew Dashboard'}</h4>
+                <p className="text-white/70 text-sm mb-6 relative z-10">
+                  {isPilot ? 'Manage checklists, logs, and live weather telemetry.' : 'View assigned flights and manage field readiness.'}
+                </p>
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest relative z-10">
                   Open Operations <ArrowUpRight size={14} />
                 </div>
@@ -126,8 +172,8 @@ const UserPortal: React.FC = () => {
 
               <div className="p-8 bg-muted/30 border dark:border-primary/20 rounded-[2.5rem] hover:bg-muted/50 transition-all group">
                 <History className="text-primary mb-4" size={32} />
-                <h4 className="text-2xl font-black italic mb-2">My Flight Logs</h4>
-                <p className="text-muted-foreground text-sm mb-6">Review 412 missions and personal flight performance.</p>
+                <h4 className="text-2xl font-black italic mb-2">My {isPilot ? 'Flight Logs' : 'Shift History'}</h4>
+                <p className="text-muted-foreground text-sm mb-6">Review your historical operational contributions to the club.</p>
                 <button className="text-primary text-xs font-black uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-1 transition-transform">
                   View History <ChevronRight size={14} />
                 </button>
@@ -141,22 +187,22 @@ const UserPortal: React.FC = () => {
                 <TrendingUp className="text-primary" size={20} /> Growth Trajectory
               </h3>
               <div className="text-[10px] font-black uppercase text-primary tracking-widest bg-primary/10 px-3 py-1 rounded-full">
-                Level 22 Senior Pilot
+                {data.rank}
               </div>
             </div>
             
             <div className="space-y-6">
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-bold uppercase tracking-widest mb-1">
-                  <span>Progress to Master Pilot Rank</span>
-                  <span className="text-primary">82%</span>
+                  <span>Progress to {data.rankTarget}</span>
+                  <span className="text-primary">{data.rankProgress}%</span>
                 </div>
                 <div className="h-3 bg-muted rounded-full overflow-hidden border border-border">
-                  <div className="h-full bg-primary transition-all duration-1000" style={{ width: '82%' }} />
+                  <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${data.rankProgress}%` }} />
                 </div>
               </div>
               <p className="text-sm text-muted-foreground italic">
-                You need 14 more instruction hours and one seasonal evaluation to achieve the next seniority rank.
+                {data.rankText}
               </p>
             </div>
           </section>

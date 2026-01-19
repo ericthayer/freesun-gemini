@@ -151,7 +151,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="/dashboard" element={isLoggedIn && userRole === 'pilot' ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/crew-dashboard" element={isLoggedIn && userRole === 'crew' ? <CrewDashboard /> : <Navigate to="/login" />} />
-            <Route path="/portal" element={isLoggedIn ? <UserPortal /> : <Navigate to="/login" />} />
+            <Route path="/portal" element={isLoggedIn ? <UserPortal userRole={userRole || 'crew'} /> : <Navigate to="/login" />} />
             <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
             <Route path="/safety" element={<SafetyRecords />} />
             <Route path="/fleet" element={<Fleet />} />
