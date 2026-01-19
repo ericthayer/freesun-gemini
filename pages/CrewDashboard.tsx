@@ -15,14 +15,16 @@ import { CrewConnect } from '../components/CrewConnectUI';
 import { CrewTutorialOverlay } from '../components/CrewTutorialOverlay';
 import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
 import { MaintenanceHub, MaintenanceEntry } from '../components/MaintenanceUI';
+import { SettingsDrawer } from '../components/SettingsDrawer';
 
-type CrewTabType = 'status' | 'profile' | 'schedule' | 'settings';
+type CrewTabType = 'status' | 'profile' | 'schedule';
 
 const CrewDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<CrewTabType>('status');
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [weatherAlerts, setWeatherAlerts] = useState<WeatherAlert[]>([]);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const lastSnapshot = useRef<WeatherSnapshot | null>(null);
 
   // Maintenance State
@@ -204,7 +206,6 @@ const CrewDashboard: React.FC = () => {
     {id: 'status', label: 'Overview', icon: Plane},
     {id: 'profile', label: 'Profile', icon: User},
     {id: 'schedule', label: 'Schedule', icon: Calendar},
-    {id: 'settings', label: 'Settings', icon: Settings},
   ];
 
   const forecastData = [
@@ -222,14 +223,29 @@ const CrewDashboard: React.FC = () => {
         onClose={completeTutorial} 
       />
 
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        onStartTutorial={() => setShowTutorial(true)}
+      />
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold">Welcome, {me.name.split(' ')[0]}</h1>
-            <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border border-primary/20">
-              <Users size={10} /> Crew
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border border-primary/20">
+                <Users size={10} /> Crew
+              </span>
+              <button 
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
+                title="App Settings"
+              >
+                <Settings size={14} />
+              </button>
+            </div>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <MapPin size={14} /> Chatfield State Park (N 39.5448°, W 105.0874°)
@@ -248,13 +264,6 @@ const CrewDashboard: React.FC = () => {
               {tab.label}
             </button>
           ))}
-          <button
-            onClick={() => setShowTutorial(true)}
-            className="p-2 ml-2 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
-            title="Show Tutorial"
-          >
-            <HelpCircle size={18} />
-          </button>
         </div>
       </div>
 
@@ -444,33 +453,6 @@ const CrewDashboard: React.FC = () => {
               <button className="bg-primary text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
                 Claim Open Shifts
               </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="max-w-3xl mx-auto w-full space-y-8">
-            <h2 className="text-2xl font-bold flex items-center gap-3">
-              <Settings className="text-primary" /> App Preferences
-            </h2>
-            <div className="bg-muted/20 border border-primary/20 rounded-[2.5rem] overflow-hidden">
-              <div className="p-8 space-y-8">
-                <section className="space-y-4">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <Bell size={14} /> Notifications
-                  </h4>
-                  <div className="space-y-3">
-                    <label className="flex items-center justify-between p-4 bg-background/50 rounded-2xl border cursor-pointer hover:bg-background transition-colors">
-                      <span className="font-bold text-sm">Instant Weather Alerts</span>
-                      <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary" />
-                    </label>
-                    <label className="flex items-center justify-between p-4 bg-background/50 rounded-2xl border cursor-pointer hover:bg-background transition-colors">
-                      <span className="font-bold text-sm">Shift Reminders (2h Prior)</span>
-                      <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary" />
-                    </label>
-                  </div>
-                </section>
-              </div>
             </div>
           </div>
         )}

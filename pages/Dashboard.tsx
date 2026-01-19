@@ -6,7 +6,7 @@ import {
   Clock, MapPin, Search, ChevronRight,
   X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
   RefreshCw, Plane, HelpCircle, Activity, Sparkles, ShieldCheck,
-  CheckCircle
+  CheckCircle, Settings
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -23,6 +23,7 @@ import { LogDetailDrawer } from '../components/LogDetailDrawer';
 import { Drawer } from '../components/DrawerUI';
 import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
 import { MaintenanceHub, MaintenanceEntry } from '../components/MaintenanceUI';
+import { SettingsDrawer } from '../components/SettingsDrawer';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -33,6 +34,7 @@ const Dashboard: React.FC = () => {
   const [showWindAlert, setShowWindAlert] = useState(true);
   const [briefingConstraints, setBriefingConstraints] = useState('');
   const [showTutorial, setShowTutorial] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSimulationMode, setIsSimulationMode] = useState(false);
   const [isManifestGenerated, setIsManifestGenerated] = useState(false);
   const [isGeneratingManifest, setIsGeneratingManifest] = useState(false);
@@ -420,15 +422,30 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         onClose={completeTutorial} 
       />
 
+      <SettingsDrawer 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        onStartTutorial={() => setShowTutorial(true)}
+      />
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold">Welcome, Sarah</h1>
-              <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border dark:border-primary/30">
-                <Plane size={10} /> Pilot
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border dark:border-primary/30">
+                  <Plane size={10} /> Pilot
+                </span>
+                <button 
+                  onClick={() => setIsSettingsOpen(true)}
+                  className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
+                  title="App Settings"
+                >
+                  <Settings size={14} />
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -447,13 +464,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
               {tab.label}
             </button>
           ))}
-          <button
-            onClick={() => setShowTutorial(true)}
-            className="p-2 mr-1 ml-auto bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
-            title="Show Tutorial"
-          >
-            <HelpCircle size={18} />
-          </button>
         </div>
       </div>
 

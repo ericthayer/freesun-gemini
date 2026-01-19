@@ -78,7 +78,7 @@ export const MaintenanceHub: React.FC<MaintenanceHubProps> = ({
     <section className="mt-12 space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-t pt-12 dark:border-primary/30">
         <div>
-          <h2 className="text-2xl font-black italic tracking-tight flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
             <Wrench className="text-primary" /> Aeronautical Maintenance Hub
           </h2>
           <p className="text-sm text-muted-foreground italic">Required FAA airworthiness logging and structural inspections.</p>
@@ -195,7 +195,7 @@ export const MaintenanceHub: React.FC<MaintenanceHubProps> = ({
             <div className="space-y-3">
               <div className="p-4 bg-muted/20 rounded-2xl">
                 <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Technician Notes</div>
-                <p className="text-xs text-muted-foreground italic leading-relaxed">"{log.notes}"</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">"{log.notes}"</p>
               </div>
               <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground px-1">
                 <div className="flex items-center gap-1"><CheckCircle2 size={12} className="text-green-500" /> Technician: {log.technician}</div>
