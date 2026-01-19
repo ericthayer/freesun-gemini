@@ -17,6 +17,13 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   onClose, 
   onStartTutorial 
 }) => {
+  const handleStartTutorial = () => {
+    onClose();
+    // Dispatch custom event so the Dashboard components can listen globally
+    window.dispatchEvent(new CustomEvent('freesun-start-tutorial'));
+    onStartTutorial();
+  };
+
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="App Settings">
       <div className="space-y-8 py-2">
@@ -27,17 +34,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
           </h4>
           <div className="space-y-2">
             <button 
-              onClick={() => {
-                onClose();
-                onStartTutorial();
-              }}
-              className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-primary/5 rounded-2xl border border-transparent hover:border-primary/20 transition-all group"
+              onClick={handleStartTutorial}
+              className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-primary/5 rounded-2xl border border-transparent hover:border-primary/20 transition-all group text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg text-primary">
                   <HelpCircle size={18} />
                 </div>
-                <div className="text-left">
+                <div>
                   <div className="font-bold text-sm">Dashboard Tutorial</div>
                   <p className="text-[10px] text-muted-foreground">Re-run the guided walkthrough</p>
                 </div>
@@ -45,12 +49,12 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               <ChevronRight size={16} className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </button>
             
-            <button className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-primary/5 rounded-2xl border border-transparent hover:border-primary/20 transition-all group">
+            <button className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-primary/5 rounded-2xl border border-transparent hover:border-primary/20 transition-all group text-left">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg text-primary">
                   <Shield size={18} />
                 </div>
-                <div className="text-left">
+                <div>
                   <div className="font-bold text-sm">Safety Handbook</div>
                   <p className="text-[10px] text-muted-foreground">Club standard operating procedures</p>
                 </div>
@@ -81,26 +85,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               </div>
               <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary rounded-lg" />
             </label>
-          </div>
-        </section>
-
-        {/* Display Section */}
-        <section className="space-y-4">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-            <Monitor size={14} /> Account
-          </h4>
-          <div className="space-y-2">
-            <button className="w-full flex items-center justify-between p-4 bg-destructive/5 hover:bg-destructive/10 rounded-2xl border border-transparent hover:border-destructive/20 transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-destructive/10 rounded-lg text-destructive">
-                  <LogOut size={18} />
-                </div>
-                <div className="text-left">
-                  <div className="font-bold text-sm text-destructive">Secure Sign Out</div>
-                  <p className="text-[10px] text-destructive/70">Clear session from this device</p>
-                </div>
-              </div>
-            </button>
           </div>
         </section>
 

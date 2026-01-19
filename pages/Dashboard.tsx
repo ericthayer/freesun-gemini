@@ -6,7 +6,7 @@ import {
   Clock, MapPin, Search, ChevronRight,
   X, Sun, Cloud, Users, Timer, Plus, Calendar, FileText,
   RefreshCw, Plane, HelpCircle, Activity, Sparkles, ShieldCheck,
-  CheckCircle, Settings
+  CheckCircle
 } from 'lucide-react';
 import { getFlightBriefing } from '../services/geminiService';
 import { CrewMember, CrewMemberCard, CrewFilterBar } from '../components/CrewUI';
@@ -23,7 +23,6 @@ import { LogDetailDrawer } from '../components/LogDetailDrawer';
 import { Drawer } from '../components/DrawerUI';
 import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
 import { MaintenanceHub, MaintenanceEntry } from '../components/MaintenanceUI';
-import { SettingsDrawer } from '../components/SettingsDrawer';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -34,7 +33,6 @@ const Dashboard: React.FC = () => {
   const [showWindAlert, setShowWindAlert] = useState(true);
   const [briefingConstraints, setBriefingConstraints] = useState('');
   const [showTutorial, setShowTutorial] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSimulationMode, setIsSimulationMode] = useState(false);
   const [isManifestGenerated, setIsManifestGenerated] = useState(false);
   const [isGeneratingManifest, setIsGeneratingManifest] = useState(false);
@@ -85,6 +83,13 @@ const Dashboard: React.FC = () => {
       icon: <FileText size={32} />
     }
   ];
+
+  // Global Event Listener for re-triggering tutorial from Settings
+  useEffect(() => {
+    const handleStartTutorial = () => setShowTutorial(true);
+    window.addEventListener('freesun-start-tutorial', handleStartTutorial);
+    return () => window.removeEventListener('freesun-start-tutorial', handleStartTutorial);
+  }, []);
 
   // Check for first-time user
   useEffect(() => {
@@ -422,12 +427,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         onClose={completeTutorial} 
       />
 
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        onStartTutorial={() => setShowTutorial(true)}
-      />
-
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
@@ -438,13 +437,6 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
                 <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border dark:border-primary/30">
                   <Plane size={10} /> Pilot
                 </span>
-                <button 
-                  onClick={() => setIsSettingsOpen(true)}
-                  className="p-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-muted-foreground transition-all"
-                  title="App Settings"
-                >
-                  <Settings size={14} />
-                </button>
               </div>
             </div>
           </div>

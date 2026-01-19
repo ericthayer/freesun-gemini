@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Wind, Users, Zap, Compass, ArrowRight, Gauge } from 'lucide-react';
+import { CrewShowcase } from '../components/CrewShowcase';
 
 const Fleet: React.FC = () => {
   useEffect(() => {
@@ -39,9 +40,9 @@ const Fleet: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-widest mb-6">
             <Wind size={14} /> The FreeSun Hangar
           </div>
-          <h1 className="text-5xl md:text-8xl font-bold tracking-tighter mb-6 uppercase italic">Our <span className="text-primary">Fleet</span></h1>
+          <h1 className="text-5xl md:text-8xl font-bold tracking-tighter mb-6 uppercase italic">Fleet & <span className="text-primary">Crew</span></h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto italic">
-            A collection of world-class aeronautical engineering, maintained to perfection for the specific challenges of mountain flight.
+            A collection of world-class aeronautical engineering and the elite team of aeronauts that master the winds.
           </p>
         </div>
       </section>
@@ -101,6 +102,9 @@ const Fleet: React.FC = () => {
           </div>
         </section>
       ))}
+
+      {/* New Freesun Crew Section */}
+      <CrewShowcase />
     </div>
   );
 };

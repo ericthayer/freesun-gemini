@@ -16,6 +16,8 @@ import BecomePilot from './pages/BecomePilot';
 import Events from './pages/Events';
 import Inquiry from './pages/Inquiry';
 import { useTheme } from './hooks/useTheme';
+import { AdminMenu } from './components/AdminMenu';
+import { SettingsDrawer } from './components/SettingsDrawer';
 
 type UserRole = 'pilot' | 'crew' | null;
 
@@ -24,6 +26,7 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Close menu on route change
   useEffect(() => {
@@ -43,6 +46,13 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <div className={`min-h-screen flex flex-col ${theme}`}>
+        {/* Settings Drawer (Global) */}
+        <SettingsDrawer 
+          isOpen={isSettingsOpen} 
+          onClose={() => setIsSettingsOpen(false)} 
+          onStartTutorial={() => {}} // Handle via event bus inside the component
+        />
+
         {/* Top Navigation */}
         <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-b dark:border-primary/30">
           <div className="container max-w-[1400] mx-auto h-16 px-4 md:px-8 flex items-center justify-between">
@@ -59,37 +69,35 @@ const App: React.FC = () => {
                 <CalendarDays size={16} /> Schedule
               </Link>
               
-              {isLoggedIn ? (
+              {isLoggedIn && userRole ? (
                 <div className="flex items-center gap-4">
-                  <Link 
-                    to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'} 
-                    className="text-sm font-medium text-primary bg-primary/20 px-4 py-2 rounded-lg hover:bg-primary/30 transition-all flex items-center gap-2"
-                  >
-                    <User size={14} />
-                    {userRole === 'pilot' ? 'Pilot Portal' : 'Crew Portal'}
-                  </Link>
-                  <button onClick={handleLogout} className="text-muted-foreground hover:text-destructive transition-colors">
-                    <LogOut size={18} />
-                  </button>
+                  <AdminMenu 
+                    userRole={userRole}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
+                    onLogout={handleLogout}
+                    onOpenSettings={() => setIsSettingsOpen(true)}
+                  />
                 </div>
               ) : (
-                <Link to="/login" className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all">
-                  Crew Login
-                </Link>
+                <div className="flex items-center gap-4">
+                  <Link to="/login" className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all">
+                    Crew Login
+                  </Link>
+                  <button 
+                    onClick={toggleTheme}
+                    className="p-2 hover:bg-muted rounded-md transition-colors"
+                    aria-label="Toggle theme"
+                  >
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                  </button>
+                </div>
               )}
             </nav>
 
-            <div className="flex items-center gap-2 md:ml-6">
+            <div className="flex items-center gap-2 md:ml-6 md:hidden">
               <button 
-                onClick={toggleTheme}
-                className="p-2 hover:bg-muted rounded-md transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-              
-              <button 
-                className="md:hidden p-2 hover:bg-muted rounded-md"
+                className="p-2 hover:bg-muted rounded-md"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -114,6 +122,12 @@ const App: React.FC = () => {
                   >
                     {userRole === 'pilot' ? 'Pilot Portal' : 'Crew Portal'}
                   </Link>
+                  <button 
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="text-2xl font-bold text-left"
+                  >
+                    Settings
+                  </button>
                   <button 
                     onClick={() => { handleLogout(); setIsMenuOpen(false); }}
                     className="flex items-center gap-2 text-destructive font-semibold mt-auto text-xl"
@@ -159,7 +173,7 @@ const App: React.FC = () => {
                 <h4 className="font-semibold mb-4">Club</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li><Link to="/safety" className="hover:text-primary transition-colors">Safety Records</Link></li>
-                  <li><Link to="/fleet" className="hover:text-primary transition-colors">Our Fleet</Link></li>
+                  <li><Link to="/fleet" className="hover:text-primary transition-colors">Fleet & Crew</Link></li>
                   <li><Link to="/become-a-pilot" className="hover:text-primary transition-colors">Become a Pilot</Link></li>
                   <li><Link to="/events" className="hover:text-primary transition-colors">Member Events</Link></li>
                 </ul>
