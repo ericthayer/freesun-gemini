@@ -9,15 +9,15 @@ const corsHeaders = {
 };
 
 const passwordMap: { [email: string]: string } = {
-  "sarah@freesun.net": "Sky2024!Launch",
-  "thorne@freesun.net": "David2024!Pilot",
-  "mike@freesun.net": "Mike2024!Ground",
-  "elena@freesun.net": "Elena2024!Crew",
-  "tom@freesun.net": "Tom2024!Wilson",
-  "linda@freesun.net": "Linda2024!Gao",
-  "james@freesun.net": "James2024!Pete",
-  "sofia@freesun.net": "Sofia2024!Rossi",
-  "marcus@freesun.net": "Marcus2024!Sky",
+  "sarah@freesun.net": "Josh2024!Dalbey",
+  "thorne@freesun.net": "Doug2024!Lorenz",
+  "mike@freesun.net": "Chad2024!Lorenz",
+  "elena@freesun.net": "Amanda2024!Dalbey",
+  "tom@freesun.net": "Andy2024!Crabb",
+  "linda@freesun.net": "Eric2024!Thayer",
+  "james@freesun.net": "Jason2024!Flynn",
+  "sofia@freesun.net": "Joyce2024!Dalbey",
+  "marcus@freesun.net": "Jon2024!Manning",
 };
 
 Deno.serve(async (req: Request) => {
