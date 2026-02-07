@@ -1,19 +1,22 @@
 
 import React, { useEffect } from 'react';
-import { 
-  Award, Plane, Timer, MapPin, 
-  ChevronRight, Calendar, Star, 
+import {
+  Award, Plane, Timer, MapPin,
+  ChevronRight, Calendar, Star,
   ShieldCheck, ArrowUpRight, History,
   TrendingUp, Users, Target, Wrench,
   Wind
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../lib/AuthContext';
 
 interface UserPortalProps {
   userRole: 'pilot' | 'crew';
 }
 
 const UserPortal: React.FC<UserPortalProps> = ({ userRole }) => {
+  const { crewProfile } = useAuth();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -21,54 +24,67 @@ const UserPortal: React.FC<UserPortalProps> = ({ userRole }) => {
   // Content configuration based on role
   const isPilot = userRole === 'pilot';
 
-  const pilotData = {
-    name: "Sarah Miller",
-    role: "Chief Pilot",
-    since: "2012",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400",
-    quote: "Pushing the ceiling of what's possible in the mountain air. Every sunrise is a new lesson in tranquility.",
-    stats: [
-      { label: "Flight Hours", value: "1,540", icon: Timer },
-      { label: "Missions", value: "412", icon: Plane },
-      { label: "Safe Landings", value: "100%", icon: ShieldCheck },
-      { label: "Crew Lead", value: "84", icon: Users },
-    ],
-    achievements: [
-      { title: "Master of the Rockies", date: "June 2023", icon: Star, color: "text-amber-500" },
-      { title: "1000h Service", date: "Sept 2022", icon: Award, color: "text-blue-500" },
-      { title: "Night Ops Certified", date: "Jan 2021", icon: ShieldCheck, color: "text-purple-500" },
-    ],
-    rank: "Level 22 Senior Pilot",
-    rankTarget: "Master Pilot Rank",
-    rankProgress: 82,
-    rankText: "You need 14 more instruction hours and one seasonal evaluation to achieve the next seniority rank."
+  const getUserData = () => {
+    const name = crewProfile?.name || "User";
+    const role = crewProfile?.role || (isPilot ? "Pilot" : "Ground Crew");
+    const avatar = crewProfile?.image_url || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400";
+    const quote = crewProfile?.bio || (isPilot
+      ? "Pushing the ceiling of what's possible in the mountain air. Every sunrise is a new lesson in tranquility."
+      : "Precision on the ground is the bedrock of safety in the sky. Every inflation is a masterpiece of coordination.");
+    const experienceYears = crewProfile?.experience_years || 0;
+    const flights = crewProfile?.flights || 0;
+    const since = experienceYears > 0 ? String(new Date().getFullYear() - experienceYears) : "2024";
+
+    if (isPilot) {
+      return {
+        name,
+        role,
+        since,
+        avatar,
+        quote,
+        stats: [
+          { label: "Flight Hours", value: String(flights * 2), icon: Timer },
+          { label: "Missions", value: String(flights), icon: Plane },
+          { label: "Safe Landings", value: "100%", icon: ShieldCheck },
+          { label: "Years Experience", value: String(experienceYears), icon: Users },
+        ],
+        achievements: [
+          { title: "Master of the Rockies", date: "June 2023", icon: Star, color: "text-amber-500" },
+          { title: "1000h Service", date: "Sept 2022", icon: Award, color: "text-blue-500" },
+          { title: "Night Ops Certified", date: "Jan 2021", icon: ShieldCheck, color: "text-purple-500" },
+        ],
+        rank: `Level ${Math.min(experienceYears * 2, 30)} ${experienceYears > 10 ? 'Senior' : ''} Pilot`,
+        rankTarget: "Master Pilot Rank",
+        rankProgress: Math.min((experienceYears / 15) * 100, 95),
+        rankText: "Continue logging flight hours and completing certifications to advance your rank."
+      };
+    } else {
+      return {
+        name,
+        role,
+        since,
+        avatar,
+        quote,
+        stats: [
+          { label: "Missions Helped", value: String(flights), icon: Users },
+          { label: "Safety Checks", value: String(flights * 4), icon: ShieldCheck },
+          { label: "Years Experience", value: String(experienceYears), icon: Wrench },
+          { label: "Shift Reliability", value: "98%", icon: Target },
+        ],
+        achievements: [
+          { title: "Recovery Specialist", date: "Oct 2023", icon: MapPin, color: "text-green-500" },
+          { title: "Cold Inflation Pro", date: "Dec 2022", icon: Wind, color: "text-sky-500" },
+          { title: "Elite Ground Team", date: "Aug 2021", icon: Award, color: "text-amber-500" },
+        ],
+        rank: `Level ${Math.min(experienceYears * 2, 20)} Operations ${experienceYears > 5 ? 'Lead' : 'Crew'}`,
+        rankTarget: "Crew Chief Certification",
+        rankProgress: Math.min((experienceYears / 10) * 100, 95),
+        rankText: "Complete training modules and assist with deployments to qualify for Chief status."
+      };
+    }
   };
 
-  const crewData = {
-    name: "Elena Rodriguez",
-    role: "Ground Crew Lead",
-    since: "2021",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400",
-    quote: "Precision on the ground is the bedrock of safety in the sky. Every inflation is a masterpiece of coordination.",
-    stats: [
-      { label: "Missions Helped", value: "210", icon: Users },
-      { label: "Safety Checks", value: "845", icon: ShieldCheck },
-      { label: "Hangar Hours", value: "1,200", icon: Wrench },
-      { label: "Shift Reliability", value: "98%", icon: Target },
-    ],
-    achievements: [
-      { title: "Recovery Specialist", date: "Oct 2023", icon: MapPin, color: "text-green-500" },
-      // Added missing Wind import and unified 'iconColor' to 'color' to match the rendering loop
-      { title: "Cold Inflation Pro", date: "Dec 2022", icon: Wind, color: "text-sky-500" },
-      { title: "Elite Ground Team", date: "Aug 2021", icon: Award, color: "text-amber-500" },
-    ],
-    rank: "Level 12 Operations Lead",
-    rankTarget: "Crew Chief Certification",
-    rankProgress: 65,
-    rankText: "Complete 3 more high-wind recovery deployments and the advanced radio-comm seminar to qualify for Chief status."
-  };
-
-  const data = isPilot ? pilotData : crewData;
+  const data = getUserData();
 
   return (
     <div className="container mx-auto px-4 py-12 md:py-20 max-w-6xl animate-in fade-in duration-700">
