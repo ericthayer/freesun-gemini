@@ -1,28 +1,34 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Settings, Moon, Sun, LogOut, ChevronDown, 
-  LayoutDashboard 
+import {
+  Settings, Moon, Sun, LogOut, ChevronDown,
+  LayoutDashboard
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+interface CrewProfile {
+  name: string;
+  role: string;
+  image_url: string;
+}
+
 interface AdminMenuProps {
   userRole: 'pilot' | 'crew';
+  crewProfile: CrewProfile | null;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   onLogout: () => void;
   onOpenSettings: () => void;
 }
 
-export const AdminMenu: React.FC<AdminMenuProps> = ({ 
-  userRole, theme, toggleTheme, onLogout, onOpenSettings 
+export const AdminMenu: React.FC<AdminMenuProps> = ({
+  userRole, crewProfile, theme, toggleTheme, onLogout, onOpenSettings
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Mocked data for the prototype
-  const name = userRole === 'pilot' ? 'Sarah Miller' : 'Elena Rodriguez';
-  const initials = userRole === 'pilot' ? 'SM' : 'ER';
+  const name = crewProfile?.name || 'User';
+  const initials = name.split(' ').filter(p => !p.startsWith('"')).map(p => p[0]).join('').slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -36,13 +42,21 @@ export const AdminMenu: React.FC<AdminMenuProps> = ({
 
   return (
     <div className="relative" ref={menuRef}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1 pr-3 hover:bg-muted rounded-full transition-all border border-transparent hover:border-primary/20 group"
       >
-        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-lg group-hover:scale-105 transition-transform">
-          {initials}
-        </div>
+        {crewProfile?.image_url ? (
+          <img
+            src={crewProfile.image_url}
+            alt={name}
+            className="w-8 h-8 rounded-full object-cover shadow-lg group-hover:scale-105 transition-transform"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-lg group-hover:scale-105 transition-transform">
+            {initials}
+          </div>
+        )}
         <ChevronDown size={14} className={`text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -52,26 +66,26 @@ export const AdminMenu: React.FC<AdminMenuProps> = ({
             <div className="font-bold text-sm text-foreground">{name}</div>
             <div className="text-[10px] font-black uppercase text-primary tracking-widest">{userRole} Account</div>
           </div>
-          
+
           <div className="p-2 space-y-1">
-            <Link 
+            <Link
               to="/portal"
               onClick={() => setIsOpen(false)}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item"
             >
-              <LayoutDashboard size={16} className="text-muted-foreground group-hover/item:text-primary" /> 
+              <LayoutDashboard size={16} className="text-muted-foreground group-hover/item:text-primary" />
               My Portal
             </Link>
 
-            <button 
+            <button
               onClick={() => { onOpenSettings(); setIsOpen(false); }}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item text-left"
             >
-              <Settings size={16} className="text-muted-foreground group-hover/item:text-primary" /> 
+              <Settings size={16} className="text-muted-foreground group-hover/item:text-primary" />
               App Settings
             </button>
 
-            <button 
+            <button
               onClick={() => { toggleTheme(); }}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item text-left"
             >
@@ -81,7 +95,7 @@ export const AdminMenu: React.FC<AdminMenuProps> = ({
           </div>
 
           <div className="p-2 border-t dark:border-primary/30">
-            <button 
+            <button
               onClick={() => { onLogout(); setIsOpen(false); }}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors group/item text-left"
             >

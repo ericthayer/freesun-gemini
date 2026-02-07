@@ -28,6 +28,7 @@ import { useBalloons } from '../hooks/useBalloons';
 import { useChecklists } from '../hooks/useChecklists';
 import { useFlightLogs } from '../hooks/useFlightLogs';
 import { useCrewMembers } from '../hooks/useCrewMembers';
+import { useAuth } from '../lib/AuthContext';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -44,6 +45,9 @@ const Dashboard: React.FC = () => {
 
   const { logs: maintenanceLogs, addLog: handleAddMaintenance, updateLog: handleUpdateMaintenance, deleteLog: handleDeleteMaintenance } = useMaintenanceLogs();
   const { balloonNames: balloonsList } = useBalloons();
+  const { crewProfile } = useAuth();
+  const pilotFirstName = crewProfile?.name?.split(' ')[0] || 'Pilot';
+  const pilotFullName = crewProfile?.name || 'Pilot';
 
   // Pilot Tutorial Steps
   const pilotTutorialSteps: TutorialStep[] = [
@@ -208,7 +212,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     passengers: `${pilotContext.passengers} Adult(s)`,
     balloon: pilotContext.balloon,
     location: "Sonoma Field Base (N 38.2975, W 122.4579)",
-    pilot: "Sarah \"Sky\" Miller",
+    pilot: pilotFullName,
     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     briefingSummary: briefing
   }), [pilotContext, briefing]);
@@ -354,7 +358,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-bold">Welcome, Sarah</h1>
+              <h1 className="text-3xl font-bold">Welcome, {pilotFirstName}</h1>
               <div className="flex items-center gap-1.5">
                 <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1 border dark:border-primary/30">
                   <Plane size={10} /> Pilot

@@ -18,6 +18,7 @@ import { useMaintenanceLogs } from '../hooks/useMaintenanceLogs';
 import { useBalloons } from '../hooks/useBalloons';
 import { useCrewMembers } from '../hooks/useCrewMembers';
 import { useScheduleItems } from '../hooks/useScheduleItems';
+import { useAuth } from '../lib/AuthContext';
 
 type CrewTabType = 'status' | 'profile' | 'schedule';
 
@@ -32,6 +33,7 @@ const CrewDashboard: React.FC = () => {
   const { balloonNames: balloonsList } = useBalloons();
   const { crewMembers: allCrewMembers, updateCrewMember } = useCrewMembers();
   const { items: myAssignments } = useScheduleItems();
+  const { crewProfile } = useAuth();
 
   const crewTutorialSteps: TutorialStep[] = [
     {
@@ -103,11 +105,18 @@ const CrewDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!meInitialized && allCrewMembers.length > 0) {
-      const elena = allCrewMembers.find(m => m.name.includes('Elena'));
-      setMe(elena || allCrewMembers[allCrewMembers.length - 1]);
+      if (crewProfile) {
+        const matched = allCrewMembers.find(m => m.name === crewProfile.name);
+        if (matched) {
+          setMe(matched);
+          setMeInitialized(true);
+          return;
+        }
+      }
+      setMe(allCrewMembers[0]);
       setMeInitialized(true);
     }
-  }, [allCrewMembers, meInitialized]);
+  }, [allCrewMembers, meInitialized, crewProfile]);
 
   useEffect(() => {
     const updateWeather = async () => {
