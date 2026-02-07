@@ -1,20 +1,23 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  User, Calendar, Plane, Award, MapPin, Mail, Phone, 
-  Settings, LogOut, CheckCircle2, Circle, Clock, ChevronRight,
-  Briefcase, X, ArrowRight, AlertCircle, Users, CloudSun, Wind, Navigation, Search, RefreshCw, Sun, Cloud, Bell, Globe, Shield, HelpCircle, Radio, ShieldAlert
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  User, Calendar, Plane, Award, MapPin,
+  CheckCircle2, Circle, Clock,
+  X, ArrowRight, AlertCircle, Users, CloudSun, Wind, Navigation, Search, RefreshCw, Sun, Cloud, Radio, ShieldAlert
 } from 'lucide-react';
 import { CrewMember } from '../components/CrewUI';
 import { CrewProfileForm } from '../components/CrewProfileForm';
-import { ScheduleItem, ScheduleCard } from '../components/ScheduleUI';
+import { ScheduleCard } from '../components/ScheduleUI';
 import { WeatherCard, ForecastCard } from '../components/StatusUI';
 import { fetchLiveWeather, detectWeatherAlerts, WeatherSnapshot, WeatherAlert } from '../services/weatherService';
 import { WeatherAlertsList } from '../components/WeatherAlertsUI';
 import { CrewConnect } from '../components/CrewConnectUI';
-import { CrewTutorialOverlay } from '../components/CrewTutorialOverlay';
 import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
-import { MaintenanceHub, MaintenanceEntry } from '../components/MaintenanceUI';
+import { MaintenanceHub } from '../components/MaintenanceUI';
+import { useMaintenanceLogs } from '../hooks/useMaintenanceLogs';
+import { useBalloons } from '../hooks/useBalloons';
+import { useCrewMembers } from '../hooks/useCrewMembers';
+import { useScheduleItems } from '../hooks/useScheduleItems';
 
 type CrewTabType = 'status' | 'profile' | 'schedule';
 
@@ -25,26 +28,11 @@ const CrewDashboard: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const lastSnapshot = useRef<WeatherSnapshot | null>(null);
 
-  // Maintenance State
-  const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceEntry[]>([
-    {
-      id: 'm1',
-      balloonName: 'SunChaser #04 (Medium)',
-      date: '2024-05-15',
-      serviceType: 'Wicker Reseal',
-      partsUsed: 'Varnish, rattan weave repair kit',
-      notes: 'Standard seasonal touchup on lower basket structural elements.',
-      technician: 'Elena Rodriguez'
-    }
-  ]);
+  const { logs: maintenanceLogs, addLog: handleAddMaintenance, updateLog: handleUpdateMaintenance, deleteLog: handleDeleteMaintenance } = useMaintenanceLogs();
+  const { balloonNames: balloonsList } = useBalloons();
+  const { crewMembers: allCrewMembers, updateCrewMember } = useCrewMembers();
+  const { items: myAssignments } = useScheduleItems();
 
-  const balloonsList = ['SunChaser #04 (Medium)', 'DawnRider #01 (Small)', 'Atlas #09 (Large)', 'SkyGazer #02 (XL)'];
-
-  const handleAddMaintenance = (log: MaintenanceEntry) => setMaintenanceLogs([log, ...maintenanceLogs]);
-  const handleUpdateMaintenance = (updated: MaintenanceEntry) => setMaintenanceLogs(maintenanceLogs.map(l => l.id === updated.id ? updated : l));
-  const handleDeleteMaintenance = (id: string) => setMaintenanceLogs(maintenanceLogs.filter(l => l.id !== id));
-
-  // Crew Tutorial Steps
   const crewTutorialSteps: TutorialStep[] = [
     {
       targetId: "crew-availability-section",
@@ -72,14 +60,12 @@ const CrewDashboard: React.FC = () => {
     }
   ];
 
-  // Global Event Listener for re-triggering tutorial from Settings
   useEffect(() => {
     const handleStartTutorial = () => setShowTutorial(true);
     window.addEventListener('freesun-start-tutorial', handleStartTutorial);
     return () => window.removeEventListener('freesun-start-tutorial', handleStartTutorial);
   }, []);
 
-  // Check for first-time user
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem('freesun_crew_contextual_tutorial_complete');
     if (!hasSeenTutorial) {
@@ -93,7 +79,6 @@ const CrewDashboard: React.FC = () => {
     setShowTutorial(false);
   };
 
-  // Weather State
   const [weatherData, setWeatherData] = useState({
     temp: '68°F',
     wind: '0 mph',
@@ -101,72 +86,29 @@ const CrewDashboard: React.FC = () => {
     visibility: '10 mi'
   });
 
-  // Shared Crew Data Mock
-  const allCrewMembers: CrewMember[] = [
-    {
-      id: '1',
-      name: 'Sarah "Sky" Miller',
-      role: 'Pilot',
-      experience: 12,
-      contact: { email: 'sarah@freesun.net', phone: '+1 555-0101' },
-      certifications: ['Commercial LTA License', 'Flight Instructor', 'Night Rating'],
-      bio: 'Lifelong aviation enthusiast with over 1,500 flight hours.',
-      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
-      availability: 'available'
-    },
-    {
-      id: '2',
-      name: 'Mike Chen',
-      role: 'Ground Crew',
-      experience: 5,
-      contact: { email: 'mike@freesun.net', phone: '+1 555-0102' },
-      certifications: ['Crew Chief Certified', 'Emergency Response'],
-      bio: 'Precision-focused ground lead.',
-      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-      availability: 'busy'
-    },
-    {
-      id: '3',
-      name: 'David Thorne',
-      role: 'Pilot',
-      experience: 20,
-      contact: { email: 'thorne@freesun.net', phone: '+1 555-0103' },
-      certifications: ['Master Pilot LTA', 'Maintenance Technician'],
-      bio: 'The "Grandmaster" of FreeSun.',
-      imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
-      availability: 'available'
-    },
-    {
-      id: '4',
-      name: 'Elena Rodriguez',
-      role: 'Ground Crew',
-      experience: 3,
-      contact: { email: 'elena@freesun.net', phone: '+1 555-0104' },
-      certifications: ['Recovery Specialist', 'Radio Communications'],
-      bio: 'Expert navigator and recovery lead. Specialist in high-wind envelope recovery.',
-      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
-      availability: 'available'
+  const defaultMe: CrewMember = {
+    id: '',
+    name: 'Loading...',
+    role: 'Ground Crew',
+    experience: 0,
+    contact: { email: '', phone: '' },
+    certifications: [],
+    bio: '',
+    imageUrl: '',
+    availability: 'available'
+  };
+
+  const [me, setMe] = useState<CrewMember>(defaultMe);
+  const [meInitialized, setMeInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!meInitialized && allCrewMembers.length > 0) {
+      const elena = allCrewMembers.find(m => m.name.includes('Elena'));
+      setMe(elena || allCrewMembers[allCrewMembers.length - 1]);
+      setMeInitialized(true);
     }
-  ];
+  }, [allCrewMembers, meInitialized]);
 
-  // Simulating the "logged-in" crew member
-  const [me, setMe] = useState<CrewMember>(allCrewMembers[3]);
-
-  // Assignments
-  const [myAssignments] = useState<ScheduleItem[]>([
-    {
-      id: 's1',
-      type: 'flight',
-      title: 'Valley Mist Morning Ride',
-      date: '2026-01-13',
-      time: '06:15',
-      location: 'South Ridge Launch Site',
-      description: 'Standard tourist flight for 4 passengers. Ground crew arrival at 05:30 for cold inflation.',
-      attendees: 4
-    }
-  ]);
-
-  // Weather Polling logic mirrored from Pilot Dashboard
   useEffect(() => {
     const updateWeather = async () => {
       setIsWeatherLoading(true);
@@ -174,7 +116,7 @@ const CrewDashboard: React.FC = () => {
         const coords = { lat: 38.2975, lon: -122.4579 };
         const weatherApiKey = (process.env as any).WEATHER_API_KEY || 'FREE_SUN_MOCK_KEY';
         const snapshot = await fetchLiveWeather(coords.lat, coords.lon, weatherApiKey);
-        
+
         setWeatherData({
           temp: snapshot.temp,
           wind: `${snapshot.windSpeed} mph`,
@@ -200,6 +142,7 @@ const CrewDashboard: React.FC = () => {
   }, []);
 
   const handleUpdateProfile = (updated: CrewMember) => {
+    updateCrewMember(updated);
     setMe(updated);
     setActiveTab('status');
   };
@@ -221,14 +164,13 @@ const CrewDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 sm:py-10 md:pt-20 md:pb-24 max-w-5xl grid grid-rows-[auto_1fr] grow animate-in fade-in duration-500">
-      
-      <ContextualTutorial 
-        isOpen={showTutorial} 
-        steps={crewTutorialSteps} 
-        onClose={completeTutorial} 
+
+      <ContextualTutorial
+        isOpen={showTutorial}
+        steps={crewTutorialSteps}
+        onClose={completeTutorial}
       />
 
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -259,13 +201,11 @@ const CrewDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tab Content Rendering */}
       <div className="grow">
         {activeTab === 'status' && (
           <div className="gap-6 flex flex-col">
             <WeatherAlertsList alerts={weatherAlerts} onDismiss={(id) => setWeatherAlerts(prev => prev.filter(a => a.id !== id))} />
 
-            {/* Metric Cards Strip */}
             <div id="weather-section" className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <WeatherCard icon={Wind} value={weatherData.wind} label="Surface Wind" />
               <WeatherCard icon={Navigation} value={weatherData.direction} label="Direction" />
@@ -273,7 +213,6 @@ const CrewDashboard: React.FC = () => {
               <WeatherCard icon={Search} value={weatherData.visibility} label="Visibility" />
             </div>
 
-            {/* Launch Outlook */}
             <div className="bg-muted/30 border dark:border-primary/30 rounded-[2rem] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold flex items-center gap-2 text-lg"><Clock size={18} className="text-primary" /> 3-Day Launch Outlook</h3>
@@ -289,14 +228,12 @@ const CrewDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* My Profile Card (Col-span 2) */}
               <div className="lg:col-span-2 bg-muted/30 border dark:border-primary/30 rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col">
                  <div className="absolute -right-4 -top-4 text-primary/5 pointer-events-none">
                   <Users size={160} />
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row gap-8 relative z-10">
                   <div className="flex flex-col items-center">
                     <div className="w-40 h-40 rounded-[2.5rem] overflow-hidden border-4 border-muted/50 mb-6 shadow-2xl shrink-0">
@@ -306,8 +243,8 @@ const CrewDashboard: React.FC = () => {
                       <button
                         onClick={() => setMe(prev => ({ ...prev, availability: isAvailable ? 'busy' : 'available' }))}
                         className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold transition-all border ${
-                          isAvailable 
-                            ? 'bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/20' 
+                          isAvailable
+                            ? 'bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/20'
                             : 'bg-muted border-border text-muted-foreground'
                         }`}
                       >
@@ -355,11 +292,10 @@ const CrewDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Upcoming Duty Card (Col-span 1) */}
               <div id="assignment-section" className="bg-muted/30 border dark:border-primary/30 rounded-[2.5rem] p-6 flex flex-col">
                 <div className="sticky top-[6rem]">
                   <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Clock size={18} className="text-primary" /> Active Assignments</h3>
-                  
+
                   {nextAssignment ? (
                     <div className="space-y-6">
                       <div className="bg-background/60 border-2 border-primary/20 p-6 rounded-[2rem] group hover:border-primary/40 transition-all">
@@ -382,7 +318,7 @@ const CrewDashboard: React.FC = () => {
                         <button className="w-full py-4 bg-secondary text-secondary-foreground font-bold rounded-2xl hover:bg-secondary/80 transition-all active:scale-[0.98]">
                           View Mission Logistics
                         </button>
-                        <button 
+                        <button
                           onClick={() => setActiveTab('schedule')}
                           className="w-full py-4 border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
                         >
@@ -414,9 +350,9 @@ const CrewDashboard: React.FC = () => {
             </div>
             <div className="bg-background border rounded-[2.5rem] p-8 shadow-xl overflow-hidden relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
-              <CrewProfileForm 
-                member={me} 
-                onUpdate={handleUpdateProfile} 
+              <CrewProfileForm
+                member={me}
+                onUpdate={handleUpdateProfile}
                 onCancel={() => setActiveTab('status')}
               />
             </div>
@@ -449,8 +385,7 @@ const CrewDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Integrated Maintenance Hub Section */}
-        <MaintenanceHub 
+        <MaintenanceHub
           logs={maintenanceLogs}
           onAdd={handleAddMaintenance}
           onUpdate={handleUpdateMaintenance}

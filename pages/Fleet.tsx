@@ -1,36 +1,28 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Wind, Users, Zap, Compass, ArrowRight, Gauge } from 'lucide-react';
 import { CrewShowcase } from '../components/CrewShowcase';
+import { useBalloons } from '../hooks/useBalloons';
 
 const Fleet: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const fleetItems = [
-    {
-      name: 'The SunChaser #04',
-      type: 'Cameron Z-250',
-      description: 'Our flagship vessel for group flights. Known for its incredible stability and vibrant sunburst pattern.',
-      stats: { volume: '250k cu ft', capacity: '12-14 Pax', burner: 'Quad-Shadow' },
-      image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1200'
-    },
-    {
-      name: 'SkyGazer #02',
-      type: 'Lindstrand LBL 90A',
-      description: 'The preferred choice for romantic private flights and high-altitude photography missions.',
-      stats: { volume: '90k cu ft', capacity: '2 Pax', burner: 'Sirocco' },
-      image: 'https://images.unsplash.com/photo-1544391681-9964893796fc?auto=format&fit=crop&q=80&w=1200'
-    },
-    {
-      name: 'Atlas #09',
-      type: 'Ultramagic N-425',
-      description: 'The giant of the Rockies. Reserved for special events and large corporate gatherings.',
-      stats: { volume: '425k cu ft', capacity: '20+ Pax', burner: 'PowerPlus' },
-      image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1200'
-    }
-  ];
+  const { balloons } = useBalloons();
+
+  const fleetItems = useMemo(() =>
+    balloons
+      .filter(b => b.type && b.image_url)
+      .map(b => ({
+        name: b.name.replace(/\s*\(.*\)/, ''),
+        type: b.type,
+        description: b.description,
+        stats: { volume: b.volume, capacity: b.capacity, burner: b.burner },
+        image: b.image_url,
+      })),
+    [balloons]
+  );
 
   return (
     <div className="flex flex-col">

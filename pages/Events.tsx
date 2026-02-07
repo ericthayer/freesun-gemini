@@ -1,38 +1,29 @@
 
 import React, { useEffect } from 'react';
 import { Calendar, Users, MapPin, ArrowRight, Camera, GlassWater, Trophy } from 'lucide-react';
+import { useEvents } from '../hooks/useEvents';
+
+const eventIconMap: Record<string, React.ReactNode> = {
+  'Flight Gala': <Users className="text-primary" />,
+  'Social': <GlassWater className="text-primary" />,
+  'Training': <Trophy className="text-primary" />,
+};
 
 const Events: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const events = [
-    {
-      title: 'Winter Solstice Ascension',
-      date: 'Dec 21, 2025',
-      type: 'Flight Gala',
-      desc: 'Our largest member flight of the year followed by a bonfire at Field Base Alpha.',
-      icon: <Users className="text-primary" />,
-      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Vintage Hangar Soirée',
-      date: 'Jan 15, 2026',
-      type: 'Social',
-      desc: 'Cocktails and jazz among our restored 19th-century ballooning artifacts.',
-      icon: <GlassWater className="text-primary" />,
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      title: 'Rockies Safety Summit',
-      date: 'Feb 05, 2026',
-      type: 'Training',
-      desc: 'A full day of lectures from industry leaders on high-altitude recovery techniques.',
-      icon: <Trophy className="text-primary" />,
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800'
-    }
-  ];
+  const { events: dbEvents } = useEvents();
+
+  const events = dbEvents.map(e => ({
+    title: e.title,
+    date: e.date,
+    type: e.type,
+    desc: e.description,
+    icon: eventIconMap[e.type] || <Calendar className="text-primary" />,
+    image: e.image_url,
+  }));
 
   return (
     <div className="flex flex-col">

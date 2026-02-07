@@ -1,116 +1,14 @@
 
 import React, { useState } from 'react';
-import { 
-  Users, Plane, Award, MapPin, Search, 
-  X, ChevronLeft, ChevronRight, Maximize2, 
-  Info, History, Heart, Sparkles 
+import {
+  Users, Plane, Award, MapPin, Search,
+  X, ChevronLeft, ChevronRight, Maximize2,
+  Info, History, Heart, Sparkles
 } from 'lucide-react';
-
-interface ShowcaseMember {
-  id: string;
-  name: string;
-  role: 'Pilot' | 'Ground Crew';
-  experience: string;
-  flights: number;
-  specialty: string;
-  imageUrl: string;
-  bio: string;
-}
-
-const crewData: ShowcaseMember[] = [
-  {
-    id: '1',
-    name: 'Sarah "Sky" Miller',
-    role: 'Pilot',
-    experience: '12 Years',
-    flights: 1540,
-    specialty: 'High Altitude Navigation',
-    imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800',
-    bio: 'Sarah is the club chief pilot, specializing in long-distance valley traverses and high-altitude weather pattern recognition.'
-  },
-  {
-    id: '2',
-    name: 'David Thorne',
-    role: 'Pilot',
-    experience: '20 Years',
-    flights: 2800,
-    specialty: 'Emergency Recovery',
-    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800',
-    bio: 'A master of the mountain winds, David has navigated nearly every peak in the Rockies and leads our safety training seminars.'
-  },
-  {
-    id: '3',
-    name: 'Mike Chen',
-    role: 'Ground Crew',
-    experience: '5 Years',
-    flights: 420,
-    specialty: 'Cold Inflation Lead',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600',
-    bio: 'Mike ensures the technical readiness of every envelope before dawn breaks.'
-  },
-  {
-    id: '4',
-    name: 'Elena Rodriguez',
-    role: 'Ground Crew',
-    experience: '3 Years',
-    flights: 210,
-    specialty: 'Chase Navigation',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600',
-    bio: 'Elena is the best in the business at predicting landing zones and leading recovery vehicles through rough terrain.'
-  },
-  {
-    id: '5',
-    name: 'Tom Wilson',
-    role: 'Ground Crew',
-    experience: '8 Years',
-    flights: 680,
-    specialty: 'Burner Maintenance',
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600',
-    bio: 'Tom keeps the fire going, literally. He oversees our maintenance hangar with surgical precision.'
-  },
-  {
-    id: '6',
-    name: 'Linda Gao',
-    role: 'Ground Crew',
-    experience: '4 Years',
-    flights: 315,
-    specialty: 'Passenger Safety',
-    imageUrl: 'https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&q=80&w=600',
-    bio: 'Linda ensures that every guest feels safe and informed from pre-flight to landing toast.'
-  },
-  {
-    id: '7',
-    name: 'James Peterson',
-    role: 'Ground Crew',
-    experience: '6 Years',
-    flights: 550,
-    specialty: 'Envelope Repair',
-    imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600',
-    bio: 'James manages our workshop, ensuring the integrity of every square inch of silk in the hangar.'
-  },
-  {
-    id: '8',
-    name: 'Sofia Rossi',
-    role: 'Ground Crew',
-    experience: '2 Years',
-    flights: 145,
-    specialty: 'Logistics Liaison',
-    imageUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600',
-    bio: 'Sofia coordinates the complex dance between pilots, ground crew, and local field permits.'
-  },
-  {
-    id: '9',
-    name: 'Marcus Wright',
-    role: 'Ground Crew',
-    experience: '10 Years',
-    flights: 920,
-    specialty: 'Team Coordination',
-    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=600',
-    bio: 'A veteran of the ground operations, Marcus oversees the workflow of our field base teams.'
-  }
-];
+import { useCrewMembers, ShowcaseMember } from '../hooks/useCrewMembers';
 
 export const CrewShowcase: React.FC = () => {
+  const { showcaseMembers: crewData } = useCrewMembers();
   const [slideshowIndex, setSlideshowIndex] = useState<number | null>(null);
 
   const openSlideshow = (index: number) => setSlideshowIndex(index);

@@ -22,7 +22,12 @@ import { LogMediaUpload } from '../components/LogMediaUI';
 import { LogDetailDrawer } from '../components/LogDetailDrawer';
 import { Drawer } from '../components/DrawerUI';
 import { ContextualTutorial, TutorialStep } from '../components/ContextualTutorial';
-import { MaintenanceHub, MaintenanceEntry } from '../components/MaintenanceUI';
+import { MaintenanceHub } from '../components/MaintenanceUI';
+import { useMaintenanceLogs } from '../hooks/useMaintenanceLogs';
+import { useBalloons } from '../hooks/useBalloons';
+import { useChecklists } from '../hooks/useChecklists';
+import { useFlightLogs } from '../hooks/useFlightLogs';
+import { useCrewMembers } from '../hooks/useCrewMembers';
 
 type TabType = 'status' | 'checklists' | 'logs' | 'crew';
 
@@ -37,24 +42,8 @@ const Dashboard: React.FC = () => {
   const [isManifestGenerated, setIsManifestGenerated] = useState(false);
   const [isGeneratingManifest, setIsGeneratingManifest] = useState(false);
 
-  // Maintenance State
-  const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceEntry[]>([
-    {
-      id: 'm1',
-      balloonName: 'SunChaser #04 (Medium)',
-      date: '2024-05-15',
-      serviceType: '100-Hour Inspection',
-      partsUsed: 'Burner hoses, load ring gaskets',
-      notes: 'Structural integrity verified. Fuel pressure optimal at all ports.',
-      technician: 'Sarah Miller'
-    }
-  ]);
-
-  const balloonsList = ['SunChaser #04 (Medium)', 'DawnRider #01 (Small)', 'Atlas #09 (Large)', 'SkyGazer #02 (XL)'];
-
-  const handleAddMaintenance = (log: MaintenanceEntry) => setMaintenanceLogs([log, ...maintenanceLogs]);
-  const handleUpdateMaintenance = (updated: MaintenanceEntry) => setMaintenanceLogs(maintenanceLogs.map(l => l.id === updated.id ? updated : l));
-  const handleDeleteMaintenance = (id: string) => setMaintenanceLogs(maintenanceLogs.filter(l => l.id !== id));
+  const { logs: maintenanceLogs, addLog: handleAddMaintenance, updateLog: handleUpdateMaintenance, deleteLog: handleDeleteMaintenance } = useMaintenanceLogs();
+  const { balloonNames: balloonsList } = useBalloons();
 
   // Pilot Tutorial Steps
   const pilotTutorialSteps: TutorialStep[] = [
@@ -224,41 +213,9 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     briefingSummary: briefing
   }), [pilotContext, briefing]);
 
-  // Checklist state
-  const [checklists, setChecklists] = useState([
-    { id: 1, text: "Envelope Integrity Check", done: true },
-    { id: 2, text: "Burner Test (Left & Right)", done: true },
-    { id: 3, text: "Fuel Pressure Inspection", done: true },
-    { id: 4, text: "Radio Communication Sync", done: false },
-    { id: 5, text: "Landing Site Permission Verified", done: false },
-    { id: 6, text: "Chase Vehicle Fuel Status", done: false },
-    { id: 7, text: "Emergency Kit Inventory", done: false },
-    { id: 8, text: "Pax Safety Briefing Signed", done: false },
-  ]);
+  const { checklists, toggleItem: toggleChecklist } = useChecklists();
 
-  // Logs state
-  const [logs, setLogs] = useState<FlightLog[]>([
-    {
-      id: '841',
-      date: '2024-05-24',
-      duration: '105',
-      site: 'Land Site Delta',
-      notes: 'Smooth landing, light crosswinds on approach.',
-      status: 'SIGNED OFF',
-      attachments: [
-        { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=200', type: 'image' },
-        { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=200', type: 'image' }
-      ]
-    },
-    {
-      id: '840',
-      date: '2024-05-23',
-      duration: '80',
-      site: 'Valley Creek',
-      notes: 'Excellent visibility. Passengers enjoyed the vineyard tour.',
-      status: 'SIGNED OFF'
-    }
-  ]);
+  const { logs, addLog: addFlightLog, archiveLog } = useFlightLogs();
 
   const [logSortField, setLogSortField] = useState<SortField>('date');
   const [logSortOrder, setLogSortOrder] = useState<SortOrder>('desc');
@@ -284,31 +241,7 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
   const [certTypeFilter, setCertTypeFilter] = useState('All');
   const [availabilityFilter, setAvailabilityFilter] = useState('All');
   const [editingMember, setEditingMember] = useState<CrewMember | null>(null);
-
-  const [crewMembers, setCrewMembers] = useState<CrewMember[]>([
-    {
-      id: '1',
-      name: 'Sarah "Sky" Miller',
-      role: 'Pilot',
-      experience: 12,
-      contact: { email: 'sarah@freesun.net', phone: '+1 555-0101' },
-      certifications: ['Commercial LTA License', 'Flight Instructor', 'Night Rating'],
-      bio: 'Lifelong aviation enthusiast with over 1,500 flight hours across three continents.',
-      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
-      availability: 'available'
-    },
-    {
-      id: '2',
-      name: 'Mike Chen',
-      role: 'Ground Crew',
-      experience: 5,
-      contact: { email: 'mike@freesun.net', phone: '+1 555-0102' },
-      certifications: ['Crew Chief Certified', 'Emergency Response'],
-      bio: 'Precision-focused ground lead.',
-      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-      availability: 'busy'
-    }
-  ]);
+  const { crewMembers, updateCrewMember, toggleAvailability } = useCrewMembers();
 
   const filteredCrew = useMemo(() => {
     const isSearching = crewSearch.trim().length > 0;
@@ -353,10 +286,9 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
     attachments: []
   });
 
-  const handleAddLog = (e: React.FormEvent) => {
+  const handleAddLog = async (e: React.FormEvent) => {
     e.preventDefault();
-    const id = (parseInt(logs[0]?.id || '0') + 1).toString();
-    setLogs([{ ...newLog, id, status: 'PENDING REVIEW' }, ...logs]);
+    await addFlightLog(newLog);
     setIsAddingLog(false);
     setNewLog({
       date: new Date().toISOString().split('T')[0],
@@ -368,29 +300,19 @@ Focus on safety risks, fuel management, and launch feasibility specific to this 
   };
 
   const handleEditSave = (updated: CrewMember) => {
-    setCrewMembers(prev => prev.map(m => m.id === updated.id ? updated : m));
+    updateCrewMember(updated);
     setEditingMember(null);
   };
 
   const handleToggleAvailability = (id: string) => {
-    setCrewMembers(prev => prev.map(m =>
-      m.id === id
-        ? { ...m, availability: m.availability === 'available' ? 'busy' : 'available' }
-        : m
-    ));
+    toggleAvailability(id);
   };
 
-  const handleConfirmArchive = () => {
+  const handleConfirmArchive = async () => {
     if (logToArchive) {
-      setLogs(prev => prev.filter(log => log.id !== logToArchive));
+      await archiveLog(logToArchive);
       setLogToArchive(null);
     }
-  };
-
-  const toggleChecklist = (id: number) => {
-    setChecklists(prev => prev.map(item =>
-      item.id === id ? { ...item, done: !item.done } : item
-    ));
   };
 
   const completedCount = checklists.filter(item => item.done).length;
