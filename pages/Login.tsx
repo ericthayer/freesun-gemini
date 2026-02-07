@@ -1,24 +1,36 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wind, Plane, Users, ArrowRight, ShieldCheck, X, Sparkles, CheckCircle2 } from 'lucide-react';
-import { LoginRoleButton } from '../components/LoginRoleButton';
+import { Wind, Mail, Lock, ArrowRight, ShieldCheck, X, Sparkles, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { CrewSignUpForm } from '../components/CrewSignUpForm';
+import { useAuth } from '../lib/AuthContext';
 
-interface LoginProps {
-  onLogin: (role: 'pilot' | 'crew') => void;
-}
-
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<'selection' | 'signup' | 'success'>('selection');
+  const { signIn, userRole, session } = useAuth();
+  const [view, setView] = useState<'login' | 'signup' | 'success'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleRoleSelection = (role: 'pilot' | 'crew') => {
-    onLogin(role);
-    if (role === 'pilot') {
-      navigate('/dashboard');
-    } else {
-      navigate('/crew-dashboard');
+  useEffect(() => {
+    if (session && userRole) {
+      navigate(userRole === 'pilot' ? '/dashboard' : '/crew-dashboard', { replace: true });
+    }
+  }, [session, userRole, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    const { error: signInError } = await signIn(email, password);
+
+    if (signInError) {
+      setError('Invalid email or password. Please try again.');
+      setIsSubmitting(false);
     }
   };
 
@@ -28,7 +40,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-12 relative overflow-hidden">
-      {/* Decorative background elements */}
       <div className="absolute top-0 right-0 p-24 opacity-5 text-primary pointer-events-none -rotate-12">
         <Wind size={400} />
       </div>
@@ -38,8 +49,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 relative">
         <div className="bg-background border dark:border-primary/30 shadow-2xl rounded-[3rem] p-10 relative z-10 overflow-hidden">
-          {/* Close Button */}
-          <button 
+          <button
             onClick={handleClose}
             className="absolute top-6 right-6 p-2 hover:bg-muted rounded-full text-muted-foreground transition-all active:scale-90"
             aria-label="Close portal"
@@ -47,34 +57,83 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <X size={24} />
           </button>
 
-          {view === 'selection' && (
+          {view === 'login' && (
             <div className="animate-in fade-in duration-300">
               <div className="flex flex-col items-center text-center mb-10">
                 <div className="bg-primary p-4 rounded-3xl text-white mb-6 shadow-xl shadow-primary/20">
                   <Wind size={40} />
                 </div>
                 <h1 className="text-3xl font-bold mb-2 tracking-tight">Crew Portal</h1>
-                <p className="text-muted-foreground">Authorized FreeSun personnel only. Please select your operational role to continue.</p>
+                <p className="text-muted-foreground">Sign in with your FreeSun credentials to access your dashboard.</p>
               </div>
 
-              <div className="space-y-4">
-                <LoginRoleButton 
-                  onClick={() => handleRoleSelection('pilot')}
-                  icon={Plane}
-                  title="Pilot Login"
-                  description="Flight briefings & logs"
-                />
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="login-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
+                    <Mail size={12} /> Email Address
+                  </label>
+                  <input
+                    id="login-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@freesun.net"
+                    autoComplete="email"
+                    className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                </div>
 
-                <LoginRoleButton 
-                  onClick={() => handleRoleSelection('crew')}
-                  icon={Users}
-                  title="Crew Login"
-                  description="Profile & assigned shifts"
-                />
-              </div>
+                <div className="space-y-2">
+                  <label htmlFor="login-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
+                    <Lock size={12} /> Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3.5 pr-12 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 px-4 py-3 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                    <AlertCircle size={16} className="shrink-0" />
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : (
+                    <>
+                      Sign In <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </form>
 
               <div className="mt-3 text-center pt-8">
-                <button 
+                <button
                   onClick={() => setView('signup')}
                   className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:opacity-80 transition-all group"
                 >
@@ -87,8 +146,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           )}
 
           {view === 'signup' && (
-            <CrewSignUpForm 
-              onBack={() => setView('selection')}
+            <CrewSignUpForm
+              onBack={() => setView('login')}
               onSuccess={() => setView('success')}
             />
           )}
@@ -102,7 +161,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <p className="text-muted-foreground mb-8">
                 Our operations team will review your profile and contact you within 48 hours for a safety screening.
               </p>
-              <button 
+              <button
                 onClick={handleClose}
                 className="w-full py-4 bg-muted hover:bg-muted/80 font-bold rounded-2xl transition-all"
               >
