@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wind, Mail, Lock, ArrowRight, ShieldCheck, X, Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Wind, Mail, Lock, ArrowRight, ShieldCheck, X, Sparkles, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { CrewSignUpForm } from '../components/CrewSignUpForm';
 import { useAuth } from '../lib/AuthContext';
 
@@ -13,6 +13,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (session && userRole) {
@@ -87,16 +88,26 @@ const Login: React.FC = () => {
                   <label htmlFor="login-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 ml-1">
                     <Lock size={12} /> Password
                   </label>
-                  <input
-                    id="login-password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
-                    className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      className="w-full bg-muted/50 border dark:border-primary/30 rounded-2xl px-4 py-3.5 pr-12 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 {error && (
