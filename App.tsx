@@ -16,6 +16,7 @@ import BecomePilot from './pages/BecomePilot';
 import Events from './pages/Events';
 import Inquiry from './pages/Inquiry';
 import UserPortal from './pages/UserPortal';
+import ProfileSettings from './pages/ProfileSettings';
 import { useTheme } from './hooks/useTheme';
 import { AdminMenu } from './components/AdminMenu';
 import { SettingsDrawer } from './components/SettingsDrawer';
@@ -114,17 +115,31 @@ const AppContent: React.FC = () => {
             {isLoggedIn ? (
               <>
                 <Link
+                  to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'}
+                  className="text-2xl font-bold border-b pb-4"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {userRole === 'pilot' ? 'Pilot Dashboard' : 'Crew Dashboard'}
+                </Link>
+                <Link
                   to="/portal"
                   className="text-2xl font-bold text-primary"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Portal
                 </Link>
+                <Link
+                  to="/profile-settings"
+                  className="text-2xl font-bold"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile Settings
+                </Link>
                 <button
                   onClick={() => setIsSettingsOpen(true)}
                   className="text-2xl font-bold text-left"
                 >
-                  Settings
+                  App Settings
                 </button>
                 <button
                   onClick={() => { handleLogout(); setIsMenuOpen(false); }}
@@ -149,6 +164,7 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard" element={isLoggedIn && userRole === 'pilot' ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="/crew-dashboard" element={isLoggedIn && userRole === 'crew' ? <CrewDashboard /> : <Navigate to="/login" />} />
           <Route path="/portal" element={isLoggedIn ? <UserPortal userRole={userRole || 'crew'} /> : <Navigate to="/login" />} />
+          <Route path="/profile-settings" element={isLoggedIn ? <ProfileSettings /> : <Navigate to="/login" />} />
           <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
           <Route path="/safety" element={<SafetyRecords />} />
           <Route path="/fleet" element={<Fleet />} />

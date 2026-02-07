@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Settings, Moon, Sun, LogOut, ChevronDown,
-  LayoutDashboard
+  LayoutDashboard, User
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -69,12 +69,30 @@ export const AdminMenu: React.FC<AdminMenuProps> = ({
 
           <div className="p-2 space-y-1">
             <Link
+              to={userRole === 'pilot' ? '/dashboard' : '/crew-dashboard'}
+              onClick={() => setIsOpen(false)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item"
+            >
+              <LayoutDashboard size={16} className="text-muted-foreground group-hover/item:text-primary" />
+              {userRole === 'pilot' ? 'Pilot Dashboard' : 'Crew Dashboard'}
+            </Link>
+
+            <Link
               to="/portal"
               onClick={() => setIsOpen(false)}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item"
             >
               <LayoutDashboard size={16} className="text-muted-foreground group-hover/item:text-primary" />
               My Portal
+            </Link>
+
+            <Link
+              to="/profile-settings"
+              onClick={() => setIsOpen(false)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-primary/10 hover:text-primary rounded-lg transition-colors group/item"
+            >
+              <User size={16} className="text-muted-foreground group-hover/item:text-primary" />
+              Profile Settings
             </Link>
 
             <button
