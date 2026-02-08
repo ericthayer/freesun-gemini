@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, Search, Filter, Plus, Edit2, Trash2, Shield, ShieldCheck,
   RefreshCw, Download, MoreVertical, Clock, CheckCircle, XCircle,
-  UserCheck, UserX, RotateCcw, Activity
+  UserCheck, UserX, RotateCcw, Activity, Mail, RefreshCcw, Key
 } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { useIsSuperAdmin } from '../lib/PermissionContext';
@@ -54,6 +54,10 @@ const UserManagement: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [showBatchSyncModal, setShowBatchSyncModal] = useState(false);
+  const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<string>('');
   const [stats, setStats] = useState<UserStats>({
     totalUsers: 0,
     activeUsers: 0,
@@ -337,6 +341,140 @@ const UserManagement: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleSyncEmail = async (user: CrewMember) => {
+    if (!user.user_id) {
+      alert('User does not have an auth account');
+      return;
+    }
+
+    try {
+      setSyncProgress('Syncing email...');
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-crew-emails`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            crewMemberId: user.id
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to sync email');
+      }
+
+      alert(`Email synced successfully for ${user.name}`);
+      await fetchCrewMembers();
+      setShowSyncModal(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error syncing email:', error);
+      alert(error instanceof Error ? error.message : 'Failed to sync email');
+    } finally {
+      setSyncProgress('');
+    }
+  };
+
+  const handleBatchSync = async (dryRun: boolean = false) => {
+    try {
+      setSyncProgress(dryRun ? 'Running dry run...' : 'Syncing all users...');
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-crew-emails`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            batchUpdate: true,
+            dryRun
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to sync emails');
+      }
+
+      const message = `${dryRun ? 'Dry Run Complete' : 'Sync Complete'}\n\n` +
+        `Total: ${result.summary.total}\n` +
+        `Updated: ${result.summary.updated}\n` +
+        `Already Synced: ${result.summary.alreadySynced}\n` +
+        `Failed: ${result.summary.failed}`;
+
+      alert(message);
+
+      if (!dryRun) {
+        await fetchCrewMembers();
+      }
+
+      setShowBatchSyncModal(false);
+    } catch (error) {
+      console.error('Error in batch sync:', error);
+      alert(error instanceof Error ? error.message : 'Failed to batch sync');
+    } finally {
+      setSyncProgress('');
+    }
+  };
+
+  const handlePasswordReset = async (user: CrewMember, sendEmail: boolean) => {
+    if (!user.user_id) {
+      alert('User does not have an auth account');
+      return;
+    }
+
+    try {
+      setSyncProgress('Processing password reset...');
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-crew-passwords`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            crewMemberId: user.id,
+            sendResetEmail: sendEmail
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reset password');
+      }
+
+      alert(result.message);
+      setShowPasswordResetModal(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      alert(error instanceof Error ? error.message : 'Failed to reset password');
+    } finally {
+      setSyncProgress('');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
@@ -347,6 +485,13 @@ const UserManagement: React.FC = () => {
               <p className="text-muted-foreground">Manage crew members and Super Admin roles</p>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={() => setShowBatchSyncModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+              >
+                <RefreshCcw className="w-4 h-4" />
+                Batch Sync Emails
+              </button>
               <button
                 onClick={exportUsers}
                 className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
@@ -559,6 +704,30 @@ const UserManagement: React.FC = () => {
                           <div className="flex items-center justify-end gap-2">
                             {!member.deleted_at ? (
                               <>
+                                {member.user_id && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedUser(member);
+                                        setShowSyncModal(true);
+                                      }}
+                                      className="p-2 hover:bg-blue-500/20 text-blue-500 rounded-lg transition-colors"
+                                      title="Sync Auth Email"
+                                    >
+                                      <Mail className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedUser(member);
+                                        setShowPasswordResetModal(true);
+                                      }}
+                                      className="p-2 hover:bg-purple-500/20 text-purple-500 rounded-lg transition-colors"
+                                      title="Reset Password"
+                                    >
+                                      <Key className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                )}
                                 <button
                                   onClick={() => {
                                     setSelectedUser(member);
@@ -724,6 +893,166 @@ const UserManagement: React.FC = () => {
                 }`}
               >
                 {selectedUser.is_super_admin ? 'Revoke' : 'Grant'} Super Admin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSyncModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-blue-500/20 text-blue-500 rounded-full">
+                <Mail className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Sync Auth Email</h3>
+                <p className="text-sm text-muted-foreground">{selectedUser.name}</p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-4">
+                This will update the auth.users email to match the crew_members email.
+              </p>
+              <div className="bg-muted/30 p-3 rounded-lg">
+                <p className="text-sm font-medium mb-1">Crew Member Email:</p>
+                <p className="text-sm text-primary">{selectedUser.email}</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                The user may be logged out temporarily and will need to use this email for future logins.
+              </p>
+            </div>
+            {syncProgress && (
+              <div className="mb-4 p-3 bg-blue-500/10 text-blue-400 rounded-lg text-sm">
+                {syncProgress}
+              </div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowSyncModal(false);
+                  setSelectedUser(null);
+                }}
+                className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSyncEmail(selectedUser)}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Sync Email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBatchSyncModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-blue-500/20 text-blue-500 rounded-full">
+                <RefreshCcw className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Batch Sync All Emails</h3>
+                <p className="text-sm text-muted-foreground">Sync all user emails with auth</p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-4">
+                This will update all auth.users emails to match their crew_members emails.
+              </p>
+              <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-lg mb-4">
+                <p className="text-sm text-yellow-400 font-medium">⚠️ Important</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Users may be logged out temporarily. Run a dry run first to see what changes will be made.
+                </p>
+              </div>
+            </div>
+            {syncProgress && (
+              <div className="mb-4 p-3 bg-blue-500/10 text-blue-400 rounded-lg text-sm">
+                {syncProgress}
+              </div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowBatchSyncModal(false)}
+                className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleBatchSync(true)}
+                className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Dry Run
+              </button>
+              <button
+                onClick={() => handleBatchSync(false)}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Sync All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPasswordResetModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-purple-500/20 text-purple-500 rounded-full">
+                <Key className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Reset Password</h3>
+                <p className="text-sm text-muted-foreground">{selectedUser.name}</p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-4">
+                Choose how to reset this user's password:
+              </p>
+              <div className="space-y-3">
+                <div className="bg-muted/30 p-3 rounded-lg">
+                  <p className="text-sm font-medium mb-1">Send Reset Email</p>
+                  <p className="text-xs text-muted-foreground">
+                    User will receive an email at {selectedUser.email} with a password reset link.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {syncProgress && (
+              <div className="mb-4 p-3 bg-purple-500/10 text-purple-400 rounded-lg text-sm">
+                {syncProgress}
+              </div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowPasswordResetModal(false);
+                  setSelectedUser(null);
+                }}
+                className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handlePasswordReset(selectedUser, true)}
+                className="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+                disabled={!!syncProgress}
+              >
+                Send Reset Email
               </button>
             </div>
           </div>
