@@ -95,9 +95,9 @@ export const CrewShowcase: React.FC = () => {
           {crewData.map((member, index) => {
             const isPilot = member.role === 'Pilot';
             return (
-              <div 
+              <div
                 key={member.id}
-                className={`group relative rounded-[2.5rem] overflow-hidden border-2 border-transparent hover:border-primary/30 transition-all duration-500 shadow-xl cursor-pointer ${
+                className={`group relative rounded-[2.5rem] overflow-hidden border-2 border-transparent hover:border-primary/30 transition-all duration-500 shadow-xl cursor-pointer @container ${
                   isPilot ? 'lg:col-span-2 lg:row-span-2 row-span-2' : 'col-span-1 row-span-1'
                 }`}
                 onClick={() => openSlideshow(index)}
@@ -127,40 +127,48 @@ export const CrewShowcase: React.FC = () => {
                 </div>
 
                 {/* Hover Detailed Content Overlay */}
-                <div className="absolute inset-0 bg-primary/95 text-white p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-between backdrop-blur-sm z-1">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className={`font-bold italic ${isPilot ? 'text-4xl' : 'text-2xl'}`}>{member.name}</h3>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">{member.role}</p>
+                <div className="absolute inset-0 bg-primary/95 text-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-between backdrop-blur-sm z-1 p-4 @[300px]:p-6 @[450px]:p-8">
+                  <div className="space-y-2 @[300px]:space-y-3 @[450px]:space-y-4">
+                    {/* Header - Always Visible (Priority 1) */}
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className={`font-bold italic leading-tight ${isPilot ? 'text-2xl @[450px]:text-3xl @[600px]:text-4xl' : 'text-lg @[300px]:text-xl @[450px]:text-2xl'}`}>
+                          {member.name}
+                        </h3>
+                        <p className="text-[9px] @[300px]:text-[10px] font-black uppercase tracking-[0.15em] @[300px]:tracking-[0.2em] opacity-70 mt-0.5">
+                          {member.role}
+                        </p>
                       </div>
-                      <div className="p-2 bg-white/10 rounded-xl">
-                        <Sparkles size={isPilot ? 24 : 16} />
+                      <div className="p-1.5 @[300px]:p-2 bg-white/10 rounded-lg @[300px]:rounded-xl shrink-0">
+                        <Sparkles size={isPilot ? 20 : 14} className="@[450px]:w-5 @[450px]:h-5" />
                       </div>
                     </div>
-                    
-                    <p className={`italic leading-relaxed ${isPilot ? 'text-base' : 'text-xs line-clamp-3'}`}>
+
+                    {/* Bio - Hidden on smallest cards (Priority 2) */}
+                    <p className={`hidden @[300px]:block italic leading-relaxed text-xs @[450px]:text-sm ${isPilot ? '@[600px]:text-base' : 'line-clamp-2 @[450px]:line-clamp-3'}`}>
                       "{member.bio}"
                     </p>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/20">
+                    {/* Stats Grid - Hidden on smallest cards (Priority 2) */}
+                    <div className="hidden @[300px]:grid grid-cols-2 gap-2 @[450px]:gap-4 pt-2 @[450px]:pt-4 border-t border-white/20">
                       <div>
-                        <div className="text-[9px] font-black uppercase opacity-60">Experience</div>
-                        <div className="font-bold text-lg">{member.experience}</div>
+                        <div className="text-[8px] @[300px]:text-[9px] font-black uppercase opacity-60">Experience</div>
+                        <div className="font-bold text-sm @[300px]:text-base @[450px]:text-lg">{member.experience}</div>
                       </div>
                       <div>
-                        <div className="text-[9px] font-black uppercase opacity-60">Flight Hours</div>
-                        <div className="font-bold text-lg">{member.flights}+</div>
+                        <div className="text-[8px] @[300px]:text-[9px] font-black uppercase opacity-60">Flight Hours</div>
+                        <div className="font-bold text-sm @[300px]:text-base @[450px]:text-lg">{member.flights}+</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-4">
-                    <button className="flex-grow py-3 bg-white text-primary font-bold text-xs rounded-xl hover:bg-slate-100 transition-all active:scale-95">
-                      Full Profile
+                  {/* Action Buttons - Always Visible (Priority 1) */}
+                  <div className="flex items-center gap-2 pt-3 @[300px]:pt-4">
+                    <button className="flex-grow py-2.5 @[300px]:py-3 bg-white text-primary font-bold text-[10px] @[300px]:text-xs rounded-lg @[300px]:rounded-xl hover:bg-slate-100 transition-all active:scale-95">
+                      {isPilot ? 'View Full Profile' : 'View Profile'}
                     </button>
-                    <button className="p-3 bg-white/20 rounded-xl hover:bg-white/30 transition-all">
-                      <Maximize2 size={16} />
+                    <button className="p-2.5 @[300px]:p-3 bg-white/20 rounded-lg @[300px]:rounded-xl hover:bg-white/30 transition-all shrink-0">
+                      <Maximize2 size={14} className="@[300px]:w-4 @[300px]:h-4" />
                     </button>
                   </div>
                 </div>
