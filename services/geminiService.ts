@@ -1,7 +1,13 @@
-
 import { GoogleGenAI } from "@google/genai";
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const GEMINI_API_KEY: string = import.meta.env.VITE_GEMINI_API_KEY ?? '';
+
+function getApiKey(): string {
+  if (GEMINI_API_KEY) return GEMINI_API_KEY;
+  throw new Error('Gemini API key is not configured. Add VITE_GEMINI_API_KEY to your .env file.');
+}
+
+const getAI = () => new GoogleGenAI({ apiKey: getApiKey() });
 
 export const getFlightBriefing = async (prompt: string, constraints?: string): Promise<string> => {
   try {

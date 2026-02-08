@@ -29,8 +29,13 @@ export const AiBioAssistant: React.FC<AiBioAssistantProps> = ({
     try {
       const bio = await generateCrewBio({ name, role, experienceYears, certifications, specialty });
       setSuggestion(bio);
-    } catch {
-      setError('Could not generate a bio right now. Please try again later.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('not configured')) {
+        setError('Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.');
+      } else {
+        setError('Could not generate a bio right now. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
