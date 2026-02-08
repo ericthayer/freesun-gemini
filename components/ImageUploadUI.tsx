@@ -13,15 +13,22 @@ interface ImageUploadProps {
   userId?: string;
 }
 
+function detectMimeFromDataUrl(dataUrl: string): { ext: string; contentType: string } {
+  if (dataUrl.startsWith('data:image/gif')) return { ext: 'gif', contentType: 'image/gif' };
+  if (dataUrl.startsWith('data:image/png')) return { ext: 'png', contentType: 'image/png' };
+  if (dataUrl.startsWith('data:image/webp')) return { ext: 'webp', contentType: 'image/webp' };
+  return { ext: 'jpg', contentType: 'image/jpeg' };
+}
+
 async function uploadToStorage(base64: string, userId: string): Promise<string> {
   const res = await fetch(base64);
   const blob = await res.blob();
-  const ext = 'jpg';
+  const { ext, contentType } = detectMimeFromDataUrl(base64);
   const filePath = `${userId}/avatar_${Date.now()}.${ext}`;
 
   const { error } = await supabase.storage
     .from('profile-images')
-    .upload(filePath, blob, { contentType: 'image/jpeg', upsert: true });
+    .upload(filePath, blob, { contentType, upsert: true });
 
   if (error) throw error;
 
@@ -73,6 +80,18 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ currentImage, onImageC
       setIsProcessing(true);
 
       try {
+        const isGif = file.type === 'image/gif';
+
+        if (isGif) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            processAndSet(base64);
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+
         const compressedBlob = await compressImage(file, {
           quality: 0.8,
           maxWidth: 800,
@@ -177,7 +196,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ currentImage, onImageC
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/gif"
           className="hidden"
           disabled={isProcessing}
         />

@@ -5,6 +5,7 @@ import { CrewMember } from './CrewUI';
 import { ImageUpload } from './ImageUploadUI';
 import { AiBioAssistant } from './profile/AiBioAssistant';
 import { PersonalLinksEditor, PersonalLink } from './profile/PersonalLinksEditor';
+import { PasswordChangeSection } from './profile/PasswordChangeSection';
 import { useAuth } from '../lib/AuthContext';
 
 interface CrewProfileFormProps {
@@ -64,7 +65,7 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
             <div className="max-w-[160px]">
               <p className="text-xs font-bold text-foreground mb-1">Upload new photo</p>
               <p className="text-[10px] text-muted-foreground leading-tight">
-                JPG, PNG or WebP. Crop and adjust after selecting.
+                JPG, PNG, WebP, or animated GIF.
               </p>
             </div>
           </div>
@@ -199,6 +200,8 @@ export const CrewProfileForm: React.FC<CrewProfileFormProps> = ({
       </div>
 
       <PersonalLinksEditor links={links} onChange={setLinks} />
+
+      <PasswordChangeSection />
 
       <div className="flex justify-end gap-3 pt-6 border-t sticky bottom-0 bg-card py-4 mt-8">
         <button
