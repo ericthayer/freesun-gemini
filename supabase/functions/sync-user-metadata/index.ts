@@ -1,11 +1,17 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.95.3";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
+
+interface SyncRequest {
+  crewMemberId: string;
+  syncEmail?: boolean;
+  syncMetadata?: boolean;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -20,73 +26,107 @@ Deno.serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { data: crewMembers, error: fetchError } = await adminClient
+    const { crewMemberId, syncEmail = true, syncMetadata = true } = await req.json() as SyncRequest;
+
+    if (!crewMemberId) {
+      return new Response(
+        JSON.stringify({ error: "crewMemberId is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { data: member, error: fetchError } = await adminClient
       .from("crew_members")
       .select("id, name, email, role, user_id")
-      .not("user_id", "is", null);
+      .eq("id", crewMemberId)
+      .is("deleted_at", null)
+      .maybeSingle();
 
-    if (fetchError) {
+    if (fetchError || !member) {
       return new Response(
-        JSON.stringify({ error: fetchError.message }),
+        JSON.stringify({ error: "Crew member not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!member.user_id) {
+      return new Response(
+        JSON.stringify({ error: "Crew member does not have an auth account" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { data: userData, error: getUserError } = await adminClient.auth.admin.getUserById(member.user_id);
+
+    if (getUserError || !userData.user) {
+      return new Response(
+        JSON.stringify({ error: `Auth user not found: ${getUserError?.message}` }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const updates: any = {};
+    const syncResults: string[] = [];
+    const oldEmail = userData.user.email;
+
+    if (syncEmail && member.email && oldEmail !== member.email) {
+      updates.email = member.email;
+      updates.email_confirm = true;
+      syncResults.push(`email: ${oldEmail} → ${member.email}`);
+    }
+
+    if (syncMetadata) {
+      updates.user_metadata = {
+        name: member.name,
+        role: member.role,
+      };
+      syncResults.push("metadata synced");
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Already in sync",
+          synced: []
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { error: updateError } = await adminClient.auth.admin.updateUserById(
+      member.user_id,
+      updates
+    );
+
+    if (updateError) {
+      return new Response(
+        JSON.stringify({ error: `Failed to sync: ${updateError.message}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const results: { name: string; email: string; status: string }[] = [];
-
-    for (const member of crewMembers || []) {
-      if (!member.user_id) {
-        results.push({
-          name: member.name,
-          email: member.email,
-          status: "skipped_no_user_id"
-        });
-        continue;
-      }
-
-      const { data: userData, error: getUserError } =
-        await adminClient.auth.admin.getUserById(member.user_id);
-
-      if (getUserError) {
-        results.push({
-          name: member.name,
-          email: member.email,
-          status: `error: ${getUserError.message}`
-        });
-        continue;
-      }
-
-      const { error: updateError } = await adminClient.auth.admin.updateUserById(
-        member.user_id,
-        {
-          user_metadata: {
-            name: member.name,
-            role: member.role,
-          },
-        }
-      );
-
-      if (updateError) {
-        results.push({
-          name: member.name,
-          email: member.email,
-          status: `error: ${updateError.message}`
-        });
-        continue;
-      }
-
-      results.push({
-        name: member.name,
-        email: member.email,
-        status: "metadata_synced"
-      });
+    if (syncEmail && updates.email) {
+      await adminClient.from("crew_members").update({
+        last_auth_sync: new Date().toISOString()
+      }).eq("id", crewMemberId);
     }
 
     return new Response(
-      JSON.stringify({ message: "User metadata sync complete", results }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        success: true,
+        message: "Sync complete",
+        synced: syncResults,
+        crewMember: {
+          id: member.id,
+          name: member.name,
+          email: member.email
+        }
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    console.error("Sync error:", err);
     return new Response(
       JSON.stringify({ error: String(err) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

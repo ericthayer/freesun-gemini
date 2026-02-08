@@ -79,20 +79,26 @@ export function useCrewMembers() {
     fetchCrew();
   }, [fetchCrew]);
 
-  const updateCrewMember = useCallback(async (member: CrewMember) => {
+  const updateCrewMember = useCallback(async (member: CrewMember, extras?: { personalLinks?: { label: string; url: string }[] }) => {
+    const updatePayload: Record<string, unknown> = {
+      name: member.name,
+      role: member.role,
+      experience_years: member.experience,
+      email: member.contact.email,
+      phone: member.contact.phone,
+      certifications: member.certifications,
+      bio: member.bio,
+      image_url: member.imageUrl || '',
+      availability: member.availability,
+    };
+
+    if (extras?.personalLinks) {
+      updatePayload.personal_urls = extras.personalLinks;
+    }
+
     const { error } = await supabase
       .from('crew_members')
-      .update({
-        name: member.name,
-        role: member.role,
-        experience_years: member.experience,
-        email: member.contact.email,
-        phone: member.contact.phone,
-        certifications: member.certifications,
-        bio: member.bio,
-        image_url: member.imageUrl || '',
-        availability: member.availability,
-      })
+      .update(updatePayload)
       .eq('id', member.id);
 
     if (!error) {

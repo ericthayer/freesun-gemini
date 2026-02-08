@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.95.3";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,111 +7,229 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+interface UpdateEmailRequest {
+  crewMemberId?: string;
+  batchUpdate?: boolean;
+  dryRun?: boolean;
+}
+
+interface UpdateResult {
+  crewMemberId: string;
+  crewMemberName: string;
+  oldEmail: string;
+  newEmail: string;
+  success: boolean;
+  error?: string;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Email mappings based on crew member names
-    const emailMappings = [
-      { name: "Amanda Dalbey", email: "adalbey@freesun.net" },
-      { name: "Andy Crabb", email: "acrabb@freesun.net" },
-      { name: "Chad Lorenz", email: "clorenz@freesun.net" },
-      { name: "Doug Lorenz", email: "dlorenz@freesun.net" },
-      { name: "Eric Thayer", email: "ethayer@freesun.net" },
-      { name: "Jason Flynn", email: "jflynn@freesun.net" },
-      { name: "Jennifer Gill", email: "jgill@freesun.net" },
-      { name: "Jon \"One Shoe\" Manning", email: "jmanning@freesun.net" },
-      { name: "Josh Dalbey", email: "jdalbey@freesun.net" },
-      { name: "Joyce Dalbey", email: "joycedalbey@freesun.net" },
-    ];
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
 
-    const results: { name: string; email: string; status: string }[] = [];
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    for (const mapping of emailMappings) {
-      // Get crew member
-      const { data: crewMember, error: fetchError } = await adminClient
+    const { data: adminCrewMember } = await supabaseAdmin
+      .from("crew_members")
+      .select("id, is_super_admin, name")
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (!adminCrewMember?.is_super_admin) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized: Only Super Admins can update auth emails" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { crewMemberId, batchUpdate = false, dryRun = false } = await req.json() as UpdateEmailRequest;
+
+    const results: UpdateResult[] = [];
+    let crewMembers: any[] = [];
+
+    if (batchUpdate) {
+      const { data, error } = await supabaseAdmin
         .from("crew_members")
-        .select("id, user_id")
-        .eq("name", mapping.name)
+        .select("id, name, email, user_id")
+        .not("user_id", "is", null)
+        .is("deleted_at", null)
+        .neq("email", "");
+
+      if (error) throw error;
+      crewMembers = data || [];
+    } else if (crewMemberId) {
+      const { data, error } = await supabaseAdmin
+        .from("crew_members")
+        .select("id, name, email, user_id")
+        .eq("id", crewMemberId)
+        .is("deleted_at", null)
         .maybeSingle();
 
-      if (fetchError || !crewMember) {
+      if (error) throw error;
+      if (data) crewMembers = [data];
+    } else {
+      return new Response(
+        JSON.stringify({ error: "Must specify crewMemberId or batchUpdate" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    for (const member of crewMembers) {
+      if (!member.user_id || !member.email) {
         results.push({
-          name: mapping.name,
-          email: mapping.email,
-          status: `error: crew member not found`,
+          crewMemberId: member.id,
+          crewMemberName: member.name,
+          oldEmail: "N/A",
+          newEmail: member.email || "N/A",
+          success: false,
+          error: "Missing user_id or email"
         });
         continue;
       }
 
-      // Update crew_members table
-      const { error: updateCrewError } = await adminClient
-        .from("crew_members")
-        .update({ email: mapping.email })
-        .eq("id", crewMember.id);
+      try {
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(member.user_id);
 
-      if (updateCrewError) {
-        results.push({
-          name: mapping.name,
-          email: mapping.email,
-          status: `error updating crew_members: ${updateCrewError.message}`,
-        });
-        continue;
-      }
-
-      // Update auth.users email if user_id exists
-      if (crewMember.user_id) {
-        const { error: updateAuthError } =
-          await adminClient.auth.admin.updateUserById(crewMember.user_id, {
-            email: mapping.email,
-          });
-
-        if (updateAuthError) {
+        if (!authUser.user) {
           results.push({
-            name: mapping.name,
-            email: mapping.email,
-            status: `crew updated, auth error: ${updateAuthError.message}`,
+            crewMemberId: member.id,
+            crewMemberName: member.name,
+            oldEmail: "N/A",
+            newEmail: member.email,
+            success: false,
+            error: "Auth user not found"
           });
           continue;
         }
 
-        results.push({
-          name: mapping.name,
-          email: mapping.email,
-          status: "success: both updated",
+        const oldEmail = authUser.user.email || "";
+
+        if (oldEmail === member.email) {
+          results.push({
+            crewMemberId: member.id,
+            crewMemberName: member.name,
+            oldEmail,
+            newEmail: member.email,
+            success: true,
+            error: "Already in sync"
+          });
+          continue;
+        }
+
+        if (dryRun) {
+          results.push({
+            crewMemberId: member.id,
+            crewMemberName: member.name,
+            oldEmail,
+            newEmail: member.email,
+            success: true,
+            error: "Dry run - no changes made"
+          });
+          continue;
+        }
+
+        const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+          member.user_id,
+          {
+            email: member.email,
+            email_confirm: true
+          }
+        );
+
+        if (updateError) {
+          results.push({
+            crewMemberId: member.id,
+            crewMemberName: member.name,
+            oldEmail,
+            newEmail: member.email,
+            success: false,
+            error: updateError.message
+          });
+          continue;
+        }
+
+        await supabaseAdmin.from("admin_actions").insert({
+          admin_user_id: user.id,
+          admin_crew_member_id: adminCrewMember.id,
+          action_type: "sync_auth_email",
+          target_crew_member_id: member.id,
+          target_user_id: member.user_id,
+          target_resource: "auth.users",
+          before_data: { email: oldEmail },
+          after_data: { email: member.email }
         });
-      } else {
+
         results.push({
-          name: mapping.name,
-          email: mapping.email,
-          status: "success: crew updated (no auth account)",
+          crewMemberId: member.id,
+          crewMemberName: member.name,
+          oldEmail,
+          newEmail: member.email,
+          success: true
+        });
+
+      } catch (error) {
+        results.push({
+          crewMemberId: member.id,
+          crewMemberName: member.name,
+          oldEmail: "Unknown",
+          newEmail: member.email,
+          success: false,
+          error: error.message
         });
       }
     }
 
+    const successCount = results.filter(r => r.success && !r.error?.includes("Already in sync")).length;
+    const alreadySyncedCount = results.filter(r => r.error?.includes("Already in sync")).length;
+    const failureCount = results.filter(r => !r.success).length;
+
     return new Response(
       JSON.stringify({
-        message: "Email update complete",
-        results,
+        success: true,
+        dryRun,
+        summary: {
+          total: results.length,
+          updated: successCount,
+          alreadySynced: alreadySyncedCount,
+          failed: failureCount
+        },
+        results
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (error) {
+    console.error("Email sync error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });

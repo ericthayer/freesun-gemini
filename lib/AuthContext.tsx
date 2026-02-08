@@ -13,6 +13,7 @@ interface CrewProfile {
   specialty: string;
   bio: string;
   availability: 'available' | 'busy';
+  is_super_admin: boolean;
 }
 
 interface AuthState {
@@ -22,7 +23,9 @@ interface AuthState {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   userRole: 'pilot' | 'crew' | null;
+  isSuperAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -36,8 +39,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchCrewProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('crew_members')
-      .select('id, name, role, email, image_url, experience_years, flights, specialty, bio, availability')
+      .select('id, name, role, email, image_url, experience_years, flights, specialty, bio, availability, is_super_admin')
       .eq('user_id', userId)
+      .is('deleted_at', null)
       .maybeSingle();
 
     setCrewProfile(data as CrewProfile | null);
@@ -79,12 +83,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCrewProfile(null);
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      await fetchCrewProfile(user.id);
+    }
+  }, [user, fetchCrewProfile]);
+
   const userRole: 'pilot' | 'crew' | null = crewProfile
     ? crewProfile.role === 'Pilot' ? 'pilot' : 'crew'
     : null;
 
+  const isSuperAdmin = crewProfile?.is_super_admin ?? false;
+
   return (
-    <AuthContext.Provider value={{ session, user, crewProfile, loading, signIn, signOut, userRole }}>
+    <AuthContext.Provider value={{ session, user, crewProfile, loading, signIn, signOut, refreshProfile, userRole, isSuperAdmin }}>
       {children}
     </AuthContext.Provider>
   );

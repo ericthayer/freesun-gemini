@@ -31,12 +31,16 @@ export const CrewMemberCard: React.FC<CrewMemberCardProps> = ({ member, onEdit, 
   return (
     <div className="bg-background border dark:border-primary/30 rounded-[2rem] overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group relative">
       <div className="p-6 flex flex-col sm:flex-row gap-6">
-        <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-muted/50 shadow-inner group-hover:scale-105 transition-transform">
-          <img 
-            src={member.imageUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'} 
-            alt={member.name} 
-            className="w-full h-full object-cover" 
-          />
+        <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border-4 border-muted/50 shadow-inner group-hover:scale-105 transition-transform bg-muted flex items-center justify-center">
+          {member.imageUrl ? (
+            <img
+              src={member.imageUrl}
+              alt={member.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Users className="text-muted-foreground" size={32} />
+          )}
         </div>
         <div className="space-y-3 flex-grow">
           <div className="flex flex-wrap items-start justify-between gap-2">

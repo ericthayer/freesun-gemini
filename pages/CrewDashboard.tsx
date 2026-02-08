@@ -33,31 +33,31 @@ const CrewDashboard: React.FC = () => {
   const { balloonNames: balloonsList } = useBalloons();
   const { crewMembers: allCrewMembers, updateCrewMember } = useCrewMembers();
   const { items: myAssignments } = useScheduleItems();
-  const { crewProfile } = useAuth();
+  const { crewProfile, refreshProfile } = useAuth();
 
   const crewTutorialSteps: TutorialStep[] = [
     {
       targetId: "crew-availability-section",
-      title: "Mission Readiness",
-      description: "Toggling your status to 'Available' signals the Operations Desk that you are ready for immediate ground recovery deployment.",
+      title: "Mission Readiness Status",
+      description: "Toggle your availability to let pilots and the Operations Desk know you're ready for deployment. When you're 'Available' (green), you'll be assigned to upcoming flights. Use this before every shift to signal you're ready for ground crew duties.",
       icon: <CheckCircle2 size={32} className="text-green-500" />
     },
     {
       targetId: "weather-section",
-      title: "Surface Awareness",
-      description: "Monitor surface winds from this panel to anticipate landing patterns and optimize vehicle positioning for recovery.",
+      title: "Live Weather Monitoring",
+      description: "Surface wind conditions update every 30 seconds. Hot air balloons can't launch safely in winds over 15 mph. Check this panel before every mission briefing to make informed go/no-go decisions and anticipate landing zones.",
       icon: <Wind size={32} />
     },
     {
       targetId: "assignment-section",
-      title: "Mission Logistics",
-      description: "Active assignments contain coordinates, pilot radio channels, and passenger manifests. Tap 'View Logistics' for the full mission brief.",
+      title: "Your Active Assignments",
+      description: "See your upcoming flight assignments with launch times, locations, and mission details. Tap 'View Mission Logistics' to access coordinates, pilot contact info, passenger manifests, and landing site maps. Plan your day and coordinate transportation here.",
       icon: <ShieldAlert size={32} />
     },
     {
       targetId: "crew-connect-section",
-      title: "Fleet Comms",
-      description: "Direct secure radio-link to all pilots and other ground stations. Use this for coordinating multi-vessel landings.",
+      title: "Crew Communication Hub",
+      description: "Find contact details for all pilots and ground crew members. Use this directory to coordinate multi-vehicle landings, request backup support, or share real-time field updates. Tap any crew member to view their contact information and current availability.",
       icon: <Radio size={32} />
     }
   ];
@@ -150,10 +150,19 @@ const CrewDashboard: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleUpdateProfile = (updated: CrewMember) => {
-    updateCrewMember(updated);
-    setMe(updated);
-    setActiveTab('status');
+  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleUpdateProfile = async (updated: CrewMember, extras?: { personalLinks?: { label: string; url: string }[] }) => {
+    try {
+      await updateCrewMember(updated, extras);
+      setMe(updated);
+      await refreshProfile();
+      setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setTimeout(() => setProfileMessage(null), 4000);
+    } catch {
+      setProfileMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+      setTimeout(() => setProfileMessage(null), 6000);
+    }
   };
 
   const isAvailable = me.availability === 'available';
@@ -357,6 +366,18 @@ const CrewDashboard: React.FC = () => {
               <h2 className="text-2xl font-bold">Crew Profile Settings</h2>
               <button onClick={() => setActiveTab('status')} className="text-sm font-bold text-muted-foreground hover:text-primary"><X size={18} /></button>
             </div>
+
+            {profileMessage && (
+              <div className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+                profileMessage.type === 'success'
+                  ? 'bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400'
+                  : 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400'
+              }`}>
+                {profileMessage.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                <span className="font-medium">{profileMessage.text}</span>
+              </div>
+            )}
+
             <div className="bg-background border rounded-[2.5rem] p-8 shadow-xl overflow-hidden relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
               <CrewProfileForm

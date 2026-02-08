@@ -17,16 +17,19 @@ import Events from './pages/Events';
 import Inquiry from './pages/Inquiry';
 import UserPortal from './pages/UserPortal';
 import ProfileSettings from './pages/ProfileSettings';
+import UserManagement from './pages/UserManagement';
+import AuditLog from './pages/AuditLog';
 import { useTheme } from './hooks/useTheme';
 import { AdminMenu } from './components/AdminMenu';
 import { SettingsDrawer } from './components/SettingsDrawer';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { PermissionProvider } from './lib/PermissionContext';
 
 const AppContent: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { session, crewProfile, userRole, signOut, loading } = useAuth();
+  const { session, crewProfile, userRole, signOut, loading, isSuperAdmin } = useAuth();
 
   const isLoggedIn = !!session && !!crewProfile;
 
@@ -54,7 +57,7 @@ const AppContent: React.FC = () => {
         onStartTutorial={() => {}}
       />
 
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-b dark:border-primary/30">
+      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-b border-primary/50">
         <div className="container max-w-[1400] mx-auto h-16 px-4 md:px-8 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
             <span className="bg-primary p-1.5 rounded-lg text-primary-foreground">
@@ -77,6 +80,7 @@ const AppContent: React.FC = () => {
                   toggleTheme={toggleTheme}
                   onLogout={handleLogout}
                   onOpenSettings={() => setIsSettingsOpen(true)}
+                  isSuperAdmin={isSuperAdmin}
                 />
               </div>
             ) : (
@@ -165,6 +169,8 @@ const AppContent: React.FC = () => {
           <Route path="/crew-dashboard" element={isLoggedIn && userRole === 'crew' ? <CrewDashboard /> : <Navigate to="/login" />} />
           <Route path="/portal" element={isLoggedIn ? <UserPortal userRole={userRole || 'crew'} /> : <Navigate to="/login" />} />
           <Route path="/profile-settings" element={isLoggedIn ? <ProfileSettings /> : <Navigate to="/login" />} />
+          <Route path="/admin/users" element={isLoggedIn && isSuperAdmin ? <UserManagement /> : <Navigate to="/login" />} />
+          <Route path="/admin/audit-log" element={isLoggedIn && isSuperAdmin ? <AuditLog /> : <Navigate to="/login" />} />
           <Route path="/schedule" element={<Schedule isLoggedIn={isLoggedIn} />} />
           <Route path="/safety" element={<SafetyRecords />} />
           <Route path="/fleet" element={<Fleet />} />
@@ -216,7 +222,9 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <AuthProvider>
-        <AppContent />
+        <PermissionProvider>
+          <AppContent />
+        </PermissionProvider>
       </AuthProvider>
     </HashRouter>
   );

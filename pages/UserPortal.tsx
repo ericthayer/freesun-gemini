@@ -27,7 +27,7 @@ const UserPortal: React.FC<UserPortalProps> = ({ userRole }) => {
   const getUserData = () => {
     const name = crewProfile?.name || "User";
     const role = crewProfile?.role || (isPilot ? "Pilot" : "Ground Crew");
-    const avatar = crewProfile?.image_url || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400";
+    const avatar = crewProfile?.image_url || "";
     const quote = crewProfile?.bio || (isPilot
       ? "Pushing the ceiling of what's possible in the mountain air. Every sunrise is a new lesson in tranquility."
       : "Precision on the ground is the bedrock of safety in the sky. Every inflation is a masterpiece of coordination.");
@@ -91,12 +91,16 @@ const UserPortal: React.FC<UserPortalProps> = ({ userRole }) => {
       {/* Profile Header */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-16">
         <div className="relative">
-          <div className="w-32 h-32 md:w-48 md:h-48 rounded-[3rem] overflow-hidden border-8 border-muted/30 shadow-2xl">
-            <img 
-              src={data.avatar} 
-              alt={data.name} 
-              className="w-full h-full object-cover"
-            />
+          <div className="w-32 h-32 md:w-48 md:h-48 rounded-[3rem] overflow-hidden border-8 border-muted/30 shadow-2xl bg-muted flex items-center justify-center">
+            {data.avatar ? (
+              <img
+                src={data.avatar}
+                alt={data.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Users className="text-muted-foreground" size={48} />
+            )}
           </div>
           <div className="absolute -bottom-2 -right-2 bg-primary text-white p-3 rounded-2xl shadow-xl">
             {isPilot ? <Award size={24} /> : <Wrench size={24} />}
