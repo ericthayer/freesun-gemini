@@ -38,26 +38,26 @@ const CrewDashboard: React.FC = () => {
   const crewTutorialSteps: TutorialStep[] = [
     {
       targetId: "crew-availability-section",
-      title: "Mission Readiness",
-      description: "Toggling your status to 'Available' signals the Operations Desk that you are ready for immediate ground recovery deployment.",
+      title: "Mission Readiness Status",
+      description: "Toggle your availability to let pilots and the Operations Desk know you're ready for deployment. When you're 'Available' (green), you'll be assigned to upcoming flights. Use this before every shift to signal you're ready for ground crew duties.",
       icon: <CheckCircle2 size={32} className="text-green-500" />
     },
     {
       targetId: "weather-section",
-      title: "Surface Awareness",
-      description: "Monitor surface winds from this panel to anticipate landing patterns and optimize vehicle positioning for recovery.",
+      title: "Live Weather Monitoring",
+      description: "Surface wind conditions update every 30 seconds. Hot air balloons can't launch safely in winds over 15 mph. Check this panel before every mission briefing to make informed go/no-go decisions and anticipate landing zones.",
       icon: <Wind size={32} />
     },
     {
       targetId: "assignment-section",
-      title: "Mission Logistics",
-      description: "Active assignments contain coordinates, pilot radio channels, and passenger manifests. Tap 'View Logistics' for the full mission brief.",
+      title: "Your Active Assignments",
+      description: "See your upcoming flight assignments with launch times, locations, and mission details. Tap 'View Mission Logistics' to access coordinates, pilot contact info, passenger manifests, and landing site maps. Plan your day and coordinate transportation here.",
       icon: <ShieldAlert size={32} />
     },
     {
       targetId: "crew-connect-section",
-      title: "Fleet Comms",
-      description: "Direct secure radio-link to all pilots and other ground stations. Use this for coordinating multi-vessel landings.",
+      title: "Crew Communication Hub",
+      description: "Find contact details for all pilots and ground crew members. Use this directory to coordinate multi-vehicle landings, request backup support, or share real-time field updates. Tap any crew member to view their contact information and current availability.",
       icon: <Radio size={32} />
     }
   ];
