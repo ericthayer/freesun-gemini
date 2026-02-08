@@ -150,11 +150,19 @@ const CrewDashboard: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   const handleUpdateProfile = async (updated: CrewMember, extras?: { personalLinks?: { label: string; url: string }[] }) => {
-    await updateCrewMember(updated, extras);
-    setMe(updated);
-    await refreshProfile();
-    setActiveTab('status');
+    try {
+      await updateCrewMember(updated, extras);
+      setMe(updated);
+      await refreshProfile();
+      setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setTimeout(() => setProfileMessage(null), 4000);
+    } catch {
+      setProfileMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+      setTimeout(() => setProfileMessage(null), 6000);
+    }
   };
 
   const isAvailable = me.availability === 'available';
@@ -358,6 +366,18 @@ const CrewDashboard: React.FC = () => {
               <h2 className="text-2xl font-bold">Crew Profile Settings</h2>
               <button onClick={() => setActiveTab('status')} className="text-sm font-bold text-muted-foreground hover:text-primary"><X size={18} /></button>
             </div>
+
+            {profileMessage && (
+              <div className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+                profileMessage.type === 'success'
+                  ? 'bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400'
+                  : 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400'
+              }`}>
+                {profileMessage.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                <span className="font-medium">{profileMessage.text}</span>
+              </div>
+            )}
+
             <div className="bg-background border rounded-[2.5rem] p-8 shadow-xl overflow-hidden relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
               <CrewProfileForm

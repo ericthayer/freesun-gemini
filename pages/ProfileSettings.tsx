@@ -49,10 +49,15 @@ const ProfileSettings: React.FC = () => {
     try {
       await updateCrewMember(updated, extras);
       await refreshProfile();
+      setMember(updated);
+      if (extras?.personalLinks) setPersonalLinks(extras.personalLinks);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      setTimeout(() => navigate(-1), 1200);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => setMessage(null), 4000);
     } catch {
       setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => setMessage(null), 6000);
     }
   };
 
