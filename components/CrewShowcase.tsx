@@ -190,7 +190,7 @@ export const CrewShowcase: React.FC = () => {
 
           <button
             onClick={closeSlideshow}
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-3 sm:p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all z-[1001] backdrop-blur-sm border border-white/20 shadow-xl group"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-3 sm:p-4 bg-white/10 hover:bg-white/20 cursor-pointer text-white rounded-full transition-all z-[1001] backdrop-blur-sm border border-white/20 shadow-xl group"
             aria-label="Close gallery"
           >
             <X size={24} className="sm:w-8 sm:h-8" />
