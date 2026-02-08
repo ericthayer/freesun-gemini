@@ -22,6 +22,7 @@ interface AuthState {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   userRole: 'pilot' | 'crew' | null;
 }
 
@@ -79,12 +80,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCrewProfile(null);
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      await fetchCrewProfile(user.id);
+    }
+  }, [user, fetchCrewProfile]);
+
   const userRole: 'pilot' | 'crew' | null = crewProfile
     ? crewProfile.role === 'Pilot' ? 'pilot' : 'crew'
     : null;
 
   return (
-    <AuthContext.Provider value={{ session, user, crewProfile, loading, signIn, signOut, userRole }}>
+    <AuthContext.Provider value={{ session, user, crewProfile, loading, signIn, signOut, refreshProfile, userRole }}>
       {children}
     </AuthContext.Provider>
   );

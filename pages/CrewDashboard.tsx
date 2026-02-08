@@ -33,7 +33,7 @@ const CrewDashboard: React.FC = () => {
   const { balloonNames: balloonsList } = useBalloons();
   const { crewMembers: allCrewMembers, updateCrewMember } = useCrewMembers();
   const { items: myAssignments } = useScheduleItems();
-  const { crewProfile } = useAuth();
+  const { crewProfile, refreshProfile } = useAuth();
 
   const crewTutorialSteps: TutorialStep[] = [
     {
@@ -150,9 +150,10 @@ const CrewDashboard: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleUpdateProfile = (updated: CrewMember) => {
-    updateCrewMember(updated);
+  const handleUpdateProfile = async (updated: CrewMember, extras?: { personalLinks?: { label: string; url: string }[] }) => {
+    await updateCrewMember(updated, extras);
     setMe(updated);
+    await refreshProfile();
     setActiveTab('status');
   };
 

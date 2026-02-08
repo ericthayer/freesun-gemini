@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { User, Mail, Phone, MapPin, FileText, ImageIcon, Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, FileText, Camera, Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ImageUpload } from '../components/ImageUploadUI';
+import { AiBioAssistant } from '../components/profile/AiBioAssistant';
+import { PersonalLinksEditor, PersonalLink } from '../components/profile/PersonalLinksEditor';
 
 interface ProfileFormData {
   name: string;
@@ -13,10 +16,11 @@ interface ProfileFormData {
   image_url: string;
   availability: 'available' | 'busy';
   experience_years: number;
+  certifications: string[];
 }
 
 const ProfileSettings: React.FC = () => {
-  const { crewProfile, loading: authLoading } = useAuth();
+  const { crewProfile, user, loading: authLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
@@ -27,7 +31,9 @@ const ProfileSettings: React.FC = () => {
     image_url: '',
     availability: 'available',
     experience_years: 0,
+    certifications: [],
   });
+  const [personalLinks, setPersonalLinks] = useState<PersonalLink[]>([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -42,6 +48,7 @@ const ProfileSettings: React.FC = () => {
         image_url: crewProfile.image_url || '',
         availability: crewProfile.availability || 'available',
         experience_years: crewProfile.experience_years || 0,
+        certifications: [],
       });
 
       const fetchFullProfile = async () => {
@@ -61,7 +68,18 @@ const ProfileSettings: React.FC = () => {
             image_url: data.image_url || '',
             availability: data.availability || 'available',
             experience_years: data.experience_years || 0,
+            certifications: data.certifications || [],
           });
+          if (data.personal_urls) {
+            try {
+              const urls = typeof data.personal_urls === 'string'
+                ? JSON.parse(data.personal_urls)
+                : data.personal_urls;
+              if (Array.isArray(urls)) setPersonalLinks(urls);
+            } catch {
+              setPersonalLinks([]);
+            }
+          }
         }
       };
 
@@ -100,10 +118,13 @@ const ProfileSettings: React.FC = () => {
           image_url: formData.image_url,
           availability: formData.availability,
           experience_years: formData.experience_years,
+          personal_urls: personalLinks,
         })
         .eq('id', crewProfile.id);
 
       if (error) throw error;
+
+      await refreshProfile();
 
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
 
@@ -161,6 +182,25 @@ const ProfileSettings: React.FC = () => {
           <h2 className="text-xl font-bold mb-4">Personal Information</h2>
 
           <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Camera size={16} /> Profile Photo
+            </label>
+            <div className="flex items-center gap-4">
+              <ImageUpload
+                currentImage={formData.image_url}
+                onImageChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                userId={user?.id}
+              />
+              <div className="max-w-[180px]">
+                <p className="text-xs font-bold text-foreground mb-1">Upload or edit photo</p>
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  JPG, PNG or WebP. Crop and adjust after selecting.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
               <User size={16} /> Full Name
             </label>
@@ -204,36 +244,6 @@ const ProfileSettings: React.FC = () => {
               placeholder="(555) 123-4567"
             />
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="image_url" className="flex items-center gap-2 text-sm font-medium">
-              <ImageIcon size={16} /> Profile Image URL
-            </label>
-            <input
-              type="url"
-              id="image_url"
-              name="image_url"
-              value={formData.image_url}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-background border dark:border-primary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
-
-          {formData.image_url && (
-            <div className="flex justify-center">
-              <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-primary/20">
-                <img
-                  src={formData.image_url}
-                  alt="Profile preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="bg-muted/30 border dark:border-primary/20 p-8 rounded-[2.5rem] space-y-6">
@@ -299,7 +309,19 @@ const ProfileSettings: React.FC = () => {
               className="w-full px-4 py-3 bg-background border dark:border-primary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               placeholder="Tell us about yourself..."
             />
+            <AiBioAssistant
+              name={formData.name}
+              role={crewProfile.role}
+              experienceYears={formData.experience_years}
+              certifications={formData.certifications}
+              specialty={formData.specialty}
+              onAccept={(bio) => setFormData(prev => ({ ...prev, bio }))}
+            />
           </div>
+        </div>
+
+        <div className="bg-muted/30 border dark:border-primary/20 p-8 rounded-[2.5rem]">
+          <PersonalLinksEditor links={personalLinks} onChange={setPersonalLinks} />
         </div>
 
         <div className="flex gap-4">
