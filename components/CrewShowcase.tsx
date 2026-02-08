@@ -10,9 +10,60 @@ import { useCrewMembers, ShowcaseMember } from '../hooks/useCrewMembers';
 export const CrewShowcase: React.FC = () => {
   const { showcaseMembers: crewData } = useCrewMembers();
   const [slideshowIndex, setSlideshowIndex] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const openSlideshow = (index: number) => setSlideshowIndex(index);
   const closeSlideshow = () => setSlideshowIndex(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+  };
+
+  React.useEffect(() => {
+    if (slideshowIndex !== null) {
+      document.body.style.overflow = 'hidden';
+
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') closeSlideshow();
+      };
+
+      const handleArrowKeys = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowLeft') prevSlide();
+        if (e.key === 'ArrowRight') nextSlide();
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      document.addEventListener('keydown', handleArrowKeys);
+
+      return () => {
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleEscape);
+        document.removeEventListener('keydown', handleArrowKeys);
+      };
+    }
+  }, [slideshowIndex]);
 
   const nextSlide = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -131,14 +182,31 @@ export const CrewShowcase: React.FC = () => {
       {/* Slideshow Lightbox */}
       {slideshowIndex !== null && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl" onClick={closeSlideshow} />
-          
-          <button 
+          <div
+            className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl cursor-pointer"
             onClick={closeSlideshow}
-            className="absolute top-6 right-6 p-4 text-white/50 hover:text-white transition-all z-[1001]"
+            aria-label="Click to close"
+          />
+
+          <button
+            onClick={closeSlideshow}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-3 sm:p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all z-[1001] backdrop-blur-sm border border-white/20 shadow-xl group"
+            aria-label="Close gallery"
           >
-            <X size={32} />
+            <X size={24} className="sm:w-8 sm:h-8" />
+            <span className="sr-only">Press ESC to close</span>
           </button>
+
+          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 text-white/40 text-xs font-medium z-[1001] hidden sm:flex items-center gap-2">
+            <span>
+              <kbd className="px-2 py-1 bg-white/10 rounded border border-white/20">ESC</kbd> to close
+            </span>
+            <span className="text-white/20">•</span>
+            <span>
+              <kbd className="px-2 py-1 bg-white/10 rounded border border-white/20">←</kbd>
+              <kbd className="px-2 py-1 bg-white/10 rounded border border-white/20 ml-1">→</kbd> to navigate
+            </span>
+          </div>
 
           <div className="relative w-full max-w-6xl h-full flex flex-col lg:flex-row items-center gap-10 z-[1001] animate-in zoom-in-95 duration-500">
             {/* Nav Left */}
@@ -150,18 +218,36 @@ export const CrewShowcase: React.FC = () => {
             </button>
 
             {/* Photo Section */}
-            <div className="lg:w-2/3 h-full max-h-[70vh] lg:max-h-full flex items-center justify-center bg-black/40 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl relative group">
-              <img 
-                src={crewData[slideshowIndex].imageUrl} 
+            <div
+              className="lg:w-2/3 h-full max-h-[70vh] lg:max-h-full flex items-center justify-center bg-black/40 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl relative group touch-pan-y"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
+              <img
+                src={crewData[slideshowIndex].imageUrl}
                 alt={crewData[slideshowIndex].name}
-                className="w-full h-full object-cover animate-in fade-in duration-700"
+                className="w-full h-full object-cover animate-in fade-in duration-700 select-none"
+                draggable="false"
               />
               <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] pointer-events-none" />
               
               {/* Mobile Nav */}
-              <div className="lg:hidden absolute bottom-6 flex gap-4">
-                <button onClick={prevSlide} className="p-4 bg-black/60 backdrop-blur rounded-full text-white"><ChevronLeft /></button>
-                <button onClick={nextSlide} className="p-4 bg-black/60 backdrop-blur rounded-full text-white"><ChevronRight /></button>
+              <div className="lg:hidden absolute bottom-6 flex gap-3">
+                <button
+                  onClick={prevSlide}
+                  className="p-4 bg-black/60 backdrop-blur rounded-full text-white border border-white/20"
+                  aria-label="Previous crew member"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="p-4 bg-black/60 backdrop-blur rounded-full text-white border border-white/20"
+                  aria-label="Next crew member"
+                >
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
 
