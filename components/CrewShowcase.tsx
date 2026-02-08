@@ -111,7 +111,7 @@ export const CrewShowcase: React.FC = () => {
 
                 {/* Pilot Badge Overlay */}
                 {isPilot && (
-                  <div className="absolute top-6 left-6 z-20">
+                  <div className="absolute top-6 left-6 z-10">
                     <span className="bg-primary text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
                       <Plane size={12} /> Chief Pilot
                     </span>
