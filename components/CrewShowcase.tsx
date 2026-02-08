@@ -122,7 +122,7 @@ export const CrewShowcase: React.FC = () => {
                 <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/90 via-black/70 to-transparent group-hover:translate-y-full transition-transform duration-500">
                   <div className="text-white">
                     <h3 className={`font-bold ${isPilot ? 'text-3xl' : 'text-xl'}`}>{member.name}</h3>
-                    <p className="text-xs font-bold uppercase tracking-widest text-primary">{member.role}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-accent">{member.role}</p>
                   </div>
                 </div>
 
