@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Settings, Moon, Sun, LogOut, ChevronDown,
-  LayoutDashboard, User
+  LayoutDashboard, User, Shield, Activity
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ interface CrewProfile {
   name: string;
   role: string;
   image_url: string;
+  is_super_admin?: boolean;
 }
 
 interface AdminMenuProps {
@@ -19,10 +20,11 @@ interface AdminMenuProps {
   toggleTheme: () => void;
   onLogout: () => void;
   onOpenSettings: () => void;
+  isSuperAdmin?: boolean;
 }
 
 export const AdminMenu: React.FC<AdminMenuProps> = ({
-  userRole, crewProfile, theme, toggleTheme, onLogout, onOpenSettings
+  userRole, crewProfile, theme, toggleTheme, onLogout, onOpenSettings, isSuperAdmin = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -94,6 +96,35 @@ export const AdminMenu: React.FC<AdminMenuProps> = ({
               <User size={16} className="text-muted-foreground group-hover/item:text-primary" />
               Profile Settings
             </Link>
+
+            {isSuperAdmin && (
+              <>
+                <div className="my-2 border-t border-border" />
+                <div className="px-3 py-1">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase text-yellow-500 tracking-wider">
+                    <Shield size={12} />
+                    Super Admin
+                  </div>
+                </div>
+                <Link
+                  to="/admin/users"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-yellow-500/10 hover:text-yellow-500 rounded-lg transition-colors group/item"
+                >
+                  <User size={16} className="text-muted-foreground group-hover/item:text-yellow-500" />
+                  User Management
+                </Link>
+                <Link
+                  to="/admin/audit-log"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium hover:bg-yellow-500/10 hover:text-yellow-500 rounded-lg transition-colors group/item"
+                >
+                  <Activity size={16} className="text-muted-foreground group-hover/item:text-yellow-500" />
+                  Audit Log
+                </Link>
+                <div className="my-2 border-t border-border" />
+              </>
+            )}
 
             <button
               onClick={() => { onOpenSettings(); setIsOpen(false); }}
