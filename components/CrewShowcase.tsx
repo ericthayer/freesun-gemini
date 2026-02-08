@@ -208,7 +208,7 @@ export const CrewShowcase: React.FC = () => {
             </span>
           </div>
 
-          <div className="relative w-full max-w-6xl h-full flex flex-col lg:flex-row items-center gap-10 z-[1001] animate-in zoom-in-95 duration-500">
+          <div className="relative w-full max-w-6xl h-full flex flex-col lg:flex-row items-center gap-10 z-[1000] animate-in zoom-in-95 duration-500">
             {/* Nav Left */}
             <button 
               onClick={prevSlide}
