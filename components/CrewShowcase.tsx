@@ -127,7 +127,7 @@ export const CrewShowcase: React.FC = () => {
                 </div>
 
                 {/* Hover Detailed Content Overlay */}
-                <div className="absolute inset-0 bg-primary/95 text-white p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-between backdrop-blur-sm z-10">
+                <div className="absolute inset-0 bg-primary/95 text-white p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-between backdrop-blur-sm z-1">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
