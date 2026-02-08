@@ -119,10 +119,10 @@ export const CrewShowcase: React.FC = () => {
                 )}
 
                 {/* Default Bottom Content */}
-                <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/100 via-black/50 to-transparent group-hover:translate-y-full transition-transform duration-500">
+                <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/100 via-black/20 to-transparent group-hover:translate-y-full transition-transform duration-500">
                   <div className="text-white">
                     <h3 className={`font-bold ${isPilot ? 'text-3xl' : 'text-xl'}`}>{member.name}</h3>
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-600">{member.role}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-sky-200">{member.role}</p>
                   </div>
                 </div>
 
